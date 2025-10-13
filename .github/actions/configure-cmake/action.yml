@@ -1,0 +1,96 @@
+name: 'Configure CMake'
+description: 'Common logic for CMake configuration'
+inputs:
+  warnings_as_errors:
+    description: 'Treat warnings as errors'
+    required: false
+    default: 'OFF'
+  custom_flags:
+    description: 'Custom CMake configuration flags'
+    required: false
+  cache_key:
+    description: 'Deps cache key'
+    required: false
+    default: 'cache-deps'
+
+runs:
+  using: "composite"
+  steps:
+    # Uncomment when using external dependencies, so they will be cached
+    # - name: Cache deps
+    #   uses: actions/cache@v4
+    #   id: cache-deps
+    #   # make the key depend on the dependency version
+    #   with:
+    #     path: |
+    #       ${{ env.BUILD_DIR }}/_deps
+    #     key: ${{ inputs.cache_key }}-${{ matrix.cmake_generator }}-${{ matrix.os }}-${{ matrix.cxx }}-${{ matrix.asan_name }}-${{ env.BUILD_TYPE }}
+
+    # NOTE: GH Actions does not allow updating the cache yet
+    # Using the workaround found here: https://github.com/actions/cache/issues/171
+    # Since this cache is small, it should not fill the cache too much
+    - name: Cache Ninja deps
+      # renovate: datasource=github-tags depName=actions/cache versioning=loose
+      uses: actions/cache@v4.3.0
+      if: matrix.cmake_generator == 'Ninja'
+      id: cache-deps-ninja
+      with:
+        path: |
+          ${{ env.BUILD_DIR }}/.ninja_deps
+          ${{ env.BUILD_DIR }}/.ninja_log
+        key: ${{ matrix.os }}-${{ matrix.cxx }}-${{ matrix.asan_name }}-ninja-cache-${{ hashFiles('CMakeLists.txt') }}
+        restore-keys: ${{ matrix.os }}-${{ matrix.cxx }}-${{ matrix.asan_name }}-ninja-cache-
+
+    - name: Cache MinGW
+      # renovate: datasource=github-tags depName=actions/cache versioning=loose
+      uses: actions/cache@v4.3.0
+      id: cache-mingw
+      if: runner.os == 'Windows' && matrix.cxx == 'g++'
+      with:
+        path: gcc
+        key: ${{ runner.os }}-${{ env.MINGW_VER }}
+
+    - name: Download toolchain (MinGW)
+      # renovate: datasource=github-tags depName=suisei-cn/actions-download-file versioning=loose
+      uses: suisei-cn/actions-download-file@v1.6.0
+      id: download-mingw-gcc
+      if: runner.os == 'Windows' && matrix.cxx == 'g++' && steps.cache-mingw.outputs.cache-hit != 'true'
+      with:
+        url: "https://github.com/brechtsanders/winlibs_mingw/releases/download/${{ env.MINGW_VER }}"
+        target: compiler/
+
+    - name: Install toolchain (MinGW)
+      shell: bash
+      if: runner.os == 'Windows' && matrix.cxx == 'g++' && steps.cache-mingw.outputs.cache-hit != 'true'
+      run: |
+        7z x compiler/${{ steps.download-mingw-gcc.outputs.filename }} -ogcc
+
+    - name: Configure CMake (MinGW)
+      shell: bash
+      if: runner.os == 'Windows' && matrix.cxx == 'g++'
+      run: |
+        PATH="$(pwd)/gcc/mingw64/bin:${PATH}"
+        # because GH Actions does not properly prepend to $PATH and still chooses VM gcc
+        # CMake generator not passed as option to script since it might not be defined
+        export CMAKE_GENERATOR=${{ matrix.cmake_generator }}
+        bash ./scripts/cmake.sh configure \
+          -b ${{ env.BUILD_DIR }} \
+          -c ${{ env.BUILD_TYPE }} \
+          -e "-DPROJECT_WARNINGS_AS_ERRORS=${{ inputs.warnings_as_errors }} -DGITHUB_ACTIONS=${GITHUB_ACTIONS} ${{ inputs.custom_flags }}" \
+          -i ${GITHUB_WORKSPACE}/artifacts \
+          -s ${GITHUB_WORKSPACE}
+
+    - name: Configure CMake
+      shell: bash
+      if: ${{ !(runner.os == 'Windows' && matrix.cxx == 'g++') }}
+      run: |
+        export CMAKE_GENERATOR=${{ matrix.cmake_generator }}
+        bash ./scripts/cmake.sh configure \
+          -b ${{ env.BUILD_DIR }} \
+          -c ${{ env.BUILD_TYPE }} \
+          -e "-DPROJECT_WARNINGS_AS_ERRORS=${{ inputs.warnings_as_errors }} -DGITHUB_ACTIONS=${GITHUB_ACTIONS} ${{ inputs.custom_flags }}" \
+          -i ${GITHUB_WORKSPACE}/artifacts \
+          -s ${GITHUB_WORKSPACE}
+
+# https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+# https://github.com/GuillaumeFalourd/poc-github-actions/blob/main/.github/workflows/36-local-action.yml
