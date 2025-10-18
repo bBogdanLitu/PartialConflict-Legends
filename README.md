@@ -190,9 +190,9 @@ Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 ```
 ## External Libraries
 
-- [Nlohmann Json]https://github.com/nlohmann/json for reading user-configurable data. Used without any modifications;
+- [Nlohmann Json](https://github.com/nlohmann/json) for reading user-configurable data. Used without any modifications;
 
 ## Resurse
 
-- [Nlohmann Json]https://github.com/nlohmann/json pentru citirea unor date ce pot fi schimbate după preferințele fiecăruia. Nu am efectuat nicio modificare proprie;
+- [Nlohmann Json](https://github.com/nlohmann/json) pentru citirea unor date ce pot fi schimbate după preferințele fiecăruia. Nu am efectuat nicio modificare proprie;
 - adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit
