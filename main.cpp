@@ -40,14 +40,14 @@ void CheckGenerals(const std::vector<General>& Generals, const std::vector<Gener
     for (const auto &i: Starters) {
         std::cout<<i<<"\n";
     }
-    for (const auto & i : Generals) {
+    for (const auto &i: Generals) {
         std::cout<<i<<"\n";
     }
 }
 
 void DisplayStartingGenerals(const std::vector<General>& Starters) {
     int k = 0;
-    for (const auto & i : Starters) {
+    for (const auto &i: Starters) {
         std::cout<<k<<".\n"<<i<<"\n";
         k++;
     }
