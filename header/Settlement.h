@@ -36,7 +36,7 @@ public:
         }
         os << settlement.stationedGarrison;
         os << "List of attached control points:\n";
-        for (auto& i : settlement.controlPoints) {
+        for (const auto& i : settlement.controlPoints) {
             os << k << ".\n" << i << "\n";
             k++;
         }
