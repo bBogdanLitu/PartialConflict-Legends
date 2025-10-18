@@ -49,9 +49,6 @@ public:
         viewRange = vR;
     }
 
-    [[nodiscard]] int getViewRange() const {
-        return viewRange;
-    }
 };
 
 #endif //Scout_H

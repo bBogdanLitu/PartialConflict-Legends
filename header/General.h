@@ -37,9 +37,6 @@ public:
 
     }
 
-    //GETTERS (TEMPORARY)
-    [[nodiscard]] int getOverall() const { return overallPower; }
-    [[nodiscard]] std::string getFullName() const { return fullName; }
     [[nodiscard]] int getType() const { return type; }
 };
 

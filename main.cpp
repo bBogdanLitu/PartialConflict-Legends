@@ -8,7 +8,7 @@
 void PopulateGenerals(std::vector<General>& Generals, std::vector<General>& Starters, unsigned int* types, unsigned int* rarity ) {
     std::ifstream generalsJson("generals.json");
     nlohmann::json data = nlohmann::json::parse(generalsJson);
-    for (auto & i : data) {
+    for (const auto &i: data) {
         General general{i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"]
@@ -37,17 +37,17 @@ void CheckGenerals(const std::vector<General>& Generals, const std::vector<Gener
     for (int i = 0; i < 4; i++) {
         std::cout<<"Rarity "<< i << " : " << rarity[i] << std::endl;
     }
-    for (auto & i : Starters) {
+    for (const auto &i: Starters) {
         std::cout<<i<<"\n";
     }
-    for (auto & i : Generals) {
+    for (const auto & i : Generals) {
         std::cout<<i<<"\n";
     }
 }
 
 void DisplayStartingGenerals(const std::vector<General>& Starters) {
     int k = 0;
-    for (auto & i : Starters) {
+    for (const auto & i : Starters) {
         std::cout<<k<<".\n"<<i<<"\n";
         k++;
     }
@@ -56,7 +56,6 @@ void DisplayStartingGenerals(const std::vector<General>& Starters) {
 int main() {
     //Initialize Generals std::vector and 2 vectors for statistics
     std::vector<General> Generals, StartingGenerals;
-    std::string temp;
     unsigned int types[5] = {0}, rarity[4] = {0}, ans2;
     bool ans1;
     PopulateGenerals(Generals, StartingGenerals, types, rarity);
@@ -65,6 +64,7 @@ int main() {
     std::cout<<balanceCheckText;
     std::cin>>ans1;
     if (ans1 == true) {
+        std::string temp;
         CheckGenerals(Generals, StartingGenerals, types, rarity);
         std::cout<<"\nHit ENTER when you want to continue!\n";
         std::cin.ignore(); //Flush \n from the buffer
