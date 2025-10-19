@@ -17,11 +17,10 @@ private:
     std::vector<int> neighbours;
 
 public:
-    Settlement(const Garrison& garrison_,const std::vector <ControlPoint>& controlPoints_, std::string  name_,
-        int owner_, std::vector<int> neighbours_) :
-            stationedGarrison(garrison_), controlPoints(controlPoints_), name(std::move(name_)),
-                owner(owner_), neighbours(std::move(neighbours_)) {
-
+    Settlement(const Garrison &garrison_, const std::vector<ControlPoint> &controlPoints_, std::string name_,
+               int owner_, std::vector<int> neighbours_) : stationedGarrison(garrison_), controlPoints(controlPoints_),
+                                                           name(std::move(name_)),
+                                                           owner(owner_), neighbours(std::move(neighbours_)) {
     }
 
     void StationArmy(const Army& army) {

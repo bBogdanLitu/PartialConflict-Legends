@@ -85,11 +85,11 @@ int main() {
     std::ifstream generalsJson("generals.json"), settlementsJson("settlements.json");
 
     if (!generalsJson || !settlementsJson) {
-        std::cerr<<"File not found."<<std::endl;
+        std::cerr << "File not found." << std::endl;
         return -1;
     }
 
-    PopulateGenerals(std::move(generalsJson),Generals, StartingGenerals, types, rarity);
+    PopulateGenerals(std::move(generalsJson), Generals, StartingGenerals, types, rarity);
     generalsJson.close();
     PopulateSettlements(std::move(settlementsJson), Settlements);
     settlementsJson.close();
@@ -100,7 +100,7 @@ int main() {
     if (ans1 == true) {
         std::string temp;
         CheckGenerals(Generals, StartingGenerals, types, rarity);
-        std::cout<<enterToContinueText;
+        std::cout << enterToContinueText;
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
     }
@@ -111,11 +111,13 @@ int main() {
     if (ans2 >= StartingGenerals.size() ) {
         ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
     }
-    std::cout<<StartingGenerals[ans2]<<starterPostChoiceText;
+    std::cout << StartingGenerals[ans2] << starterPostChoiceText;
 
     //Now I can use the starter to show the other classes' functionalities
     Army starterArmy{StartingGenerals[ans2]};
-    std::cout<<starterArmy<<"\n";
+    std::cout << starterArmy << "\n";
+
+    Settlements[0].StationArmy(starterArmy);
 
     std::cout<<Settlements[0]<<"\n";
 

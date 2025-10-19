@@ -7,7 +7,8 @@ inline std::string balanceCheckText = "Would you like to check the general list 
 inline std::string enterToContinueText = "\nHit ENTER when you want to continue!\n";
 inline std::string beginningGeneralText =  "You will now be prompted to choose your starting General from the following list:\n";
 inline std::string starterPreChoiceText = "Type the number of the wanted General (some might have hidden bonuses!):\n";
-inline std::string starterPostChoiceText = "This is your starter. Good luck!\n The choice is final. The game will now begin (or end).\n\n";
+inline std::string starterPostChoiceText =
+        "This is your starter. Good luck!\n The choice is final. The game will now begin (or end).\n\n";
 
 
 #endif //Texts_H
