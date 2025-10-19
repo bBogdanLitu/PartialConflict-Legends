@@ -5,8 +5,8 @@
 #include "header/Texts.h"
 #include "header/Settlement.h"
 
-void PopulateGenerals(std::vector<General>& Generals, std::vector<General>& Starters, unsigned int* types, unsigned int* rarity ) {
-    std::ifstream generalsJson("generals.json");
+void PopulateGenerals(std::ifstream generalsJson, std::vector<General> &Generals, std::vector<General> &Starters,
+                      unsigned int *types, unsigned int *rarity) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
     for (const auto &i: data) {
         General general{i["firstName"], i["lastName"], i["type"], i["rarity"],
@@ -26,6 +26,29 @@ void PopulateGenerals(std::vector<General>& Generals, std::vector<General>& Star
 
     }
     generalsJson.close();
+}
+
+void PopulateSettlements(std::ifstream settlementsJson, std::vector<Settlement> &Settlements) {
+    std::vector<ControlPoint> ControlPoints;
+    nlohmann::json data = nlohmann::json::parse(settlementsJson);
+
+    for (const auto &i: data) {
+        std::vector<int> neighbours;
+        if (i["cpCount"] > 0) {
+            for (int k = 0; k < i["cpCount"]; k++) {
+                Scout scout{i["controlPoints"][k]["scoutViewRange"]};
+                ControlPoint controlPoint{scout, i["controlPoints"][k]["name"], i["controlPoints"][k]["cost"]};
+                ControlPoints.push_back(controlPoint);
+                for (int p = 0; p < i["controlPoints"][k]["connectionNumber"]; p++) {
+                    neighbours.push_back(i["controlPoints"][k]["connections"][p]);
+                }
+            }
+        }
+        Garrison garrison(i["startingGarrisonLevel"]);
+        Settlement settlement{garrison, ControlPoints, i["name"], i["owner"], neighbours};
+        Settlements.push_back(settlement);
+    }
+    settlementsJson.close();
 }
 
 void CheckGenerals(const std::vector<General>& Generals, const std::vector<General>& Starters,
@@ -54,11 +77,22 @@ void DisplayStartingGenerals(const std::vector<General>& Starters) {
 }
 
 int main() {
-    //Initialize Generals std::vector and 2 vectors for statistics
+    //types[] and rarity[] are for statistics only, could be deleted sometime
     std::vector<General> Generals, StartingGenerals;
+    std::vector<Settlement> Settlements;
     unsigned int types[5] = {0}, rarity[4] = {0}, ans2;
     bool ans1;
-    PopulateGenerals(Generals, StartingGenerals, types, rarity);
+    std::ifstream generalsJson("generals.json"), settlementsJson("settlements.json");
+
+    if (!generalsJson || !settlementsJson) {
+        std::cerr<<"File not found."<<std::endl;
+        return -1;
+    }
+
+    PopulateGenerals(std::move(generalsJson),Generals, StartingGenerals, types, rarity);
+    generalsJson.close();
+    PopulateSettlements(std::move(settlementsJson), Settlements);
+    settlementsJson.close();
 
     std::cout<<welcomeText;
     std::cout<<balanceCheckText;
@@ -66,7 +100,7 @@ int main() {
     if (ans1 == true) {
         std::string temp;
         CheckGenerals(Generals, StartingGenerals, types, rarity);
-        std::cout<<"\nHit ENTER when you want to continue!\n";
+        std::cout<<enterToContinueText;
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
     }
@@ -77,25 +111,13 @@ int main() {
     if (ans2 >= StartingGenerals.size() ) {
         ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
     }
-    std::cout<<StartingGenerals[ans2]<<"This is your starter. Good luck!\n";
-    std::cout<<starterPostChoiceText;
-
+    std::cout<<StartingGenerals[ans2]<<starterPostChoiceText;
 
     //Now I can use the starter to show the other classes' functionalities
     Army starterArmy{StartingGenerals[ans2]};
     std::cout<<starterArmy<<"\n";
 
-    Garrison garrison{1};
-    Scout scout1{1};
-    ControlPoint controlPoint1{scout1, "Pod", 1}, controlPoint2{scout1, "Giratoriu", 1};
-
-    std::vector<ControlPoint> controlPoints;
-    controlPoints.push_back(controlPoint1);
-    controlPoints.push_back(controlPoint2);
-
-    Settlement settlement{garrison, controlPoints, "Cernavoda", 0};
-    settlement.StationArmy(starterArmy);
-    std::cout<<settlement;
+    std::cout<<Settlements[0]<<"\n";
 
     //Testarea cc si op=
     Scout sc1{1};
@@ -108,8 +130,7 @@ int main() {
     sc1.setViewRange(100);
     assert((std::cout << "op=: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
 
-
-    controlPoints.clear();
+    Settlements.clear();
     StartingGenerals.clear();
     Generals.clear();
     return 0;

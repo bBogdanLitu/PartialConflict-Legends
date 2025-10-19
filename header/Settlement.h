@@ -13,11 +13,14 @@ private:
     Garrison stationedGarrison;
     std::vector<ControlPoint> controlPoints;
     std::string name;
-    int owner; // 0 = player, others to be determined
+    int owner; //0 = player, others are enemies or contenders
+    std::vector<int> neighbours;
 
 public:
-    Settlement(const Garrison& garrison_,const std::vector <ControlPoint>& controlPoints_, const std::string& name_, int owner_) :
-    stationedGarrison(garrison_), controlPoints(controlPoints_), name(name_), owner(owner_) {
+    Settlement(const Garrison& garrison_,const std::vector <ControlPoint>& controlPoints_, std::string  name_,
+        int owner_, std::vector<int> neighbours_) :
+            stationedGarrison(garrison_), controlPoints(controlPoints_), name(std::move(name_)),
+                owner(owner_), neighbours(std::move(neighbours_)) {
 
     }
 
@@ -36,7 +39,7 @@ public:
         }
         os << settlement.stationedGarrison;
         os << "List of attached control points:\n";
-        for (const auto& i : settlement.controlPoints) {
+        for (const auto& i: settlement.controlPoints) {
             os << k << ".\n" << i << "\n";
             k++;
         }
