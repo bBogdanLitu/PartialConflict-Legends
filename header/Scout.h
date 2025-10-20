@@ -12,12 +12,12 @@ public:
     }
 
     Scout (const Scout& other) : viewRange(other.viewRange) {
-        std::cout << "Constructor de copiere pentru Scout\n";
+        //std::cout << "Constructor de copiere pentru Scout\n";
     }
 
     Scout& operator=(const Scout& other) {
         viewRange = other.viewRange;
-        std::cout << "operator= copiere Scout\n";
+        //std::cout << "operator= copiere Scout\n";
         return *this;
     }
 
@@ -36,7 +36,7 @@ public:
     }
 
     ~Scout() {
-        std::cout << "Destructor pentru Scout\n";
+        //std::cout << "Destructor pentru Scout\n";
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Scout& scout) {
