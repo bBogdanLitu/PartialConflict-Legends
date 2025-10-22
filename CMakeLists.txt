@@ -50,7 +50,7 @@ FetchContent_MakeAvailable(json)
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
         header/General.h
-        header/Texts.h
+        header/Constants.h
         header/Army.h
         header/Garrison.h
         header/Scout.h

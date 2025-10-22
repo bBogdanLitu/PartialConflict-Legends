@@ -2,26 +2,43 @@
 #include <fstream>
 #include <vector>
 #include <nlohmann/json.hpp>
-#include "header/Texts.h"
+#include "header/Constants.h"
 #include "header/Settlement.h"
 
-void PopulateGenerals(std::ifstream generalsJson, std::vector<General> &Generals, std::vector<General> &Starters,
-                      unsigned int *types, unsigned int *rarity) {
+void PopulateGenerals(std::ifstream generalsJson, std::vector<General> &Starters, std::vector<General> &Players,
+                      std::vector<General> &Contenders,
+                      std::vector<General> &Warlords, std::vector<General> &Emperors) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
     for (const auto &i: data) {
         General general{i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"]
         };
-        int currType = i["type"], currRarity = i["rarity"];
-        types[currType]++;
-        rarity[currRarity]++;
+        switch (general.getType()) {
+            case 0: {
+                Starters.push_back(general);
+                break;
+            }
+            case 1: {
+                Players.push_back(general);
+                break;
+            }
+            case 2: {
+                Contenders.push_back(general);
+                break;
+            }
+            case 3: {
+                Warlords.push_back(general);
+                break;
+            }
+            case 4: {
+                Emperors.push_back(general);
+                break;
+            }
+            default: {
+                std::cerr << "Unhandled type, check your .json! Game will start anyway." << std::endl;
+            }
 
-        if (general.getType() != 0) {
-            Generals.push_back(general);
-        }
-        else {
-            Starters.push_back(general);
         }
 
     }
@@ -51,36 +68,30 @@ void PopulateSettlements(std::ifstream settlementsJson, std::vector<Settlement> 
     settlementsJson.close();
 }
 
-void CheckGenerals(const std::vector<General>& Generals, const std::vector<General>& Starters,
-    const unsigned int* types, const unsigned int* rarity) {
-    std::cout<<"The generals.json file currently holds " << Generals.size() + Starters.size()<<" generals."<<std::endl;
-    for (int i = 0; i < 5; i++) {
-        std::cout<<"Type "<< i << " : " << types[i] << std::endl;
-    }
-    for (int i = 0; i < 4; i++) {
-        std::cout<<"Rarity "<< i << " : " << rarity[i] << std::endl;
-    }
-    for (const auto &i: Starters) {
-        std::cout<<i<<"\n";
-    }
-    for (const auto &i: Generals) {
-        std::cout<<i<<"\n";
-    }
+void CheckGenerals(const std::vector<General> &Starters, const std::vector<General> &Players,
+                   const std::vector<General> &Contenders,
+                   const std::vector<General> &Warlords, const std::vector<General> &Emperors) {
+    std::cout << "The generals.json file currently holds " << Starters.size() + Players.size() +
+            Contenders.size() + Warlords.size() + Emperors.size() << " generals." << std::endl;
+    std::cout << "Starter generals for the player: " << Starters.size() << std::endl;
+    std::cout << "Generals selectable by the player (at any point): " << Starters.size() + Players.size() << std::endl;
+    std::cout << "Contender general pool (doesn't use more than 3): " << Contenders.size() << std::endl;
+    std::cout << "Warlord general pool: " << Warlords.size() << std::endl;
+    std::cout << "Emperor general pool: " << Emperors.size() << std::endl;
 }
 
 void DisplayStartingGenerals(const std::vector<General>& Starters) {
     int k = 0;
     for (const auto &i: Starters) {
-        std::cout<<k<<".\n"<<i<<"\n";
+        std::cout << k << ".\n" << i << "\n";
         k++;
     }
 }
 
 int main() {
-    //types[] and rarity[] are for statistics only, could be deleted sometime
-    std::vector<General> Generals, StartingGenerals;
+    std::vector<General> StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals;
     std::vector<Settlement> Settlements;
-    unsigned int types[5] = {0}, rarity[4] = {0}, ans2;
+    unsigned int ans2;
     bool ans1;
     std::ifstream generalsJson("generals.json"), settlementsJson("settlements.json");
 
@@ -89,17 +100,26 @@ int main() {
         return -1;
     }
 
-    PopulateGenerals(std::move(generalsJson), Generals, StartingGenerals, types, rarity);
+    PopulateGenerals(std::move(generalsJson), StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals);
     generalsJson.close();
     PopulateSettlements(std::move(settlementsJson), Settlements);
     settlementsJson.close();
 
+    if (WarlordGenerals.size() < warlordMinimumGenerals) {
+        std::cout << warlordCountWarningText;
+        return -1;
+    }
+    if (EmperorGenerals.size() < emperorMinimumGenerals) {
+        std::cout<<emperorCountWarningText;
+        return -1;
+    }
+
     std::cout<<welcomeText;
     std::cout<<balanceCheckText;
-    std::cin>>ans1;
+    std::cin >> ans1;
     if (ans1 == true) {
         std::string temp;
-        CheckGenerals(Generals, StartingGenerals, types, rarity);
+        CheckGenerals(StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals);
         std::cout << enterToContinueText;
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
@@ -115,11 +135,19 @@ int main() {
 
     //Now I can use the starter to show the other classes' functionalities
     Army starterArmy{StartingGenerals[ans2]};
-    std::cout << starterArmy << "\n";
+    StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
 
     Settlements[0].StationArmy(starterArmy);
 
     std::cout<<Settlements[0]<<"\n";
+
+
+
+
+
+
+
+
 
     //Testarea cc si op=
     Scout sc1{1};
@@ -134,6 +162,6 @@ int main() {
 
     Settlements.clear();
     StartingGenerals.clear();
-    Generals.clear();
+    WarlordGenerals.clear();
     return 0;
 }
