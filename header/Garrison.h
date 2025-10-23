@@ -13,6 +13,17 @@ public:
         PowerCalculation();
     }
 
+    [[nodiscard]] int GetOverallPower() const { return overallPower; }
+
+    //If there is no stationed army to help the defence of the settlement
+    [[nodiscard]] int DirectlyAttacked(const Army& attackingArmy) const {
+        int actualPower = this->overallPower / garrisonOverallBoostContribution;
+        if (actualPower < attackingArmy.getTotalOverallPower()) {
+            return 1; //The battle is won by the defending garrison
+        }
+        return -1; //The battle is won by the attacking army
+    }
+
     friend std::ostream&  operator<<(std::ostream& os, const Garrison& garrison) {
         os << "This garrison has an overall of: "<< garrison.overallPower <<"\n";
         return os;

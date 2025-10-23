@@ -16,6 +16,10 @@ public:
     ControlPoint(const Scout& appointedScout_, const std::string& name_, int travelCost_)
     : appointedScout(appointedScout_), name(name_), travelCost(travelCost_) {}
 
+    /*void StationArmy(const Army& army) {
+        stationedArmy = army;
+    }*/
+
     friend std::ostream& operator<<(std::ostream& os, const ControlPoint& controlPoint) {
         os << "Point name: " << controlPoint.name << "\n" << controlPoint.appointedScout
         << "The point has a travel cost of: "<< controlPoint.travelCost;

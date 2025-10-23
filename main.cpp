@@ -51,19 +51,21 @@ void PopulateSettlements(std::ifstream settlementsJson, std::vector<Settlement> 
 
     for (const auto &i: data) {
         std::vector<int> neighbours;
-        if (i["cpCount"] > 0) {
-            for (int k = 0; k < i["cpCount"]; k++) {
-                Scout scout{i["controlPoints"][k]["scoutViewRange"]};
-                ControlPoint controlPoint{scout, i["controlPoints"][k]["name"], i["controlPoints"][k]["cost"]};
-                ControlPoints.push_back(controlPoint);
-                for (int p = 0; p < i["controlPoints"][k]["connectionNumber"]; p++) {
-                    neighbours.push_back(i["controlPoints"][k]["connections"][p]);
-                }
+        //If there are control points owned by this settlement
+        for (int k = 0; k < i["cpCount"]; k++) {
+            Scout scout{i["controlPoints"][k]["scoutViewRange"]}; //We create a scout for each one of them
+            ControlPoint controlPoint{scout, i["controlPoints"][k]["name"], i["controlPoints"][k]["cost"]};
+            ControlPoints.push_back(controlPoint); //And create the control point that will be added to the settlement
+            for (int p = 0; p < i["controlPoints"][k]["connectionNumber"]; p++) {
+                //We also take into account the neighbours (written in settlements.json),
+                //memorised by their index that they would get in the Settlements std::vector.
+                neighbours.push_back(i["controlPoints"][k]["connections"][p]);
             }
         }
-        Garrison garrison(i["startingGarrisonLevel"]);
+        Garrison garrison(i["startingGarrisonLevel"]); //Create the garrison according to config
         Settlement settlement{garrison, ControlPoints, i["name"], i["owner"], neighbours};
-        Settlements.push_back(settlement);
+        Settlements.push_back(settlement); //Settlement is created and added to this collection
+        ControlPoints.clear(); //So that we don't have every settlement controlling every control point !!
     }
     settlementsJson.close();
 }
@@ -131,24 +133,27 @@ int main() {
     if (ans2 >= StartingGenerals.size() ) {
         ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
     }
-    std::cout << StartingGenerals[ans2] << starterPostChoiceText;
-
     //Now I can use the starter to show the other classes' functionalities
     Army starterArmy{StartingGenerals[ans2]};
     StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
 
     Settlements[0].StationArmy(starterArmy);
-
-    std::cout<<Settlements[0]<<"\n";
-
-
-
+    std::cout<<starterPostChoiceText;
+    std::cout<<Settlements[0];
+    std::cout<<starterPreTutorial;
 
 
+    //EXAMPLE TO TEST COMBAT
+    Army warlord1Army{WarlordGenerals[1]};
+
+    std::cout<<tutorialFirstDefenceText;
+    //the first attack doesn't require the attacking army to be actually stationed somewhere,
+    //it is scripted and just a one-time occurrence.
+    Settlements[0].Besieged(warlord1Army);
 
 
 
-
+    std::cout<<"\n\n\n";
     //Testarea cc si op=
     Scout sc1{1};
     Scout sc2{sc1};
@@ -162,6 +167,9 @@ int main() {
 
     Settlements.clear();
     StartingGenerals.clear();
+    PlayerGenerals.clear();
+    ContenderGenerals.clear();
     WarlordGenerals.clear();
+    EmperorGenerals.clear();
     return 0;
 }

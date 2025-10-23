@@ -28,6 +28,11 @@ public:
     General(const std::string& firstName_, const std::string& lastName_, int type_, int rarity_,
         int melee_, int ranged_, int armour_, int str_, int acc_, int dex_);
 
+    [[nodiscard]] int getType() const { return type; }
+    [[nodiscard]] int getOverallPower() const { return overallPower; }
+
+
+
     friend std::ostream& operator<<(std::ostream& os, const General& general) {
         os << "Name: " << general.fullName << "\nType and rarity: " << general.type << " " << general.rarity <<
             "\nMelee, ranged and armour stats: " << general.melee << " " << general.ranged << " " << general.armour <<
@@ -37,7 +42,7 @@ public:
 
     }
 
-    [[nodiscard]] int getType() const { return type; }
+
 };
 
 
