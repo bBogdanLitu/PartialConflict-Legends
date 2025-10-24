@@ -15,7 +15,7 @@ private:
     bool isStationed = true; //All armies must start in a Settlement
 
     //Will be called whenever a general is added or removed
-    int TotalOverallPowerCalculation(const General& modifiedGeneral) {
+    int TotalOverallPowerCalculation(const General &modifiedGeneral) {
         totalOverallPower += modifiedGeneral.getOverallPower();
         return totalOverallPower;
     }
@@ -28,7 +28,16 @@ public:
         }
     }
 
-    [[nodiscard]] int Attacked(const Army& attackingArmy, const int overallBoost) const {
+    void AddGeneral(const General &general) {
+        assignedGenerals.push_back(general);
+    }
+
+    [[nodiscard]] int Attacked(const Army &attackingArmy, const int overallBoost,
+                               const std::vector<unsigned long> &battleOrder) const {
+        std::cout << "This is the battle order:\n";
+        for (const unsigned long i: battleOrder) {
+            std::cout << i << "\n";
+        }
         int boostedOverallPower = this->totalOverallPower + overallBoost / garrisonOverallBoostContribution;
         if (boostedOverallPower >= attackingArmy.getTotalOverallPower()) {
             return 1; //The battle is won by the defending army
@@ -37,15 +46,16 @@ public:
     }
 
     [[nodiscard]] int getTotalOverallPower() const { return totalOverallPower; }
+    [[nodiscard]] unsigned long getGeneralCount() const { return assignedGenerals.size(); }
 
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
-        os << "Composition of this army:\n";
+        os << "Composition:\n";
         for (const auto &general : army.assignedGenerals) {
             os << k << ".\n" << general;
             k++;
         }
-        os << "\nAction points at the start of every turn: " << army.actionPoints << "\n";
+        os << "Action points at the start of every turn: " << army.actionPoints << "\n";
         if (army.isStationed == true) {
             os << "The army is stationed.\n";
         }

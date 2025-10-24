@@ -27,29 +27,18 @@ public:
         stationedArmy = army;
     }
 
-    void Besieged(const Army& attackingArmy) const {
-        //If there is a stationedArmy, there will be a combat prompt to the player.
-        //If not, then the player will only get the notification of the outcome.
-        int result;
-        if (stationedArmy) {
-             result = stationedArmy->Attacked(attackingArmy, stationedGarrison.GetOverallPower());
+    //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
+    void AddGeneralToArmy(const General &general) {
+        stationedArmy.value().AddGeneral(general);
+    }
+
+    void Besieged(const Army &attackingArmy) const;
+
+    [[nodiscard]] std::optional<Army> getStationedArmy() const {
+        if (stationedArmy.has_value()) {
+            return stationedArmy.value();
         }
-        else {
-            result = stationedGarrison.DirectlyAttacked(attackingArmy);
-        }
-        switch (result) {
-            case 1: {
-                std::cout << this->name << settlementBesiegeFailedText << "\n";
-                break;
-            }
-            case -1: {
-                std::cout << this->name << settlementBesiegeSuccessText << "\n";
-                break;
-            }
-            default: {
-                std::cerr << "Undefined behaviour detected!" << "\n";
-            }
-        }
+        return std::nullopt;
     }
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
@@ -70,16 +59,69 @@ public:
         }
         os << settlement.stationedGarrison;
         os << "List of attached control points:\n";
-        for (const auto& i: settlement.controlPoints) {
+        for (const auto &i: settlement.controlPoints) {
             os << k << ".\n" << i << "\n";
             k++;
         }
-        os<<"\n";
+        os << "\n";
         if (settlement.stationedArmy.has_value()) {
             os << settlement.stationedArmy.value() << "\n";
         }
         return os;
     }
 };
+
+inline void Settlement::Besieged(const Army &attackingArmy) const {
+    //If there is a stationedArmy, there will be a combat prompt to the player.
+    //If not, then the player will only get the notification of the outcome.
+    int result;
+    if (stationedArmy.has_value()) {
+        std::cout << settlementStationedArmyText;
+        std::cout << stationedArmy.value();
+        std::cout << chooseBattleOrderText;
+
+        std::vector<unsigned long> battleOrder;
+        //Choosing the order until it is useless to do so.
+        for (unsigned long i = 0;
+                i < stationedArmy.value().getGeneralCount() && i < attackingArmy.getGeneralCount();
+                i++ ) {
+            unsigned long a;
+            std::cout << "Enemy " << i << " to fight with your: ";
+            std::cin >> a;
+            //Sanitizing user input
+            if (a > stationedArmy.value().getGeneralCount()) {
+                a = stationedArmy.value().getGeneralCount() - 1; //capping to the last possible one
+            }
+            //To prevent assigning one general to fight multiple enemies (at once)
+            for (const unsigned long j : battleOrder) {
+                //We search for the first unassigned general and make it assigned instead.
+                unsigned long k=0;
+                while (j == a && k <= armyGeneralsMaximumIndex) {
+                    a = k;
+                    k++;
+                }
+            }
+            battleOrder.push_back(a);
+        }
+
+        result = stationedArmy.value().Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder);
+    } else {
+        std::cout << settlementNoStationedArmyText;
+        result = stationedGarrison.DirectlyAttacked(attackingArmy);
+    }
+    switch (result) {
+        case 1: {
+            std::cout << this->name << settlementBesiegeFailedText << "\n";
+            break;
+        }
+        case -1: {
+            std::cout << this->name << settlementBesiegeSuccessText << "\n";
+            break;
+        }
+        default: {
+            std::cerr << "Undefined behaviour detected!" << "\n";
+        }
+    }
+}
 
 #endif

@@ -16,7 +16,7 @@ public:
     [[nodiscard]] int GetOverallPower() const { return overallPower; }
 
     //If there is no stationed army to help the defence of the settlement
-    [[nodiscard]] int DirectlyAttacked(const Army& attackingArmy) const {
+    [[nodiscard]] int DirectlyAttacked(const Army &attackingArmy) const {
         int actualPower = this->overallPower / garrisonOverallBoostContribution;
         if (actualPower < attackingArmy.getTotalOverallPower()) {
             return 1; //The battle is won by the defending garrison

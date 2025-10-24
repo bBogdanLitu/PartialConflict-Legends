@@ -32,7 +32,6 @@ public:
     [[nodiscard]] int getOverallPower() const { return overallPower; }
 
 
-
     friend std::ostream& operator<<(std::ostream& os, const General& general) {
         os << "Name: " << general.fullName << "\nType and rarity: " << general.type << " " << general.rarity <<
             "\nMelee, ranged and armour stats: " << general.melee << " " << general.ranged << " " << general.armour <<
@@ -41,8 +40,6 @@ public:
         return os;
 
     }
-
-
 };
 
 

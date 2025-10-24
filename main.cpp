@@ -93,8 +93,7 @@ void DisplayStartingGenerals(const std::vector<General>& Starters) {
 int main() {
     std::vector<General> StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals;
     std::vector<Settlement> Settlements;
-    unsigned int ans2;
-    bool ans1;
+    unsigned int ans1, ans2;
     std::ifstream generalsJson("generals.json"), settlementsJson("settlements.json");
 
     if (!generalsJson || !settlementsJson) {
@@ -119,7 +118,10 @@ int main() {
     std::cout<<welcomeText;
     std::cout<<balanceCheckText;
     std::cin >> ans1;
-    if (ans1 == true) {
+    if (ans1 > 1) {
+        ans1 = 0;
+    }
+    if (ans1 == 1) {
         std::string temp;
         CheckGenerals(StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals);
         std::cout << enterToContinueText;
@@ -138,22 +140,26 @@ int main() {
     StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
 
     Settlements[0].StationArmy(starterArmy);
-    std::cout<<starterPostChoiceText;
-    std::cout<<Settlements[0];
-    std::cout<<starterPreTutorial;
+
+    std::cout << starterPostChoiceText;
+    std::cout << Settlements[0];
+    std::cout << starterPreTutorial;
 
 
     //EXAMPLE TO TEST COMBAT
+    Settlements[0].AddGeneralToArmy(PlayerGenerals[5]);
     Army warlord1Army{WarlordGenerals[1]};
+    warlord1Army.AddGeneral(WarlordGenerals[3]);
 
-    std::cout<<tutorialFirstDefenceText;
+    std::cout << tutorialFirstDefenceText;
     //the first attack doesn't require the attacking army to be actually stationed somewhere,
     //it is scripted and just a one-time occurrence.
+    std::cout << incomingAttackText;
+    std::cout << warlord1Army;
     Settlements[0].Besieged(warlord1Army);
 
 
-
-    std::cout<<"\n\n\n";
+    std::cout << "\n\n\n";
     //Testarea cc si op=
     Scout sc1{1};
     Scout sc2{sc1};
