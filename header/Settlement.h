@@ -34,12 +34,12 @@ public:
 
     void Besieged(const Army &attackingArmy) const;
 
-    [[nodiscard]] std::optional<Army> getStationedArmy() const {
+    /*[[nodiscard]] std::optional<Army> getStationedArmy() const {
         if (stationedArmy.has_value()) {
             return stationedArmy.value();
         }
         return std::nullopt;
-    }
+    }*/
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
         controlPoints[index].StationArmy(army);
@@ -83,8 +83,8 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
         std::vector<unsigned long> battleOrder;
         //Choosing the order until it is useless to do so.
         for (unsigned long i = 0;
-                i < stationedArmy.value().getGeneralCount() && i < attackingArmy.getGeneralCount();
-                i++ ) {
+             i < stationedArmy.value().getGeneralCount() && i < attackingArmy.getGeneralCount();
+             i++) {
             unsigned long a;
             std::cout << "Enemy " << i << " to fight with your: ";
             std::cin >> a;
@@ -93,9 +93,9 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
                 a = stationedArmy.value().getGeneralCount() - 1; //capping to the last possible one
             }
             //To prevent assigning one general to fight multiple enemies (at once)
-            for (const unsigned long j : battleOrder) {
+            for (const unsigned long j: battleOrder) {
                 //We search for the first unassigned general and make it assigned instead.
-                unsigned long k=0;
+                unsigned long k = 0;
                 while (j == a && k <= armyGeneralsMaximumIndex) {
                     a = k;
                     k++;

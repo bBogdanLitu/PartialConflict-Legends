@@ -16,11 +16,11 @@ const inline std::string warlordCountWarningText =
 const inline std::string emperorCountWarningText =
         "Your generals.json doesn't meet the expectations: 30 Generals for the Emperor (type 4)";
 const inline std::string beginningGeneralText =
-                "You will now be prompted to choose your starting General from the following list:\n";
+        "You will now be prompted to choose your starting General from the following list:\n";
 const inline std::string starterPreChoiceText =
-                "Type the number of the wanted General (some might have hidden bonuses!):\n";
+        "Type the number of the wanted General (some might have hidden bonuses!):\n";
 const inline std::string starterPostChoiceText =
-                "This is your first settlement. Defend it well!\n";
+        "This is your first settlement. Defend it well!\n";
 const inline std::string starterPreTutorial =
                 "The game will now begin. Good luck!\n\n";
 const inline std::string tutorialFirstDefenceText =
@@ -30,13 +30,13 @@ const inline std::string settlementBesiegeFailedText =
 const inline std::string settlementBesiegeSuccessText =
                 " was captured!\n";
 const inline std::string incomingAttackText =
-                "Prepare yourself! An enemy army is approaching:\n";
+        "Prepare yourself! An enemy army is approaching:\n";
 const inline std::string settlementStationedArmyText =
-                "\nThis is your stationed army:\n";
+        "\nThis is your stationed army:\n";
 const inline std::string settlementNoStationedArmyText =
-                "The battle will be led by your garrisoned troops...\n";
+        "The battle will be led by your garrisoned troops...\n";
 const inline std::string chooseBattleOrderText =
-    "\nEnter indexes from your army according to the order you want the generals to fight in:\n";
+        "\nEnter indexes from your army according to the order you want the generals to fight in:\n";
 
 
 #endif
