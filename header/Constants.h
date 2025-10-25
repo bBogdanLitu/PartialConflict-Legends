@@ -13,15 +13,15 @@ constexpr int armourToRangedNullifierPossible = 416;
 constexpr int armourToRangedNullifierMinimumRPower = 432;
 constexpr int rPowerMaximumValue = 1600;
 constexpr float armourToRangedNullifierMInFormula =
-        (armourToRangedNullifierCertain - armourToRangedNullifierPossible) / static_cast<float>(
-            rPowerMaximumValue - armourToRangedNullifierMinimumRPower);
+                (armourToRangedNullifierCertain - armourToRangedNullifierPossible) / static_cast<float>(
+                        rPowerMaximumValue - armourToRangedNullifierMinimumRPower);
 constexpr int armourMaximumForBonusMultiplier = 200;
-constexpr float meleeBonusMultiplierForLowArmour = 1.1;
-constexpr float rangedBonusMultiplierForLowArmour = 1.1;
+constexpr float meleeBonusMultiplierForLowArmour = 1.1f;
+constexpr float rangedBonusMultiplierForLowArmour = 1.1f;
 constexpr int rangedToMeleeOverpowerFixedAdditionBase = 100;
 constexpr int rangedToMeleeOverpowerRequiredMultiplier = 2;
 constexpr int rangedToMeleeOverpowerFixedAddition =
-        rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
+                rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
 const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
 const inline std::string balanceCheckText = "Would you like to see General types? (1/0)\n";
@@ -31,11 +31,11 @@ const inline std::string warlordCountWarningText =
 const inline std::string emperorCountWarningText =
         "Your generals.json doesn't meet the expectations: 30 Generals for the Emperor (type 4)";
 const inline std::string beginningGeneralText =
-        "You will now be prompted to choose your starting General from the following list:\n";
+                "You will now be prompted to choose your starting General from the following list:\n";
 const inline std::string starterPreChoiceText =
-        "Type the number of the wanted General (some might have hidden bonuses!):\n";
+                "Type the number of the wanted General (some might have hidden bonuses!):\n";
 const inline std::string starterPostChoiceText =
-        "This is your first settlement. Defend it well!\n";
+                "This is your first settlement. Defend it well!\n";
 const inline std::string starterPreTutorial =
                 "The game will now begin. Good luck!\n\n";
 const inline std::string tutorialFirstDefenceText =
@@ -45,7 +45,7 @@ const inline std::string settlementBesiegeFailedText =
 const inline std::string settlementBesiegeSuccessText =
                 " was captured!\n";
 const inline std::string incomingAttackText =
-        "Prepare yourself! An enemy army is approaching:\n";
+                "Prepare yourself! An enemy army is approaching:\n";
 const inline std::string settlementStationedArmyText =
         "\nThis is your stationed army:\n";
 const inline std::string settlementNoStationedArmyText =
@@ -53,10 +53,10 @@ const inline std::string settlementNoStationedArmyText =
 const inline std::string chooseBattleOrderText =
                 "\nEnter indexes from your army according to the order you want the generals to fight in:\n";
 const inline std::string settlementFightRemainingAttackersText =
-        "There are still attackers remaining. Defenders will attempt to defeat them.\n";
+                "There are still attackers remaining. Defenders will attempt to defeat them.\n";
 const inline std::string settlementFightNoRemainingAttackersText =
-        "The defenders have defeated the attackers from the first attempt.\n";
+                "The defenders have defeated the attackers from the first attempt.\n";
 const inline std::string settlementFightNoRemainingDefendersText =
-        "The attackers have defeated the defenders from the first attempt.\n";
+                "The attackers have defeated the defenders from the first attempt.\n";
 
 #endif

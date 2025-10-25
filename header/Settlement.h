@@ -97,8 +97,7 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
                 //We search for the first unassigned general and make it assigned instead.
                 unsigned long k = 0;
                 while (j == a && k <= armyGeneralsMaximumIndex) {
-                    a = k;
-                    k++;
+                    a = ++k;
                 }
             }
             battleOrder.push_back(a);

@@ -39,11 +39,11 @@ public:
         int melee_, int ranged_, int armour_, int str_, int acc_, int dex_);
 
     //Combat function
-    int FightWith(const General &enemyGeneral, int overallBoost) const;
+    [[nodiscard]] int FightWith(const General &enemyGeneral, int overallBoost) const;
 
     [[nodiscard]] int getType() const { return type; }
     [[nodiscard]] int getOverallPower() const { return overallPower; }
-    [[nodiscard]] std::vector<int> getPowers() const { return Powers; }
+    [[nodiscard]] const std::vector<int>& getPowers() const { return Powers; }
 
 
     friend std::ostream& operator<<(std::ostream& os, const General& general) {
@@ -161,7 +161,7 @@ inline int General::FightWith(const General &enemyGeneral, const int overallBoos
     }
     //All equal stats -> whoever gets called (the defender) wins
     return result;
-    }
+}
 
 
 #endif //General_H

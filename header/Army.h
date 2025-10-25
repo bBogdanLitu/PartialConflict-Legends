@@ -56,7 +56,7 @@ public:
 
     [[nodiscard]] int getTotalOverallPower() const { return totalOverallPower; }
     [[nodiscard]] unsigned long getGeneralCount() const { return assignedGenerals.size(); }
-    [[nodiscard]] std::vector<General> getAssignedGenerals() const { return assignedGenerals; }
+    [[nodiscard]] const std::vector<General> &getAssignedGenerals() const { return assignedGenerals; }
 
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
@@ -94,8 +94,8 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     if (!remainingFights.empty() && !remainingAllies.empty()) {
         std::cout << settlementFightRemainingAttackersText;
         //We still have to defeat the undefeated enemy using remaining generals
-        int fightResult;
         unsigned long attempts = 0;
+        int fightResult = 0;
         for (const int remainingFight: remainingFights) {
             //We will attempt to defeat all remaining enemies using our allies.
             //We stop when either they are all defeated or we don't have any allies left.
@@ -106,7 +106,7 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                     attempts++; //only try going to the next remaining ally if the current loses a battle.
                 }
             } while (fightResult == 0 && attempts < remainingAllies.size());
-            if (attempts > remainingAllies.size()) {
+            if (attempts == remainingAllies.size()) {
                 //There are no more possible fights, the battle is lost
                 return -1;
             }

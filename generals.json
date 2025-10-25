@@ -2008,11 +2008,11 @@
 		"lastName": "Simione",
 		"type": 3,
 		"rarity": 2,
-		"melee": 70,
-		"ranged": 70,
-		"armour": 70,
-		"strength": 50,
-		"accuracy": 50,
-		"dexterity": 50
+		"melee": 99,
+		"ranged": 99,
+		"armour": 99,
+		"strength": 99,
+		"accuracy": 99,
+		"dexterity": 99
 	}
 ]
