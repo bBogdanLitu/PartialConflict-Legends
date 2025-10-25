@@ -7,6 +7,21 @@ constexpr int emperorMinimumGenerals = 30;
 //How much the overall is divided by when supporting an army / being attacked
 constexpr int garrisonOverallBoostContribution = 4;
 constexpr int armyGeneralsMaximumIndex = 2;
+//For combat bonuses
+constexpr int armourToRangedNullifierCertain = 1000;
+constexpr int armourToRangedNullifierPossible = 416;
+constexpr int armourToRangedNullifierMinimumRPower = 432;
+constexpr int rPowerMaximumValue = 1600;
+constexpr float armourToRangedNullifierMInFormula =
+        (armourToRangedNullifierCertain - armourToRangedNullifierPossible) / static_cast<float>(
+            rPowerMaximumValue - armourToRangedNullifierMinimumRPower);
+constexpr int armourMaximumForBonusMultiplier = 200;
+constexpr float meleeBonusMultiplierForLowArmour = 1.1;
+constexpr float rangedBonusMultiplierForLowArmour = 1.1;
+constexpr int rangedToMeleeOverpowerFixedAdditionBase = 100;
+constexpr int rangedToMeleeOverpowerRequiredMultiplier = 2;
+constexpr int rangedToMeleeOverpowerFixedAddition =
+        rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
 const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
 const inline std::string balanceCheckText = "Would you like to see General types? (1/0)\n";
@@ -34,9 +49,14 @@ const inline std::string incomingAttackText =
 const inline std::string settlementStationedArmyText =
         "\nThis is your stationed army:\n";
 const inline std::string settlementNoStationedArmyText =
-        "The battle will be led by your garrisoned troops...\n";
+                "The battle will be led by your garrisoned troops...\n";
 const inline std::string chooseBattleOrderText =
-        "\nEnter indexes from your army according to the order you want the generals to fight in:\n";
-
+                "\nEnter indexes from your army according to the order you want the generals to fight in:\n";
+const inline std::string settlementFightRemainingAttackersText =
+        "There are still attackers remaining. Defenders will attempt to defeat them.\n";
+const inline std::string settlementFightNoRemainingAttackersText =
+        "The defenders have defeated the attackers from the first attempt.\n";
+const inline std::string settlementFightNoRemainingDefendersText =
+        "The attackers have defeated the defenders from the first attempt.\n";
 
 #endif

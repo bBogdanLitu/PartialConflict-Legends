@@ -148,6 +148,7 @@ int main() {
 
     //EXAMPLE TO TEST COMBAT
     Settlements[0].AddGeneralToArmy(PlayerGenerals[5]);
+    Settlements[0].AddGeneralToArmy(PlayerGenerals[4]);
     Army warlord1Army{WarlordGenerals[1]};
     warlord1Army.AddGeneral(WarlordGenerals[3]);
 

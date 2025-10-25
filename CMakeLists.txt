@@ -56,6 +56,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Scout.h
         header/ControlPoint.h
         header/Settlement.h
+        header/Formulas.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
