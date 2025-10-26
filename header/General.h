@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] int getType() const { return type; }
     [[nodiscard]] int getOverallPower() const { return overallPower; }
-    [[nodiscard]] const std::vector<int>& getPowers() const { return Powers; }
+    [[nodiscard]] const std::vector<int> &getPowers() const { return Powers; }
 
 
     friend std::ostream& operator<<(std::ostream& os, const General& general) {
@@ -131,6 +131,14 @@ inline int General::FightWith(const General &enemyGeneral, const int overallBoos
             selfPowers[1], enemyPowers[0], enemyPowers[1]) == true) {
         result = 1; //win
         return result;
+    }
+
+    //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
+    if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
+        selfPowers[0] *= rangedToMeleeDebuffMultiplier;
+    }
+    if (selfPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(selfPowers[1], enemyPowers[0])) {
+        enemyPowers[0] *= rangedToMeleeDebuffMultiplier;
     }
 
     if (selfPowers[0] > enemyPowers[0]) {

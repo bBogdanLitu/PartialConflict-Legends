@@ -21,6 +21,14 @@ inline bool RangedToMeleeInstantWin(const int rangedPower, const int meleePower,
     return result;
 }
 
+inline bool RangedToMeleeDebuff(const int rangedPower, const int meleePower) {
+    bool result = false;
+    if (rangedPower > meleePower * rangedToMeleeDebuffRequiredMultiplier + rangedToMeleeDebuffFixedAddition) {
+        result = true;
+    }
+    return result;
+}
+
 /*inline bool RangedToMeleeDebuff(const int rangedPower, const int meleePower) {
     bool result = false;
     if (rangedPower > (meleePower))

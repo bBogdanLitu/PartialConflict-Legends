@@ -13,8 +13,8 @@ constexpr int armourToRangedNullifierPossible = 416;
 constexpr int armourToRangedNullifierMinimumRPower = 432;
 constexpr int rPowerMaximumValue = 1600;
 constexpr float armourToRangedNullifierMInFormula =
-                (armourToRangedNullifierCertain - armourToRangedNullifierPossible) / static_cast<float>(
-                        rPowerMaximumValue - armourToRangedNullifierMinimumRPower);
+        (armourToRangedNullifierCertain - armourToRangedNullifierPossible) / static_cast<float>(
+            rPowerMaximumValue - armourToRangedNullifierMinimumRPower);
 constexpr int armourMaximumForBonusMultiplier = 200;
 constexpr float meleeBonusMultiplierForLowArmour = 1.1f;
 constexpr float rangedBonusMultiplierForLowArmour = 1.1f;
@@ -22,6 +22,11 @@ constexpr int rangedToMeleeOverpowerFixedAdditionBase = 100;
 constexpr int rangedToMeleeOverpowerRequiredMultiplier = 2;
 constexpr int rangedToMeleeOverpowerFixedAddition =
                 rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
+constexpr int rangedToMeleeDebuffFixedAdditionBase = 100;
+constexpr float rangedToMeleeDebuffRequiredMultiplier = 1.5;
+constexpr int rangedToMeleeDebuffFixedAddition =
+                rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
+constexpr float rangedToMeleeDebuffMultiplier = 0.9f;
 const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
 const inline std::string balanceCheckText = "Would you like to see General types? (1/0)\n";

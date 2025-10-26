@@ -147,11 +147,11 @@ int main() {
 
 
     //EXAMPLE TO TEST COMBAT
-    Settlements[0].AddGeneralToArmy(PlayerGenerals[5]);
-    Settlements[0].AddGeneralToArmy(StartingGenerals[4]);
-    Army warlord1Army{WarlordGenerals[1]};
-    warlord1Army.AddGeneral(WarlordGenerals[3]);
-    warlord1Army.AddGeneral(WarlordGenerals[67]); //OP general to test if the fight is handled correctly in Army.h
+    Settlements[0].AddGeneralToArmy(PlayerGenerals[5]); //Good general
+    Settlements[0].AddGeneralToArmy(StartingGenerals[4]); //Very weak general
+    Army warlord1Army{WarlordGenerals[67]}; //Weak general, can be beat by the garrison alone
+    warlord1Army.AddGeneral(WarlordGenerals[3]); //Medium general to test some of the functionalities
+    warlord1Army.AddGeneral(WarlordGenerals[1]); //OP general to test if the fight is handled correctly in Army.h
     std::cout << tutorialFirstDefenceText;
     //the first attack doesn't require the attacking army to be actually stationed somewhere,
     //it is scripted and just a one-time occurrence.

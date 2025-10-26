@@ -79,34 +79,65 @@ public:
 inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                           const std::vector<unsigned long> &battleOrder) const {
     std::cout << "This is the battle order:\n";
-    int k = 0;
-    std::vector<int> remainingFights, remainingAllies;
-    for (const unsigned long i: battleOrder) {
-        std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[k] << "\nVS\n\nDefending general:\n"
-                << this->getAssignedGenerals()[i];
-        int fightResult = this->getAssignedGenerals()[i].
-                FightWith(attackingArmy.getAssignedGenerals()[k], overallBoost);
-        this->evaluateFightOutcome(fightResult, remainingFights, remainingAllies, k, static_cast<int>(i));
-        k++;
+    int currentEnemy = 0;
+    std::vector<int> remainingAttackers, remainingDefenders, surplusDefenders;
+    //We assume that every defender and attacker can be surplus (apriori)
+    for (int i = 0; i < static_cast<int>(this->getGeneralCount()); i++) {
+        surplusDefenders.push_back(i);
+    }
+
+    for (const unsigned long currentAlly: battleOrder) {
+        //We mark the chosen defender as non-surplus
+        surplusDefenders[currentAlly] = -1;
+        std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[currentEnemy] <<
+                "\nVS\n\nDefending general:\n"
+                << this->getAssignedGenerals()[currentAlly];
+        int fightResult = this->getAssignedGenerals()[currentAlly].
+                FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);
+        //defender combat is boosted by the garrison
+        this->evaluateFightOutcome(fightResult, remainingAttackers, remainingDefenders, currentEnemy,
+                                   static_cast<int>(currentAlly));
+        currentEnemy++;
+    }
+
+    //If there are generals that didn't take part because of size difference, we add them to their pools.
+    if (this->getGeneralCount() > attackingArmy.getGeneralCount()) {
+        for (int surplusDefender: surplusDefenders) {
+            if (surplusDefender != -1) {
+                remainingDefenders.push_back(surplusDefender);
+            }
+        }
+    } else if (attackingArmy.getGeneralCount() > this->getGeneralCount()) {
+        //Because the attackers use a simple order (0, 1, 2) we can simply add what's left to the remaining pool.
+        for (unsigned long i = attackingArmy.getGeneralCount() - 1;
+             i > armyGeneralsMaximumIndex - (attackingArmy.getGeneralCount() - this->getGeneralCount()); i--) {
+            remainingAttackers.push_back(static_cast<int>(i));
+        }
     }
 
     //If there are enemies left to fight and we still have allies.
-    if (!remainingFights.empty() && !remainingAllies.empty()) {
+    if (!remainingAttackers.empty() && !remainingDefenders.empty()) {
         std::cout << settlementFightRemainingAttackersText;
         //We still have to defeat the undefeated enemy using remaining generals
         unsigned long attempts = 0;
         int fightResult = 0;
-        for (const int remainingFight: remainingFights) {
+        for (const int remainingAttacker: remainingAttackers) {
             //We will attempt to defeat all remaining enemies using our allies.
             //We stop when either they are all defeated or we don't have any allies left.
             do {
-                fightResult = this->getAssignedGenerals()[remainingAllies[attempts]].FightWith(
-                    attackingArmy.getAssignedGenerals()[remainingFight], overallBoost);
+                std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[remainingAttacker] <<
+                        "\nVS\n\nDefending general:\n"
+                        << this->getAssignedGenerals()[remainingDefenders[attempts]] << "\n";
+                fightResult = this->getAssignedGenerals()[remainingDefenders[attempts]].FightWith(
+                    attackingArmy.getAssignedGenerals()[remainingAttacker], overallBoost);
                 if (fightResult == 0) {
+                    std::cout << "Battle lost by the defender.\n\n";
                     attempts++; //only try going to the next remaining ally if the current loses a battle.
+                } else {
+                    std::cout << "Battle won by the defender.\n\n";
                 }
-            } while (fightResult == 0 && attempts < remainingAllies.size());
-            if (attempts == remainingAllies.size()) {
+            } while (fightResult == 0 && attempts < remainingDefenders.size());
+            if (attempts == remainingDefenders.size()) {
                 //There are no more possible fights, the battle is lost
                 return -1;
             }
@@ -116,7 +147,7 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
         return 1;
     }
     //If there are enemies left to fight, but we have no allies
-    if (!remainingFights.empty() && remainingAllies.empty()) {
+    if (!remainingAttackers.empty() && remainingDefenders.empty()) {
         std::cout << settlementFightNoRemainingDefendersText;
         //Battle is lost
         return -1;

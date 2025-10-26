@@ -3,7 +3,7 @@
 ### Description
 <p align="justify">Command your All-Star army to victory in a turn-based strategy game heavily inspired by my passion for the 'Total War' series by Creative Assembly. Begin as a Contender, with one starting general from a (stat-wise) slightly underwhelming pool. Fight your neighbouring Warlords, loyal to the Emperor, and take over their Settlements to increase your power and influence, but make sure to setup your defence! Periodic attacks from all Warlords who can directly (?) reach one of your controlled Settlements are meant to test your grasp over the realm. Master their routines and exploit their weaknesses in order to progress towards the Emperor himself! If defeating his underlings wasn't a hard task, you might find taking him on to be a real challenge. Upgrade your generals, hire new ones and make sure your army is ready for any situation. Other bot Contenders will follow their path to glory (decided by me) until prevented from doing so, you don't have unlimited time. Defeat the Emperor and take control of his Settlements to claim victory.
 
-<p align="justify">You don't like my take on the stats and/or names of the generals? Edit them yourself by modifying the configuration file, following the given format (***.json). Give yourself an easier start by creating the most overpowered unit possible, make every enemy as strong as a dying snail or sabotage the other contenders by giving them absolutely nothing to work with (might fire back (?) ).
+<p align="justify">You don't like my take on the stats and/or names of the generals? Edit them yourself by modifying the configuration file, following the given format (generals.json). Give yourself an easier start by creating the most overpowered unit possible, make every enemy as strong as a dying snail or sabotage the other contenders by giving them absolutely nothing to work with (might fire back (?) ).
 
 Why the name 'Partial Conflict'? Because it can't be compared to its 'inspiration' - [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms).
 
@@ -12,7 +12,7 @@ Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 ### Descriere
 <p align="justify">Condu-ți armata de vedete către victorie în jocul meu de strategie pe ture (sună ciudat) inspirat din seria de jocuri „Total War” a celor de la Creative Assembly. Începe ca un Necunoscut, cu un general dintr-o listă slabă (din punct de vedere al puterii). Luptă-te cu Războinicii, cei loiali Împăratului, și preia controlul Orașelor pentru a-ți crește puterea și influența, dar asigură-te că le și aperi! Atacurile periodice de la toți Războinicii care au rută directă (?) spre unul dintre Orașele tale sunt menite să te pună la încercare. Învață-le obiceiurile și exploatează-le slăbiciunile (au) pentru a progresa către Împărat! Dacă, până acum, nu ți s-a părut mare lucru, s-ar putea ca acesta să reprezinte o încercare mai grea. Îmbunătățește-ți generalii și angajează alții, doar asigură-te că armata ta poate trece peste orice situație. Alți boți Necunoscuți își vor urma drumul spre victorie (codat de mine) până când nu mai pot face pași, așa că timpul nu este nelimitat. Doboară Împăratul și stăpânește-i orașele pentru a obține gloria supremă (e doar un joc, totuși).
 
-<p align="justify">Dacă nu-ți convin stats-urile și numele puse de mine (nu te învinuiesc), poți să le schimbi personal prin editarea fișierului de configurație (***.json). Fă-ți cel mai puternic general de start posibil, dă-le inamicilor cadavre ambulante pe post de unități și/sau sabotează-i pe ceilalți Necunoscuți prin „oferirea” unor melci umani (ar putea avea consecințe (?) ).
+<p align="justify">Dacă nu-ți convin stats-urile și numele puse de mine (nu te învinuiesc), poți să le schimbi personal prin editarea fișierului de configurație (generals.json). Fă-ți cel mai puternic general de start posibil, dă-le inamicilor cadavre ambulante pe post de unități și/sau sabotează-i pe ceilalți Necunoscuți prin „oferirea” unor melci umani (ar putea avea consecințe (?) ).
 
 Numele se „justifică” pentru că nu îmi imaginez că acesta va fi măcar comparabil cu jocul [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms).
 
@@ -55,7 +55,8 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 - [X] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu
   `operator<<`
 - [ ] cât mai multe `const` (unde este cazul) și funcții `private`
-- [ ] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
+- [X] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre
+  care cel puțin 1-2 funcții mai complexe
   - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
 - [X] scenariu de utilizare **cu sens** a claselor definite:
   - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
