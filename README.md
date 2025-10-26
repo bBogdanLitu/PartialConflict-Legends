@@ -5,7 +5,7 @@
 
 <p align="justify">You don't like my take on the stats and/or names of the generals? Edit them yourself by modifying the configuration file, following the given format (generals.json). Give yourself an easier start by creating the most overpowered unit possible, make every enemy as strong as a dying snail or sabotage the other contenders by giving them absolutely nothing to work with (might fire back (?) ).
 
-Why the name 'Partial Conflict'? Because it can't be compared to its 'inspiration' - [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms).
+Why the name 'Partial Conflict'? Because it can't be compared to its 'inspiration' - [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms) - [Gameplay (my own)](https://www.youtube.com/watch?v=EjgtD9rqzyU).
 
 Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 
@@ -14,7 +14,7 @@ Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 
 <p align="justify">Dacă nu-ți convin stats-urile și numele puse de mine (nu te învinuiesc), poți să le schimbi personal prin editarea fișierului de configurație (generals.json). Fă-ți cel mai puternic general de start posibil, dă-le inamicilor cadavre ambulante pe post de unități și/sau sabotează-i pe ceilalți Necunoscuți prin „oferirea” unor melci umani (ar putea avea consecințe (?) ).
 
-Numele se „justifică” pentru că nu îmi imaginez că acesta va fi măcar comparabil cu jocul [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms).
+Numele se „justifică” pentru că nu îmi imaginez că acesta va fi măcar comparabil cu jocul [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms) - [Gameplay (al meu)](https://www.youtube.com/watch?v=EjgtD9rqzyU).
 
 Mai mult, poți pune la treabă niște generali „interesanți” (exemplu în engleză).
 
