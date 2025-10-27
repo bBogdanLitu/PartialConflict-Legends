@@ -96,10 +96,10 @@
 		"dexterity": 90
 	},
 	{
-		"firstName": "Sachil",
-		"lastName": "Onil",
-		"type": 1,
-		"rarity": 0,
+      "firstName": "Rastah",
+      "lastName": "Yung",
+      "type": 3,
+      "rarity": 3,
 		"melee": 90,
 		"ranged": 2,
 		"armour": 90,
@@ -733,7 +733,7 @@
 	},
 	{
 		"firstName": "DiGoat",
-		"lastName": "Leo",
+      "lastName": "Lucy",
 		"type": 2,
 		"rarity": 2,
 		"melee": 90,

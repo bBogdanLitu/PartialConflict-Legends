@@ -25,7 +25,7 @@ constexpr int rangedToMeleeOverpowerFixedAddition =
 constexpr int rangedToMeleeDebuffFixedAdditionBase = 100;
 constexpr float rangedToMeleeDebuffRequiredMultiplier = 1.5;
 constexpr int rangedToMeleeDebuffFixedAddition =
-                rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
+        rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
 constexpr float rangedToMeleeDebuffMultiplier = 0.9f;
 const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
