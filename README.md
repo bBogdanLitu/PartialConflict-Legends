@@ -54,7 +54,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 
 - [X] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu
   `operator<<`
-- [ ] cât mai multe `const` (unde este cazul) și funcții `private`
+- [X] cât mai multe `const` (unde este cazul) și funcții `private`
 - [X] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre
   care cel puțin 1-2 funcții mai complexe
   - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
@@ -62,9 +62,32 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
   - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
   - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
 - [X] minim 50-55% din codul propriu să fie C++, `.gitattributes` configurat corect
-- [ ] tag de `git`: de exemplu `v0.1`
-- [ ] serviciu de integrare continuă (CI) cu **toate bifele**; exemplu: GitHub Actions
+- [X] tag de `git`: de exemplu `v0.1`
+- [X] serviciu de integrare continuă (CI) cu **toate bifele**; exemplu: GitHub Actions
 - [ ] code review #1 2 proiecte
+
+#### Chestii specifice
+
+- [X] generals.json, citire, distribuire;
+- [X] settlements.json, citire, distribuire (exemplu minim);
+- [X] verificare input utilizator pentru a preveni unele probleme (mai trebuie investigat);
+- [X] alegere general de start, intrare intr-un tutorial simplut;
+- [X] prima versiune a sistemului si logicii de lupta dintre armate;
+- [ ] output intuitiv si usor de urmat (ftxui / macar text colorat si decorat);
+
+#### Posibile idei pentru Tema 2
+
+- Schimbare logica Settlements.h / ControlPoint.h pentru a permite mersul inainte si inapoi, nu doar inainte;
+- Extindere tutorial la o zona mai mare, nu neaparat toata harta, dar jucabila (putem misca, modifica armata);
+- Implementare cost pentru fiecare general (calculat in mod dinamic prin comparatie cu ce mai exista prin minunatul
+  generals.json, nu poate fi editat direct de jucator pentru ca nu vreau eu, d-aia);
+- LocalLeader - pentru mostenire (e un fel de General), care sta intr-un settlement si contribuie la apararea sa, plus
+  alte beneficii (?);
+- Captain - tot pentru mostenire. Este un general mai slab, usor accesibil dpdv al costului, fara nume foarte smecher,
+  care poate ocupa un loc dintr-o armata;
+- Emperor - oare pentru ce? Va fi marele *REVEAL* al imparatului din acest joc. Probabil va fi pus la intimidare
+  printr-un settlement aparent inofensiv, parte din povestea jocului (insane lore);
+- Librarie pentru sunete (vor contribui la *aura* imparatului suprem).
 
 ## Tema 2
 
