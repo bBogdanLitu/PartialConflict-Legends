@@ -156,16 +156,16 @@
 		"dexterity": 3
 	},
 	{
-		"firstName": "Sachil",
-		"lastName": "Onil",
+      "firstName": "Rava",
+      "lastName": "Nelly",
 		"type": 0,
 		"rarity": 0,
-		"melee": 90,
-		"ranged": 2,
-		"armour": 90,
-		"strength": 90,
-		"accuracy": 50,
-		"dexterity": 50
+      "melee": 50,
+      "ranged": 72,
+      "armour": 40,
+      "strength": 40,
+      "accuracy": 80,
+      "dexterity": 60
 	},
 	{
 		"firstName": "Koda",

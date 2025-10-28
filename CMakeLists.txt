@@ -35,6 +35,13 @@ FetchContent_Declare(
          URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
 )
 
+FetchContent_Declare(
+        ftxui
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+        GIT_TAG v6.1.9
+)
+
+FetchContent_MakeAvailable(ftxui)
 FetchContent_MakeAvailable(json)
 
 
@@ -57,6 +64,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/ControlPoint.h
         header/Settlement.h
         header/Formulas.h
+        header/Game.h
+        source/Game.cpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -72,7 +81,12 @@ set_compiler_flags(RUN_SANITIZERS TRUE TARGET_NAMES ${MAIN_EXECUTABLE_NAME})
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ext/<SomeHppLib>/include)
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ${json_SOURCE_DIR}/include)
 # target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${json_BINARY_DIR}/lib)
-target_link_libraries(${MAIN_EXECUTABLE_NAME} nlohmann_json::nlohmann_json)
+target_link_libraries(${MAIN_EXECUTABLE_NAME}
+        nlohmann_json::nlohmann_json
+        ftxui::component
+        ftxui::dom
+        ftxui::screen
+)
 
 ###############################################################################
 

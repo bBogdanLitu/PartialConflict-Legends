@@ -44,6 +44,33 @@ public:
     [[nodiscard]] int getType() const { return type; }
     [[nodiscard]] int getOverallPower() const { return overallPower; }
     [[nodiscard]] const std::vector<int> &getPowers() const { return Powers; }
+    [[nodiscard]] std::vector<std::string> getPrintableStats() const {
+        std::vector<std::string> printableStats;
+
+        //Convert what I want to show using FTXUI to string
+        const std::string typeConverted = std::to_string(type);
+        const std::string rarityConverted = std::to_string(rarity);
+        const std::string meleeConverted = std::to_string(melee);
+        const std::string rangedConverted = std::to_string(ranged);
+        const std::string armourConverted = std::to_string(armour);
+        const std::string strConverted = std::to_string(str);
+        const std::string accConverted = std::to_string(acc);
+        const std::string dexConverted = std::to_string(dex);
+        const std::string overallPowerConverted = std::to_string(overallPower);
+
+        printableStats.push_back(fullName);
+        printableStats.push_back(typeConverted);
+        printableStats.push_back(rarityConverted);
+        printableStats.push_back(meleeConverted);
+        printableStats.push_back(rangedConverted);
+        printableStats.push_back(armourConverted);
+        printableStats.push_back(strConverted);
+        printableStats.push_back(accConverted);
+        printableStats.push_back(dexConverted);
+        printableStats.push_back(overallPowerConverted);
+
+        return printableStats;
+    }
 
 
     friend std::ostream& operator<<(std::ostream& os, const General& general) {

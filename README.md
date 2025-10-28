@@ -73,7 +73,7 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
 - [X] verificare input utilizator pentru a preveni unele probleme (mai trebuie investigat);
 - [X] alegere general de start, intrare intr-un tutorial simplut;
 - [X] prima versiune a sistemului si logicii de lupta dintre armate;
-- [ ] output intuitiv si usor de urmat (ftxui / macar text colorat si decorat);
+- [ ] output intuitiv si usor de urmat (ftxui / macar text colorat si decorat).
 
 #### Posibile idei pentru Tema 2
 
