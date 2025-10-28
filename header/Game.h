@@ -2,6 +2,8 @@
 #define Game_H
 #include <iostream>
 #include <vector>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
 #include "Settlement.h"
 
 class Game {
@@ -17,6 +19,8 @@ private:
     void CheckGenerals() const;
 
     void DisplayStartingGenerals() const;
+
+    void OutputFTXUIText(const std::string& textToOutput, ftxui::Color textColor) const;
 
 public:
     int Start();

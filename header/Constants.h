@@ -38,7 +38,7 @@ const inline std::string emperorCountWarningText =
 const inline std::string beginningGeneralText =
         "You will now be prompted to choose your starting General from the following table:\n";
 const inline std::string starterPreChoiceText =
-        "Type the index of the wanted General (some might have hidden bonuses!):\n";
+        "Type the index of the wanted General (some might have hidden bonuses!): ";
 const inline std::string starterPostChoiceText =
                 "This is your first settlement. Defend it well!\n";
 const inline std::string starterPreTutorial =
@@ -66,6 +66,10 @@ const inline std::string settlementFightNoRemainingDefendersText =
 const inline std::vector<std::string> startingGeneralTableHeaders =
 {
     "Index", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy", "Dexterity", "Overall"
+};
+const inline std::vector<std::string> settlementTableHeaders =
+{
+    "Name", "Owned by", "Garrison OVR", "Has Army", "Control Points #", "Neighbours"
 };
 
 #endif

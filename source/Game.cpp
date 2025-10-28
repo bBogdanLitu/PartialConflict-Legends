@@ -109,17 +109,17 @@ void Game::DisplayStartingGenerals() const {
 
     table.SelectAll().Border(LIGHT);
 
-    // Add border around the first column.
-    table.SelectColumn(0).Border(LIGHT);
-
-    // Make first row bold with a double border.
+    //Make first row bold with a double border.
     table.SelectRow(0).Decorate(bold);
-    table.SelectRow(0).SeparatorVertical(LIGHT);
     table.SelectRow(0).Border(DOUBLE);
 
-    // Select row from the second to the last.
+    //Separators
+    table.SelectAll().SeparatorVertical(LIGHT);
+    table.SelectAll().SeparatorHorizontal(LIGHT);
+
+    // elect row from the second to the last.
     auto content = table.SelectRows(1, -1);
-    // Alternate in between 3 colors.
+    //Alternate in between 3 colors.
     content.DecorateCellsAlternateRow(color(Color::Blue), 3, 0);
     content.DecorateCellsAlternateRow(color(Color::Cyan), 3, 1);
     content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
@@ -127,9 +127,21 @@ void Game::DisplayStartingGenerals() const {
     auto document = table.Render();
     auto screen =
             Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
+    //Non-blocking output, I don't want to have to output every single thing using FTXUI and its messy scrolling, maybe later
     Render(screen, document);
     screen.Print();
     std::cout << std::endl;
+}
+
+void Game::OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) const {
+    using namespace ftxui;
+    auto document = paragraph(textToOutput) | color(textColor);
+    auto screen = Screen::Create(Dimension::Fit(document, true));
+    Render(screen, document);
+    screen.Print();
+    //This is basically a way to output either a newline or a space after the beautified text.
+    //As a consequence, all passed strings should end in one of those :)
+    std::cout << textToOutput[textToOutput.size() - 1];
 }
 
 int Game::Start() {
@@ -155,16 +167,14 @@ int Game::Start() {
         std::cout << emperorCountWarningText;
         return -1;
     }
-
-
     //Actual start of the game after all checks
-    std::cout << welcomeText;
+    OutputFTXUIText(welcomeText, ftxui::Color::Gold1);
     std::cout << balanceCheckText;
-    std::cin >> ans1;
+    std::cin>>ans1;
     if (ans1 > 1) {
         ans1 = 0;
     }
-    if (ans1 == 1) {
+    else if (ans1 == 1) {
         std::string temp;
         CheckGenerals();
         std::cout << enterToContinueText;
@@ -174,7 +184,7 @@ int Game::Start() {
 
     std::cout << beginningGeneralText;
     DisplayStartingGenerals();
-    std::cout << starterPreChoiceText;
+    OutputFTXUIText(starterPreChoiceText, ftxui::Color::Chartreuse4);
     std::cin >> ans2;
     if (ans2 >= StartingGenerals.size()) {
         ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
@@ -185,9 +195,12 @@ int Game::Start() {
 
     Settlements[0].StationArmy(starterArmy);
 
-    std::cout << starterPostChoiceText;
-    std::cout << Settlements[0];
-    std::cout << starterPreTutorial;
+    //std::cout << starterPostChoiceText;
+    OutputFTXUIText(starterPostChoiceText, ftxui::Color::Red);
+    //std::cout << Settlements[0];
+    Settlements[0].DisplaySettlement();
+    //std::cout << starterPreTutorial;
+    OutputFTXUIText(starterPreTutorial, ftxui::Color::Gold1);
 
 
     //EXAMPLE TO TEST COMBAT
@@ -196,10 +209,12 @@ int Game::Start() {
     Army warlord1Army{WarlordGenerals[67]}; //Weak general, can be beat by the garrison alone
     warlord1Army.AddGeneral(WarlordGenerals[3]); //Medium general to test some of the functionalities
     warlord1Army.AddGeneral(WarlordGenerals[1]); //OP general to test if the fight is handled correctly in Army.h
-    std::cout << tutorialFirstDefenceText;
+    //std::cout << tutorialFirstDefenceText;
+    OutputFTXUIText(tutorialFirstDefenceText, ftxui::Color::MediumVioletRed);
     //the first attack doesn't require the attacking army to be actually stationed somewhere,
     //it is scripted and just a one-time occurrence.
-    std::cout << incomingAttackText;
+    //std::cout << incomingAttackText;
+    OutputFTXUIText(incomingAttackText, ftxui::Color::DarkOrange);
     std::cout << warlord1Army;
     Settlements[0].Besieged(warlord1Army);
 

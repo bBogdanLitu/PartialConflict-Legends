@@ -1,9 +1,11 @@
 #ifndef Settlement_H
 #define Settlement_H
 #include <optional>
+#include <nlohmann/detail/string_utils.hpp>
 
 #include "ControlPoint.h"
 #include "Garrison.h"
+#include "ftxui/dom/table.hpp"
 
 //The objective of the game, conquering them leads to victory. Has an Army and/or a (weak) Garrison stationed.
 //There are Control Points assigned to a Settlement
@@ -51,6 +53,8 @@ public:
         stationedArmy = std::nullopt;
     }*/
 
+    void DisplaySettlement() const;
+
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;
         os << "Settlement name: " << settlement.name << "\n";
@@ -65,7 +69,7 @@ public:
         }
         os << "\n";
         if (settlement.stationedArmy.has_value()) {
-            os << settlement.stationedArmy.value() << "\n";
+            os << "And this is the stationed army. "<<settlement.stationedArmy.value() << "\n";
         }
         return os;
     }
@@ -121,6 +125,62 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
             std::cerr << "Undefined behaviour detected!" << "\n";
         }
     }
+}
+
+inline void Settlement::DisplaySettlement() const {
+    std::vector<std::vector<std::string> > tableContent;
+    std::vector<std::string> tableRow;
+    std::string neighboursConverted;
+    //Headers for the FTXUI table
+    tableContent.push_back(settlementTableHeaders);
+
+    //Populating the (only) row
+    tableRow.push_back(name);
+    if (owner == 0) {
+        tableRow.push_back("You");
+    }
+    else {
+        tableRow.push_back(std::to_string(owner));
+    }
+    tableRow.push_back(std::to_string(stationedGarrison.GetOverallPower()));
+    if (stationedArmy != std::nullopt) {
+        tableRow.push_back("Yes");
+    }
+    else {
+        tableRow.push_back("No");
+    }
+    tableRow.push_back(std::to_string(controlPoints.size()));
+    for (unsigned long i = 0; i < neighbours.size(); i++) {
+        neighboursConverted += std::to_string(neighbours[i]) + " ";
+    }
+    tableRow.push_back(neighboursConverted);
+
+    //Push the row to display it
+    tableContent.push_back(tableRow);
+
+    //Display stuff
+    using namespace ftxui;
+    auto table = Table({tableContent});
+
+    table.SelectAll().Border(LIGHT);
+
+    //Separate all cells
+    table.SelectAll().SeparatorVertical(LIGHT);
+
+    //Make first row bold with a double border.
+    table.SelectRow(0).Decorate(bold);
+    table.SelectRow(0).SeparatorVertical(LIGHT);
+    table.SelectRow(0).Border(DOUBLE);
+
+    //Make the content a different color
+    table.SelectRow(1).DecorateCells(color(Color::GreenYellow));
+
+    auto document = table.Render();
+    auto screen =
+            Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
+    Render(screen, document);
+    screen.Print();
+    std::cout << std::endl;
 }
 
 #endif
