@@ -219,8 +219,10 @@ Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 ## External Libraries
 
 - [Nlohmann Json](https://github.com/nlohmann/json) for reading user-configurable data. Used without any modifications;
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) for terminal beautification.
 
 ## Resurse
 
 - [Nlohmann Json](https://github.com/nlohmann/json) pentru citirea unor date ce pot fi schimbate după preferințele fiecăruia. Nu am efectuat nicio modificare proprie;
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) pentru oportunitati de infrumusetare a terminalului.
 - adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit
