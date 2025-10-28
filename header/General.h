@@ -44,6 +44,7 @@ public:
     [[nodiscard]] int getType() const { return type; }
     [[nodiscard]] int getOverallPower() const { return overallPower; }
     [[nodiscard]] const std::vector<int> &getPowers() const { return Powers; }
+
     [[nodiscard]] std::vector<std::string> getPrintableStats() const {
         std::vector<std::string> printableStats;
 

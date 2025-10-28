@@ -11,7 +11,8 @@
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
     for (const auto &i: data) {
-        General general{i["firstName"], i["lastName"], i["type"], i["rarity"],
+        General general{
+            i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"]
         };
@@ -39,9 +40,7 @@ void Game::PopulateGenerals(std::ifstream generalsJson) {
             default: {
                 std::cerr << "Unhandled type, check your .json! Game will start anyway." << std::endl;
             }
-
         }
-
     }
     generalsJson.close();
 }
@@ -75,7 +74,8 @@ void Game::CheckGenerals() const {
     std::cout << "The generals.json file currently holds " << StartingGenerals.size() + PlayerGenerals.size() +
             ContenderGenerals.size() + WarlordGenerals.size() + EmperorGenerals.size() << " generals." << std::endl;
     std::cout << "Starter generals for the player: " << StartingGenerals.size() << std::endl;
-    std::cout << "Generals selectable by the player (at any point): " << StartingGenerals.size() + PlayerGenerals.size() << std::endl;
+    std::cout << "Generals selectable by the player (at any point): " << StartingGenerals.size() + PlayerGenerals.size()
+            << std::endl;
     std::cout << "Contender general pool (doesn't use more than 3): " << ContenderGenerals.size() << std::endl;
     std::cout << "Warlord general pool: " << WarlordGenerals.size() << std::endl;
     std::cout << "Emperor general pool: " << EmperorGenerals.size() << std::endl;
@@ -89,11 +89,11 @@ void Game::DisplayStartingGenerals() const {
     }*/
     std::vector<General> Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
-    std::vector<std::vector<std::string>> tableContent;
+    std::vector<std::vector<std::string> > tableContent;
     tableContent.push_back(startingGeneralTableHeaders);
 
     int count = 0;
-    for (const auto& general : Generals) {
+    for (const auto &general: Generals) {
         std::string countConverted = std::to_string(count);
 
         statsToPrintForEachGeneral.clear();
@@ -126,7 +126,7 @@ void Game::DisplayStartingGenerals() const {
 
     auto document = table.Render();
     auto screen =
-        Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
+            Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
     Render(screen, document);
     screen.Print();
     std::cout << std::endl;
@@ -152,14 +152,14 @@ int Game::Start() {
         return -1;
     }
     if (EmperorGenerals.size() < emperorMinimumGenerals) {
-        std::cout<<emperorCountWarningText;
+        std::cout << emperorCountWarningText;
         return -1;
     }
 
 
     //Actual start of the game after all checks
-    std::cout<<welcomeText;
-    std::cout<<balanceCheckText;
+    std::cout << welcomeText;
+    std::cout << balanceCheckText;
     std::cin >> ans1;
     if (ans1 > 1) {
         ans1 = 0;
@@ -172,11 +172,11 @@ int Game::Start() {
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
     }
 
-    std::cout<<beginningGeneralText;
+    std::cout << beginningGeneralText;
     DisplayStartingGenerals();
-    std::cout<<starterPreChoiceText;
-    std::cin>>ans2;
-    if (ans2 >= StartingGenerals.size() ) {
+    std::cout << starterPreChoiceText;
+    std::cin >> ans2;
+    if (ans2 >= StartingGenerals.size()) {
         ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
     }
     //Now I can use the starter to show the other classes' functionalities
