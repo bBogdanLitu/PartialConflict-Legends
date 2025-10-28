@@ -39,6 +39,7 @@ FetchContent_Declare(
         ftxui
         GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
         GIT_TAG v6.1.9
+        GIT_SHALLOW 1
 )
 
 FetchContent_MakeAvailable(ftxui)
@@ -82,10 +83,10 @@ set_compiler_flags(RUN_SANITIZERS TRUE TARGET_NAMES ${MAIN_EXECUTABLE_NAME})
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ${json_SOURCE_DIR}/include)
 # target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${json_BINARY_DIR}/lib)
 target_link_libraries(${MAIN_EXECUTABLE_NAME}
-        nlohmann_json::nlohmann_json
-        ftxui::component
-        ftxui::dom
-        ftxui::screen
+        PRIVATE nlohmann_json::nlohmann_json
+        PRIVATE ftxui::component
+        PRIVATE ftxui::dom
+        PRIVATE ftxui::screen
 )
 
 ###############################################################################
