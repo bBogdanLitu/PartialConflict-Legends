@@ -170,11 +170,10 @@ int Game::Start() {
     //Actual start of the game after all checks
     OutputFTXUIText(welcomeText, ftxui::Color::Gold1);
     std::cout << balanceCheckText;
-    std::cin>>ans1;
+    std::cin >> ans1;
     if (ans1 > 1) {
         ans1 = 0;
-    }
-    else if (ans1 == 1) {
+    } else if (ans1 == 1) {
         std::string temp;
         CheckGenerals();
         std::cout << enterToContinueText;

@@ -2,10 +2,10 @@
 #define Settlement_H
 #include <optional>
 #include <nlohmann/detail/string_utils.hpp>
+#include <ftxui/dom/table.hpp>
 
 #include "ControlPoint.h"
 #include "Garrison.h"
-#include "ftxui/dom/table.hpp"
 
 //The objective of the game, conquering them leads to victory. Has an Army and/or a (weak) Garrison stationed.
 //There are Control Points assigned to a Settlement
@@ -69,7 +69,7 @@ public:
         }
         os << "\n";
         if (settlement.stationedArmy.has_value()) {
-            os << "And this is the stationed army. "<<settlement.stationedArmy.value() << "\n";
+            os << "And this is the stationed army. " << settlement.stationedArmy.value() << "\n";
         }
         return os;
     }
@@ -138,15 +138,13 @@ inline void Settlement::DisplaySettlement() const {
     tableRow.push_back(name);
     if (owner == 0) {
         tableRow.push_back("You");
-    }
-    else {
+    } else {
         tableRow.push_back(std::to_string(owner));
     }
     tableRow.push_back(std::to_string(stationedGarrison.GetOverallPower()));
     if (stationedArmy != std::nullopt) {
         tableRow.push_back("Yes");
-    }
-    else {
+    } else {
         tableRow.push_back("No");
     }
     tableRow.push_back(std::to_string(controlPoints.size()));
