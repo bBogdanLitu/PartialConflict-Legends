@@ -1,5 +1,5 @@
-#ifndef Formulas_H
-#define Formulas_H
+#ifndef Functions_H
+#define Functions_H
 #include "Constants.h"
 
 //Combat formulas
@@ -35,5 +35,26 @@ inline bool RangedToMeleeDebuff(const int rangedPower, const int meleePower) {
 
     return result;
 }*/
+
+//Function to display FTXUI coloured text
+inline void OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) {
+    using namespace ftxui;
+    auto document = paragraph(textToOutput) | color(textColor);
+    auto screen = Screen::Create(Dimension::Fit(document, true));
+    Render(screen, document);
+    screen.Print();
+    //This is basically a way to output either a newline or a space after the beautified text.
+    //As a consequence, all passed strings should end in one of those :)
+    std::cout << textToOutput[textToOutput.size() - 1];
+}
+
+//Function to sanitize user input a tad better
+inline void sanitizeInputMore(auto thingToRead) {
+    while (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore();
+        std::cin >> thingToRead;
+    }
+}
 
 #endif

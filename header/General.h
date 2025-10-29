@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Constants.h"
-#include "Formulas.h"
+#include "Functions.h"
 
 class General {
 private:

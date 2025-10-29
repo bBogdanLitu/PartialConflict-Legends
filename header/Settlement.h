@@ -80,9 +80,12 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
     //If not, then the player will only get the notification of the outcome.
     int result;
     if (stationedArmy.has_value()) {
-        std::cout << settlementStationedArmyText;
-        std::cout << stationedArmy.value();
-        std::cout << chooseBattleOrderText;
+        //std::cout << settlementStationedArmyText;
+        OutputFTXUIText(settlementStationedArmyText, allyRelatedTextColor);
+        //std::cout << stationedArmy.value();
+        stationedArmy.value().DisplayArmy();
+        //std::cout << chooseBattleOrderText;
+        OutputFTXUIText(chooseBattleOrderText, importantGameInformationColor);
 
         std::vector<unsigned long> battleOrder;
         //Choosing the order until it is useless to do so.
@@ -90,9 +93,11 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
              i < stationedArmy.value().getGeneralCount() && i < attackingArmy.getGeneralCount();
              i++) {
             unsigned long a;
-            std::cout << "Enemy " << i << " to fight with your: ";
+            //std::cout << "Enemy " << i << " to fight with your: ";
+            OutputFTXUIText("Enemy " + std::to_string(i) + " to fight with your: ", userInputExpectedColor);
             std::cin >> a;
             //Sanitizing user input
+            sanitizeInputMore(a);
             if (a > stationedArmy.value().getGeneralCount()) {
                 a = stationedArmy.value().getGeneralCount() - 1; //capping to the last possible one
             }
@@ -114,11 +119,13 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
     }
     switch (result) {
         case 1: {
-            std::cout << this->name << settlementBesiegeFailedText << "\n";
+            //std::cout << this->name << settlementBesiegeFailedText << "\n";
+            OutputFTXUIText(this->name + settlementBesiegeFailedText, importantGameInformationColor);
             break;
         }
         case -1: {
-            std::cout << this->name << settlementBesiegeSuccessText << "\n";
+            //std::cout << this->name << settlementBesiegeSuccessText << "\n";
+            OutputFTXUIText(this->name + settlementBesiegeSuccessText, importantGameInformationColor);
             break;
         }
         default: {

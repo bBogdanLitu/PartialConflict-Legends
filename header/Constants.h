@@ -2,6 +2,14 @@
 #define Constants_H
 #include <string>
 
+//Usual colours
+#define gameAnnouncementsColor ftxui::Color::Gold1
+#define userInputExpectedColor ftxui::Color::RoyalBlue1
+#define importantGameInformationColor ftxui::Color::Red
+#define storyRelatedTextColor ftxui::Color::MediumVioletRed
+#define enemyRelatedTextColor ftxui::Color::DarkOrange
+#define allyRelatedTextColor ftxui::Color::DarkCyan
+
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;
 //How much the overall is divided by when supporting an army / being attacked
@@ -70,6 +78,10 @@ const inline std::vector<std::string> startingGeneralTableHeaders =
 const inline std::vector<std::string> settlementTableHeaders =
 {
     "Name", "Owned by", "Garrison OVR", "Has Army", "Control Points #", "Neighbours"
+};
+const inline std::vector<std::string> armyTableHeaders =
+{
+    "Index", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy", "Dexterity", "Overall"
 };
 
 #endif

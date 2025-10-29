@@ -58,6 +58,8 @@ public:
     [[nodiscard]] unsigned long getGeneralCount() const { return assignedGenerals.size(); }
     [[nodiscard]] const std::vector<General> &getAssignedGenerals() const { return assignedGenerals; }
 
+    void DisplayArmy() const;
+
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
         os << "Composition:\n";
@@ -157,5 +159,45 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
     }
+
+inline void Army::DisplayArmy() const {
+    std::vector<std::vector<std::string>> tableContent;
+    std::vector<std::string> tableRow;
+
+    tableContent.push_back(armyTableHeaders);
+
+    int count = 0;
+    for (const auto& general : assignedGenerals) {
+        tableRow = general.getPrintableStats();
+        tableRow.emplace(tableRow.begin(), std::to_string(count));
+        tableContent.push_back(tableRow);
+
+        count++;
+    }
+
+    //Display stuff
+    using namespace ftxui;
+    auto table = Table({tableContent});
+
+    table.SelectAll().Border(LIGHT);
+
+    //Separate all cells
+    table.SelectAll().SeparatorVertical(LIGHT);
+
+    //Make first row bold with a double border.
+    table.SelectRow(0).Decorate(bold);
+    table.SelectRow(0).SeparatorVertical(LIGHT);
+    table.SelectRow(0).Border(DOUBLE);
+
+    //Make the content a different color
+    table.SelectRows(1, -1).DecorateCells(color(Color::LightSkyBlue1));
+
+    auto document = table.Render();
+    auto screen =
+            Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
+    Render(screen, document);
+    screen.Print();
+    std::cout << std::endl;
+}
 
 #endif

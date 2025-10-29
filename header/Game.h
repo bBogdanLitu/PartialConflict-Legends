@@ -19,7 +19,7 @@ private:
 
     void DisplayStartingGenerals() const;
 
-    void OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) const;
+    //void OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) const;
 
 public:
     int Start();

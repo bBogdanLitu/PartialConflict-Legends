@@ -64,7 +64,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Scout.h
         header/ControlPoint.h
         header/Settlement.h
-        header/Formulas.h
+        header/Functions.h
         header/Game.h
         source/Game.cpp
 )
