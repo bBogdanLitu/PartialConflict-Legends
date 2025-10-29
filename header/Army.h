@@ -161,14 +161,13 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     }
 
 inline void Army::DisplayArmy() const {
-    std::vector<std::vector<std::string>> tableContent;
-    std::vector<std::string> tableRow;
+    std::vector<std::vector<std::string> > tableContent;
 
     tableContent.push_back(armyTableHeaders);
 
     int count = 0;
-    for (const auto& general : assignedGenerals) {
-        tableRow = general.getPrintableStats();
+    for (const auto &general: assignedGenerals) {
+        std::vector<std::string> tableRow = general.getPrintableStats();
         tableRow.emplace(tableRow.begin(), std::to_string(count));
         tableContent.push_back(tableRow);
 
