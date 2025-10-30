@@ -9,6 +9,10 @@
 #define storyRelatedTextColor ftxui::Color::MediumVioletRed
 #define enemyRelatedTextColor ftxui::Color::DarkOrange
 #define allyRelatedTextColor ftxui::Color::DarkCyan
+#define generalFightDefenderInfoColor ftxui::Color::SpringGreen4
+#define generalFightAttackerInfoColor ftxui::Color::IndianRed
+#define generalFightDefenderWinColor ftxui::Color::SpringGreen4
+#define generalFightAttackerWinColor ftxui::Color::OrangeRed1
 
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;
@@ -82,6 +86,10 @@ const inline std::vector<std::string> settlementTableHeaders =
 const inline std::vector<std::string> armyTableHeaders =
 {
     "Index", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy", "Dexterity", "Overall"
+};
+const inline std::vector<std::string> generalFightTableHeaders =
+{
+    "Name", "Melee Power (Eff)", "Ranged Power (Eff)", "Armour Power (Eff)"
 };
 
 #endif

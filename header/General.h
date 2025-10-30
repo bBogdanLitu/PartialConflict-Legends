@@ -34,6 +34,9 @@ private:
         Powers.push_back(aPower);
     }
 
+    void DisplayFight(const General &enemyGeneral, const std::vector<int> &selfEffPowers,
+                      const std::vector<int> &enemyEffPowers) const;
+
 public:
     General(const std::string& firstName_, const std::string& lastName_, int type_, int rarity_,
         int melee_, int ranged_, int armour_, int str_, int acc_, int dex_);
@@ -71,6 +74,21 @@ public:
         printableStats.push_back(overallPowerConverted);
 
         return printableStats;
+    }
+
+    [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int>& ecs) const {
+        std::vector<std::string> combatStats;
+
+        const std::string mPowerConverted = std::to_string(ecs[0]);
+        const std::string rPowerConverted = std::to_string(ecs[1]);
+        const std::string aPowerConverted = std::to_string(ecs[2]);
+
+        combatStats.push_back(fullName);
+        combatStats.push_back(mPowerConverted);
+        combatStats.push_back(rPowerConverted);
+        combatStats.push_back(aPowerConverted);
+
+        return combatStats;
     }
 
 
@@ -112,11 +130,68 @@ inline void General::StatCap() {
     else if (dex <= -1) dex = 0;
 }
 
+inline void General::DisplayFight(const General &enemyGeneral, const std::vector<int> &selfEffPowers,
+                                  const std::vector<int> &enemyEffPowers) const {
+    std::vector<std::vector<std::string> > table1Content, table2Content;
+
+    table1Content.push_back(generalFightTableHeaders); //defender
+    table2Content.push_back(generalFightTableHeaders); //attacker
+
+    table1Content.push_back(this->getEffectiveCombatStats(selfEffPowers));
+    table2Content.push_back(enemyGeneral.getEffectiveCombatStats(enemyEffPowers));
+
+    //Display stuff
+    using namespace ftxui;
+    auto table1 = Table({table1Content});
+
+    table1.SelectAll().Border(LIGHT);
+
+    //Separate all cells
+    table1.SelectAll().SeparatorVertical(LIGHT);
+
+    //Make first row bold with a double border.
+    table1.SelectRow(0).Decorate(bold);
+    table1.SelectRow(0).SeparatorVertical(LIGHT);
+    table1.SelectRow(0).Border(LIGHT);
+
+    //Make the content a different color
+    table1.SelectRows(1, -1).DecorateCells(color(generalFightDefenderInfoColor));
+
+    auto table2 = Table({table2Content});
+
+    table2.SelectAll().Border(LIGHT);
+
+    //Separate all cells
+    table2.SelectAll().SeparatorVertical(LIGHT);
+
+    //Make first row bold with a double border.
+    table2.SelectRow(0).Decorate(bold);
+    table2.SelectRow(0).SeparatorVertical(LIGHT);
+    table2.SelectRow(0).Border(LIGHT);
+
+    //Make the content a different color
+    table2.SelectRows(1, -1).DecorateCells(color(generalFightAttackerInfoColor));
+
+
+    auto document =
+            hbox({
+                table1.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
+                text("VERSUS") | bold | color(Color::Magenta) | center | size(
+                    WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 10),
+                table2.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
+            });
+    auto screen =
+            Screen::Create(Dimension::Full(), Dimension::Fit(document, true));
+    Render(screen, document);
+    screen.Print();
+    std::cout << std::endl;
+}
+
 inline int General::FightWith(const General &enemyGeneral, const int overallBoost) const {
     int result = 1;
     std::vector<int> enemyPowers = enemyGeneral.getPowers();
-    std::vector<int> selfPowers = this->getPowers();
     //Copy so that temporary modifications don't have a permanent effect
+    std::vector<int> selfPowers = this->getPowers();
 
     //Apply garrison boost to defending general
     for (unsigned long i = 0; i < selfPowers.size(); i++) {
@@ -149,6 +224,18 @@ inline int General::FightWith(const General &enemyGeneral, const int overallBoos
         selfPowers[1] *= rangedBonusMultiplierForLowArmour;
     }
 
+    //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
+    if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
+        selfPowers[0] *= rangedToMeleeDebuffMultiplier;
+    }
+    if (selfPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(selfPowers[1], enemyPowers[0])) {
+        enemyPowers[0] *= rangedToMeleeDebuffMultiplier;
+    }
+
+    DisplayFight(enemyGeneral, selfPowers, enemyPowers); //to display the effective stats
+
+    //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!
+
     //If there is a very talented ranged vs a mediocre melee with lesser rangedPower, instant win for the ranged.
     if (enemyPowers[1] > rangedToMeleeOverpowerFixedAddition && RangedToMeleeInstantWin(
             enemyPowers[1], selfPowers[0], selfPowers[1]) == true) {
@@ -161,13 +248,7 @@ inline int General::FightWith(const General &enemyGeneral, const int overallBoos
         return result;
     }
 
-    //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
-    if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
-        selfPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
-    if (selfPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(selfPowers[1], enemyPowers[0])) {
-        enemyPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
+
 
     if (selfPowers[0] > enemyPowers[0]) {
         result = 1;
@@ -198,6 +279,5 @@ inline int General::FightWith(const General &enemyGeneral, const int overallBoos
     //All equal stats -> whoever gets called (the defender) wins
     return result;
 }
-
 
 #endif //General_H

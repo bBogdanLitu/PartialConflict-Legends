@@ -2,7 +2,6 @@
 #define Game_H
 #include <iostream>
 #include <vector>
-#include <ftxui/dom/elements.hpp>
 #include "Settlement.h"
 
 class Game {

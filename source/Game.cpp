@@ -211,9 +211,9 @@ int Game::Start() {
     //EXAMPLE TO TEST COMBAT
     Settlements[0].AddGeneralToArmy(PlayerGenerals[5]); //Good general
     Settlements[0].AddGeneralToArmy(StartingGenerals[4]); //Very weak general
-    Army warlord1Army{WarlordGenerals[67]}; //Weak general, can be beat by the garrison alone
+    Army warlord1Army{WarlordGenerals[1]}; //Weak general, can be beat by the garrison alone
     warlord1Army.AddGeneral(WarlordGenerals[3]); //Medium general to test some of the functionalities
-    warlord1Army.AddGeneral(WarlordGenerals[1]); //OP general to test if the fight is handled correctly in Army.h
+    warlord1Army.AddGeneral(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
     //std::cout << tutorialFirstDefenceText;
     OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
     //the first attack doesn't require the attacking army to be actually stationed somewhere,

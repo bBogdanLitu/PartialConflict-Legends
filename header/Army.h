@@ -24,14 +24,17 @@ private:
                               int indexOfAttacker, int indexOfDefender) const {
         switch (fightResult) {
             case 0: {
-                std::cout << "\nBattle lost by the defender.\n\n";
-                remainingFights.push_back(indexOfAttacker); //Save the index of the undefeated attacker
+                //std::cout << "\nBattle lost by the defender.\n\n";
+                OutputFTXUIText("\nFight won by the attacker.\n\n", generalFightAttackerWinColor);
+                //Save the index of the undefeated attacker
+                remainingFights.push_back(indexOfAttacker);
                 break;
             }
             case 1: {
-                std::cout << "\nBattle won by the defender.\n\n";
-                remainingAllies.push_back(static_cast<int>(indexOfDefender));
+                //std::cout << "\nBattle won by the defender.\n\n";
+                OutputFTXUIText("\nFight won by the defender.\n\n", generalFightDefenderWinColor);
                 //Save the index of the undefeated defender
+                remainingAllies.push_back(static_cast<int>(indexOfDefender));
                 break;
             }
             default: {
@@ -80,7 +83,8 @@ public:
 
 inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                           const std::vector<unsigned long> &battleOrder) const {
-    std::cout << "This is the battle order:\n";
+    //std::cout << "This is the battle order:\n";
+    OutputFTXUIText("\nThe battle will now begin.\n", gameAnnouncementsColor);
     int currentEnemy = 0;
     std::vector<int> remainingAttackers, remainingDefenders, surplusDefenders;
     //We assume that every defender and attacker can be surplus (apriori)
@@ -91,9 +95,10 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     for (const unsigned long currentAlly: battleOrder) {
         //We mark the chosen defender as non-surplus
         surplusDefenders[currentAlly] = -1;
-        std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[currentEnemy] <<
+        //FIGHT DISPLAY LOGIC MOVED TO GENERAL CLASS
+        /*std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[currentEnemy] <<
                 "\nVS\n\nDefending general:\n"
-                << this->getAssignedGenerals()[currentAlly];
+                << this->getAssignedGenerals()[currentAlly];*/
         int fightResult = this->getAssignedGenerals()[currentAlly].
                 FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);
         //defender combat is boosted by the garrison
@@ -119,7 +124,9 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
 
     //If there are enemies left to fight and we still have allies.
     if (!remainingAttackers.empty() && !remainingDefenders.empty()) {
-        std::cout << settlementFightRemainingAttackersText;
+        //std::cout << settlementFightRemainingAttackersText;
+        OutputFTXUIText(settlementFightRemainingAttackersText, gameAnnouncementsColor);
+
         //We still have to defeat the undefeated enemy using remaining generals
         unsigned long attempts = 0;
         int fightResult = 0;
@@ -127,16 +134,18 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
             //We will attempt to defeat all remaining enemies using our allies.
             //We stop when either they are all defeated or we don't have any allies left.
             do {
-                std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[remainingAttacker] <<
+                /*std::cout << "Attacking general:\n" << attackingArmy.getAssignedGenerals()[remainingAttacker] <<
                         "\nVS\n\nDefending general:\n"
-                        << this->getAssignedGenerals()[remainingDefenders[attempts]] << "\n";
+                        << this->getAssignedGenerals()[remainingDefenders[attempts]] << "\n";*/
                 fightResult = this->getAssignedGenerals()[remainingDefenders[attempts]].FightWith(
                     attackingArmy.getAssignedGenerals()[remainingAttacker], overallBoost);
                 if (fightResult == 0) {
-                    std::cout << "Battle lost by the defender.\n\n";
+                    //std::cout << "Battle lost by the defender.\n\n";
+                    OutputFTXUIText("\nFight won by the attacker.\n\n", generalFightAttackerWinColor);
                     attempts++; //only try going to the next remaining ally if the current loses a battle.
                 } else {
-                    std::cout << "Battle won by the defender.\n\n";
+                    //std::cout << "Battle won by the defender.\n\n";
+                    OutputFTXUIText("\nFight won by the defender.\n\n", generalFightDefenderWinColor);
                 }
             } while (fightResult == 0 && attempts < remainingDefenders.size());
             if (attempts == remainingDefenders.size()) {
@@ -150,12 +159,14 @@ inline int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     }
     //If there are enemies left to fight, but we have no allies
     if (!remainingAttackers.empty() && remainingDefenders.empty()) {
-        std::cout << settlementFightNoRemainingDefendersText;
+        //std::cout << settlementFightNoRemainingDefendersText;
+        OutputFTXUIText(settlementFightNoRemainingDefendersText, generalFightAttackerWinColor);
         //Battle is lost
         return -1;
     }
 
-    std::cout << settlementFightNoRemainingAttackersText;
+    //std::cout << settlementFightNoRemainingAttackersText;
+    OutputFTXUIText(settlementFightNoRemainingAttackersText, generalFightDefenderWinColor);
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
     }
@@ -190,6 +201,7 @@ inline void Army::DisplayArmy() const {
 
     //Make the content a different color
     table.SelectRows(1, -1).DecorateCells(color(Color::LightSkyBlue1));
+
 
     auto document = table.Render();
     auto screen =

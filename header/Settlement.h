@@ -98,15 +98,18 @@ inline void Settlement::Besieged(const Army &attackingArmy) const {
             std::cin >> a;
             //Sanitizing user input
             sanitizeInputMore(a);
-            if (a > stationedArmy.value().getGeneralCount()) {
+            if (a >= stationedArmy.value().getGeneralCount()) {
                 a = stationedArmy.value().getGeneralCount() - 1; //capping to the last possible one
             }
             //To prevent assigning one general to fight multiple enemies (at once)
+            //If k was equal once, it will be equal the second time (like, for real),
+            //so it is wrong to restart it from 0 every time it loops.
+            unsigned long k = 0;
             for (const unsigned long j: battleOrder) {
                 //We search for the first unassigned general and make it assigned instead.
-                unsigned long k = 0;
                 while (j == a && k <= armyGeneralsMaximumIndex) {
-                    a = ++k;
+                    a = k;
+                    k++;
                 }
             }
             battleOrder.push_back(a);

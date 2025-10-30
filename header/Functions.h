@@ -45,6 +45,9 @@ inline void OutputFTXUIText(const std::string &textToOutput, ftxui::Color textCo
     screen.Print();
     //This is basically a way to output either a newline or a space after the beautified text.
     //As a consequence, all passed strings should end in one of those :)
+    if (textToOutput[textToOutput.size() - 2] == '\n') {
+        std::cout << '\n'; //for the cases where I want 2 newlines
+    }
     std::cout << textToOutput[textToOutput.size() - 1];
 }
 
