@@ -1,6 +1,8 @@
 #ifndef Functions_H
 #define Functions_H
 #include "Constants.h"
+#include <ftxui/dom/elements.hpp>
+#include <iostream>
 
 //Combat formulas
 inline bool ArmourToRangedNullification(const int rangedPower, const int armourPower) {
@@ -28,13 +30,6 @@ inline bool RangedToMeleeDebuff(const int rangedPower, const int meleePower) {
     }
     return result;
 }
-
-/*inline bool RangedToMeleeDebuff(const int rangedPower, const int meleePower) {
-    bool result = false;
-    if (rangedPower > (meleePower))
-
-    return result;
-}*/
 
 //Function to display FTXUI coloured text
 inline void OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) {

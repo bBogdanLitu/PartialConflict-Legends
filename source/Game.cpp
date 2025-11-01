@@ -83,11 +83,6 @@ void Game::CheckGenerals() const {
 }
 
 void Game::DisplayStartingGenerals() const {
-    /*int k = 0;
-    for (const auto &i: StartingGenerals) {
-        std::cout << k << ".\n" << i << "\n";
-        k++;
-    }*/
     std::vector<General> Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
     std::vector<std::vector<std::string> > tableContent;
@@ -134,17 +129,6 @@ void Game::DisplayStartingGenerals() const {
     std::cout << std::endl;
 }
 
-/*void Game::OutputFTXUIText(const std::string &textToOutput, ftxui::Color textColor) const {
-    using namespace ftxui;
-    auto document = paragraph(textToOutput) | color(textColor);
-    auto screen = Screen::Create(Dimension::Fit(document, true));
-    Render(screen, document);
-    screen.Print();
-    //This is basically a way to output either a newline or a space after the beautified text.
-    //As a consequence, all passed strings should end in one of those :)
-    std::cout << textToOutput[textToOutput.size() - 1];
-}*/
-
 int Game::Start() {
     std::ifstream generalsJson, settlementsJson;
 
@@ -170,7 +154,6 @@ int Game::Start() {
     }
     //Actual start of the game after all checks
     OutputFTXUIText(welcomeText, gameAnnouncementsColor);
-    //std::cout << balanceCheckText;
     OutputFTXUIText(balanceCheckText, userInputExpectedColor);
     std::cin >> ans1;
     sanitizeInputMore(ans1);
@@ -179,13 +162,11 @@ int Game::Start() {
     } else if (ans1 == 1) {
         std::string temp;
         CheckGenerals();
-        //std::cout << enterToContinueText;
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
     }
 
-    //std::cout << beginningGeneralText;
     OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
     DisplayStartingGenerals();
     OutputFTXUIText(starterPreChoiceText, userInputExpectedColor);
@@ -200,11 +181,8 @@ int Game::Start() {
 
     Settlements[0].StationArmy(starterArmy);
 
-    //std::cout << starterPostChoiceText;
     OutputFTXUIText(starterPostChoiceText, importantGameInformationColor);
-    //std::cout << Settlements[0];
     Settlements[0].DisplaySettlement();
-    //std::cout << starterPreTutorial;
     OutputFTXUIText(starterPreTutorial, gameAnnouncementsColor);
 
 
@@ -214,13 +192,10 @@ int Game::Start() {
     Army warlord1Army{WarlordGenerals[1]}; //Weak general, can be beat by the garrison alone
     warlord1Army.AddGeneral(WarlordGenerals[3]); //Medium general to test some of the functionalities
     warlord1Army.AddGeneral(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
-    //std::cout << tutorialFirstDefenceText;
     OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
     //the first attack doesn't require the attacking army to be actually stationed somewhere,
     //it is scripted and just a one-time occurrence.
-    //std::cout << incomingAttackText;
     OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-    //std::cout << warlord1Army;
     warlord1Army.DisplayArmy();
     Settlements[0].Besieged(warlord1Army);
 

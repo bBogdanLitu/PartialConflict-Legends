@@ -1,7 +1,7 @@
 #ifndef General_H
 #define General_H
 #include <string>
-
+#include <ftxui/dom/table.hpp>
 #include "Constants.h"
 #include "Functions.h"
 
@@ -13,26 +13,16 @@ private:
 
     //Applying the designed cap to the stats so the game makes sense
     void StatCap();
-    void ArmourPowerCalculation() {
-        aPower = dex / 10.0 * (armour + 5);
-    }
-    void RangedPowerCalculation() {
-        rPower = acc / 25.0 * str / 25.0 * ranged;
-    }
-    void MeleePowerCalculation() {
-        mPower = str / 20.0 * dex / 33.3 * melee;
-    }
-    //very basic mode to balance the generals early
-    void OverallCalculation() {
-        overallPower = (aPower + rPower + mPower) / 3;
-    }
+    void ArmourPowerCalculation();
 
-    void UpdatePowers() {
-        Powers.clear();
-        Powers.push_back(mPower);
-        Powers.push_back(rPower);
-        Powers.push_back(aPower);
-    }
+    void RangedPowerCalculation();
+
+    void MeleePowerCalculation();
+
+    //very basic mode to balance the generals early
+    void OverallCalculation();
+
+    void UpdatePowers();
 
     void DisplayFight(const General &enemyGeneral, const std::vector<int> &selfEffPowers,
                       const std::vector<int> &enemyEffPowers) const;
@@ -44,52 +34,15 @@ public:
     //Combat function
     [[nodiscard]] int FightWith(const General &enemyGeneral, int overallBoost) const;
 
-    [[nodiscard]] int getType() const { return type; }
-    [[nodiscard]] int getOverallPower() const { return overallPower; }
-    [[nodiscard]] const std::vector<int> &getPowers() const { return Powers; }
+    [[nodiscard]] int getType() const;
 
-    [[nodiscard]] std::vector<std::string> getPrintableStats() const {
-        std::vector<std::string> printableStats;
+    [[nodiscard]] int getOverallPower() const;
 
-        //Convert what I want to show using FTXUI to string
-        const std::string typeConverted = std::to_string(type);
-        const std::string rarityConverted = std::to_string(rarity);
-        const std::string meleeConverted = std::to_string(melee);
-        const std::string rangedConverted = std::to_string(ranged);
-        const std::string armourConverted = std::to_string(armour);
-        const std::string strConverted = std::to_string(str);
-        const std::string accConverted = std::to_string(acc);
-        const std::string dexConverted = std::to_string(dex);
-        const std::string overallPowerConverted = std::to_string(overallPower);
+    [[nodiscard]] const std::vector<int> &getPowers() const;
 
-        printableStats.push_back(fullName);
-        printableStats.push_back(typeConverted);
-        printableStats.push_back(rarityConverted);
-        printableStats.push_back(meleeConverted);
-        printableStats.push_back(rangedConverted);
-        printableStats.push_back(armourConverted);
-        printableStats.push_back(strConverted);
-        printableStats.push_back(accConverted);
-        printableStats.push_back(dexConverted);
-        printableStats.push_back(overallPowerConverted);
+    [[nodiscard]] std::vector<std::string> getPrintableStats() const;
 
-        return printableStats;
-    }
-
-    [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int>& ecs) const {
-        std::vector<std::string> combatStats;
-
-        const std::string mPowerConverted = std::to_string(ecs[0]);
-        const std::string rPowerConverted = std::to_string(ecs[1]);
-        const std::string aPowerConverted = std::to_string(ecs[2]);
-
-        combatStats.push_back(fullName);
-        combatStats.push_back(mPowerConverted);
-        combatStats.push_back(rPowerConverted);
-        combatStats.push_back(aPowerConverted);
-
-        return combatStats;
-    }
+    [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int>& ecs) const;
 
 
     friend std::ostream& operator<<(std::ostream& os, const General& general) {
@@ -102,182 +55,6 @@ public:
     }
 };
 
-inline General::General(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
-                        int ranged_, int armour_, int str_, int acc_, int dex_) : firstName(firstName_),
-    lastName(lastName_), type(type_), rarity(rarity_),
-    melee(melee_), ranged(ranged_), armour(armour_), str(str_), acc(acc_), dex(dex_) {
-    StatCap();
-    ArmourPowerCalculation();
-    RangedPowerCalculation();
-    MeleePowerCalculation();
-    OverallCalculation();
-    UpdatePowers();
-    fullName = firstName + " " + lastName;
-}
 
-inline void General::StatCap() {
-    if (melee >= 100) melee = 99;
-    else if (melee <= -1) melee = 0;
-    if (ranged >= 100) ranged = 99;
-    else if (ranged <= -1) ranged = 0;
-    if (armour >= 100) armour = 99;
-    else if (armour <= -1) armour = 0;
-    if (str >= 100) str = 99;
-    else if (str <= -1) str = 0;
-    if (acc >= 100) acc = 99;
-    else if (acc <= -1) acc = 0;
-    if (dex >= 100) dex = 99;
-    else if (dex <= -1) dex = 0;
-}
-
-inline void General::DisplayFight(const General &enemyGeneral, const std::vector<int> &selfEffPowers,
-                                  const std::vector<int> &enemyEffPowers) const {
-    std::vector<std::vector<std::string> > table1Content, table2Content;
-
-    table1Content.push_back(generalFightTableHeaders); //defender
-    table2Content.push_back(generalFightTableHeaders); //attacker
-
-    table1Content.push_back(this->getEffectiveCombatStats(selfEffPowers));
-    table2Content.push_back(enemyGeneral.getEffectiveCombatStats(enemyEffPowers));
-
-    //Display stuff
-    using namespace ftxui;
-    auto table1 = Table({table1Content});
-
-    table1.SelectAll().Border(LIGHT);
-
-    //Separate all cells
-    table1.SelectAll().SeparatorVertical(LIGHT);
-
-    //Make first row bold with a double border.
-    table1.SelectRow(0).Decorate(bold);
-    table1.SelectRow(0).SeparatorVertical(LIGHT);
-    table1.SelectRow(0).Border(LIGHT);
-
-    //Make the content a different color
-    table1.SelectRows(1, -1).DecorateCells(color(generalFightDefenderInfoColor));
-
-    auto table2 = Table({table2Content});
-
-    table2.SelectAll().Border(LIGHT);
-
-    //Separate all cells
-    table2.SelectAll().SeparatorVertical(LIGHT);
-
-    //Make first row bold with a double border.
-    table2.SelectRow(0).Decorate(bold);
-    table2.SelectRow(0).SeparatorVertical(LIGHT);
-    table2.SelectRow(0).Border(LIGHT);
-
-    //Make the content a different color
-    table2.SelectRows(1, -1).DecorateCells(color(generalFightAttackerInfoColor));
-
-
-    auto document =
-            hbox({
-                table1.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
-                text("VERSUS") | bold | color(Color::Magenta) | center | size(
-                    WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 10),
-                table2.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
-            });
-    auto screen =
-            Screen::Create(Dimension::Full(), Dimension::Fit(document, true));
-    Render(screen, document);
-    screen.Print();
-    std::cout << std::endl;
-}
-
-inline int General::FightWith(const General &enemyGeneral, const int overallBoost) const {
-    int result = 1;
-    std::vector<int> enemyPowers = enemyGeneral.getPowers();
-    //Copy so that temporary modifications don't have a permanent effect
-    std::vector<int> selfPowers = this->getPowers();
-
-    //Apply garrison boost to defending general
-    for (unsigned long i = 0; i < selfPowers.size(); i++) {
-        selfPowers[i] += overallBoost / garrisonOverallBoostContribution;
-    }
-
-    //First of all, we determine if the generals can nullify stats or get bonuses
-    //armour -> ranged (if armour >= 1000, no ranged power can penetrate it)
-    if (selfPowers[2] >= armourToRangedNullifierCertain) {
-        enemyPowers[1] = 0;
-    }
-    //if aPower is at least 416, there might be a chance to nullify ranged using the formula in Formulas.h
-    else if (selfPowers[2] >= armourToRangedNullifierPossible && ArmourToRangedNullification(
-                 enemyPowers[1], selfPowers[2]) == true) {
-        enemyPowers[1] = 0;
-    }
-    //if aPower is low (will balance later), the enemy gets a boost to ranged and melee power.
-    else if (selfPowers[2] <= armourMaximumForBonusMultiplier) {
-        enemyPowers[0] *= meleeBonusMultiplierForLowArmour;
-        enemyPowers[1] *= rangedBonusMultiplierForLowArmour;
-    }
-
-    if (enemyPowers[2] >= armourToRangedNullifierCertain) {
-        selfPowers[1] = 0;
-    } else if (enemyPowers[2] >= armourToRangedNullifierPossible && ArmourToRangedNullification(
-                   selfPowers[1], enemyPowers[2]) == true) {
-        selfPowers[1] = 0;
-    } else if (enemyPowers[2] <= armourMaximumForBonusMultiplier) {
-        selfPowers[0] *= meleeBonusMultiplierForLowArmour;
-        selfPowers[1] *= rangedBonusMultiplierForLowArmour;
-    }
-
-    //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
-    if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
-        selfPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
-    if (selfPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(selfPowers[1], enemyPowers[0])) {
-        enemyPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
-
-    DisplayFight(enemyGeneral, selfPowers, enemyPowers); //to display the effective stats
-
-    //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!
-
-    //If there is a very talented ranged vs a mediocre melee with lesser rangedPower, instant win for the ranged.
-    if (enemyPowers[1] > rangedToMeleeOverpowerFixedAddition && RangedToMeleeInstantWin(
-            enemyPowers[1], selfPowers[0], selfPowers[1]) == true) {
-        result = 0; //loss
-        return result;
-    }
-    if (selfPowers[1] > rangedToMeleeOverpowerFixedAddition && RangedToMeleeInstantWin(
-            selfPowers[1], enemyPowers[0], enemyPowers[1]) == true) {
-        result = 1; //win
-        return result;
-    }
-
-
-
-    if (selfPowers[0] > enemyPowers[0]) {
-        result = 1;
-        return result;
-    }
-    if (selfPowers[0] < enemyPowers[0]) {
-        result = 0;
-        return result;
-    }
-    //Equal melee
-    if (selfPowers[1] > enemyPowers[1]) {
-        result = 1;
-        return result;
-    }
-    if (selfPowers[1] < enemyPowers[1]) {
-        result = 0;
-        return result;
-    }
-    //Equal melee and ranged
-    if (selfPowers[2] > enemyPowers[2]) {
-        result = 1;
-        return result;
-    }
-    if (selfPowers[2] < enemyPowers[2]) {
-        result = 0;
-        return result;
-    }
-    //All equal stats -> whoever gets called (the defender) wins
-    return result;
-}
 
 #endif //General_H

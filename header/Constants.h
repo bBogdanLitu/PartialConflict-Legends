@@ -1,6 +1,7 @@
 #ifndef Constants_H
 #define Constants_H
 #include <string>
+#include <vector>
 
 //Usual colours
 #define gameAnnouncementsColor ftxui::Color::Gold1

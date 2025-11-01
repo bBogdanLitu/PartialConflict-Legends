@@ -1,5 +1,7 @@
 #ifndef ControlPoint_H
 #define ControlPoint_H
+#include <optional>
+#include <iostream>
 #include "Army.h"
 #include "Scout.h"
 
@@ -13,8 +15,7 @@ private:
     int travelCost; //consume the action points of an army passing through by the cost
 
 public:
-    ControlPoint(const Scout& appointedScout_, const std::string& name_, int travelCost_)
-    : appointedScout(appointedScout_), name(name_), travelCost(travelCost_) {}
+    ControlPoint(const Scout& appointedScout_, const std::string& name_, int travelCost_);
 
     /*void StationArmy(const Army& army) {
         stationedArmy = army;
@@ -26,5 +27,7 @@ public:
         return os;
     }
 };
+
+
 
 #endif //ControlPoint_H
