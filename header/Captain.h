@@ -5,11 +5,11 @@
 
 class Captain : public Unit {
 private:
-    float captainHandicap = 0.8;
+    float captainHandicap = 0.8f;
 
     void ApplyStatModifiers(int garrisonOverallBoost, std::vector<int> &selfPowers) const override;
 
-    void NullifyOrBoost(std::vector<int> enemyPowers, std::vector<int> selfPowers) const override;
+    void NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int> &selfPowers) const override;
 
     int InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> selfPowers) const override;
 

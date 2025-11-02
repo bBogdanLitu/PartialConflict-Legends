@@ -7,7 +7,7 @@ void Captain::ApplyStatModifiers(int garrisonOverallBoost, std::vector<int> &sel
     }
 }
 
-void Captain::NullifyOrBoost(std::vector<int> enemyPowers, std::vector<int> selfPowers) const {
+void Captain::NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int> &selfPowers) const {
     //First of all, we determine if the generals can nullify stats or get bonuses
     //armour -> ranged (if armour >= 1000, no ranged power can penetrate it)
     if (selfPowers[2] >= armourToRangedNullifierCertain) {

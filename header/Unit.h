@@ -32,21 +32,23 @@ private:
 
 
     //Virtual functions used in the NVI (FightWith)
-    virtual void ApplyStatModifiers(int garrisonOverallBoost, std::vector<int>& selfPowers) const = 0;
+    virtual void ApplyStatModifiers(int garrisonOverallBoost, std::vector<int> &selfPowers) const = 0;
 
-    virtual void NullifyOrBoost(std::vector<int> enemyPowers, std::vector<int> selfPowers) const = 0;
+    virtual void NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int> &selfPowers) const = 0;
 
     [[nodiscard]] virtual int InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> selfPowers) const = 0;
 
 public:
     virtual ~Unit() = default;
+
     virtual std::shared_ptr<Unit> clone() const = 0;
 
-    Unit(Unit&& other) = default;
-    Unit& operator=(Unit&& other) = default;
+    Unit(Unit &&other) = default;
+
+    Unit &operator=(Unit &&other) = default;
 
 
-    Unit(const std::string& firstName_, const std::string& lastName_, int type_, int rarity_,
+    Unit(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_,
          int melee_, int ranged_, int armour_, int str_, int acc_, int dex_);
 
 
@@ -65,17 +67,18 @@ public:
     [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int> &ecs) const;
 
 
-    friend std::ostream& operator<<(std::ostream& os, const Unit& unit) {
+    friend std::ostream &operator<<(std::ostream &os, const Unit &unit) {
         os << "Name: " << unit.fullName << "\nType and rarity: " << unit.type << " " << unit.rarity <<
-            "\nMelee, ranged and armour stats: " << unit.melee << " " << unit.ranged << " " << unit.armour <<
+                "\nMelee, ranged and armour stats: " << unit.melee << " " << unit.ranged << " " << unit.armour <<
                 "\nStrength, accuracy and dexterity: " << unit.str << " " << unit.acc << " " << unit.dex <<
-                    "\nOverall power: " <<unit.overallPower << "\n";
+                "\nOverall power: " << unit.overallPower << "\n";
         return os;
-
     }
+
 protected:
-    Unit(const Unit& other) = default;
-    Unit &operator=(const Unit& other) = default;
+    Unit(const Unit &other) = default;
+
+    Unit &operator=(const Unit &other) = default;
 };
 
 

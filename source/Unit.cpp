@@ -2,12 +2,12 @@
 
 
 Unit::Unit(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
-                 int ranged_, int armour_, int str_, int acc_, int dex_) : firstName(firstName_),
-                                                                           lastName(lastName_), type(type_),
-                                                                           rarity(rarity_),
-                                                                           melee(melee_), ranged(ranged_),
-                                                                           armour(armour_), str(str_), acc(acc_),
-                                                                           dex(dex_) {
+           int ranged_, int armour_, int str_, int acc_, int dex_) : firstName(firstName_),
+                                                                     lastName(lastName_), type(type_),
+                                                                     rarity(rarity_),
+                                                                     melee(melee_), ranged(ranged_),
+                                                                     armour(armour_), str(str_), acc(acc_),
+                                                                     dex(dex_) {
     StatCap();
     ArmourPowerCalculation();
     RangedPowerCalculation();
@@ -56,7 +56,7 @@ void Unit::UpdatePowers() {
 }
 
 void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEffPowers,
-                           const std::vector<int> &enemyEffPowers) const {
+                        const std::vector<int> &enemyEffPowers) const {
     std::vector<std::vector<std::string> > table1Content, table2Content;
 
     table1Content.push_back(generalFightTableHeaders); //defender
@@ -116,7 +116,7 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const
     ///STAGE 1 - FETCH STATS
 
     int result = 1;
-    const std::vector<int>& enemyPowers = enemyUnit.getPowers();
+    std::vector<int> enemyPowers = enemyUnit.getPowers(); //can't be const because it's modifiable
     //Copy so that temporary modifications don't have a permanent effect
     std::vector<int> selfPowers = this->getPowers();
 
