@@ -8,15 +8,15 @@ private:
     int viewRange;
 
 public:
-    explicit Scout (int viewRange_);
+    explicit Scout(int viewRange_);
 
-    Scout (const Scout& other);
+    Scout(const Scout &other);
 
-    Scout& operator=(const Scout& other);
+    Scout &operator=(const Scout &other);
 
-    bool operator==(const Scout& other) const;
+    bool operator==(const Scout &other) const;
 
-    bool operator!=(const Scout& other) const;
+    bool operator!=(const Scout &other) const;
 
     ~Scout();
 

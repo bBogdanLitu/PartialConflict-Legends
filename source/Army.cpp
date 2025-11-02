@@ -6,7 +6,7 @@ int Army::TotalOverallPowerCalculation(const General &modifiedGeneral) {
 }
 
 void Army::evaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
-                                       std::vector<int> &remainingAllies, int indexOfAttacker, int indexOfDefender) const {
+                                std::vector<int> &remainingAllies, int indexOfAttacker, int indexOfDefender) const {
     switch (fightResult) {
         case 0: {
             OutputFTXUIText("\nFight won by the attacker.\n\n", generalFightAttackerWinColor);
@@ -38,7 +38,7 @@ void Army::AddGeneral(const General &general) {
 }
 
 int Army::Attacked(const Army &attackingArmy, const int overallBoost,
-                          const std::vector<unsigned long> &battleOrder) const {
+                   const std::vector<unsigned long> &battleOrder) const {
     OutputFTXUIText("\nThe battle will now begin.\n", gameAnnouncementsColor);
     int currentEnemy = 0;
     std::vector<int> remainingAttackers, remainingDefenders, surplusDefenders;
@@ -112,13 +112,13 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     OutputFTXUIText(settlementFightNoRemainingAttackersText, generalFightDefenderWinColor);
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
-    }
+}
 
 int Army::getTotalOverallPower() const { return totalOverallPower; }
 
 unsigned long Army::getGeneralCount() const { return assignedGenerals.size(); }
 
-const std::vector<General> & Army::getAssignedGenerals() const { return assignedGenerals; }
+const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
 
 void Army::DisplayArmy() const {
     std::vector<std::vector<std::string> > tableContent;

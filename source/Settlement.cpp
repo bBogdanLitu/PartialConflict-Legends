@@ -1,9 +1,10 @@
 #include "../header/Settlement.h"
 
 Settlement::Settlement(const Garrison &garrison_, const std::vector<ControlPoint> &controlPoints_,
-    std::string name_, int owner_, std::vector<int> neighbours_): stationedGarrison(garrison_), controlPoints(controlPoints_),
-                                                                  name(std::move(name_)),
-                                                                  owner(owner_), neighbours(std::move(neighbours_)) {
+                       std::string name_, int owner_, std::vector<int> neighbours_) : stationedGarrison(garrison_),
+    controlPoints(controlPoints_),
+    name(std::move(name_)),
+    owner(owner_), neighbours(std::move(neighbours_)) {
 }
 
 void Settlement::StationArmy(const Army &army) {

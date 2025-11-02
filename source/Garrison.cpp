@@ -21,7 +21,7 @@ void Garrison::PowerCalculation() {
     overallPower = (mPower + rPower + aPower) / 3;
 }
 
-Garrison::Garrison(const int powerLevel_): powerLevel(powerLevel_) {
+Garrison::Garrison(const int powerLevel_) : powerLevel(powerLevel_) {
     PowerCalculation();
 }
 

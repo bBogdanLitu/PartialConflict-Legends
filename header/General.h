@@ -13,6 +13,7 @@ private:
 
     //Applying the designed cap to the stats so the game makes sense
     void StatCap();
+
     void ArmourPowerCalculation();
 
     void RangedPowerCalculation();
@@ -42,7 +43,7 @@ public:
 
     [[nodiscard]] std::vector<std::string> getPrintableStats() const;
 
-    [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int>& ecs) const;
+    [[nodiscard]] std::vector<std::string> getEffectiveCombatStats(const std::vector<int> &ecs) const;
 
 
     friend std::ostream& operator<<(std::ostream& os, const General& general) {

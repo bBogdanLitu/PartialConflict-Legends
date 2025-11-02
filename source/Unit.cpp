@@ -1,6 +1,7 @@
-#include "../header/General.h"
+#include "../header/Unit.h"
 
-General::General(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
+
+Unit::Unit(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
                  int ranged_, int armour_, int str_, int acc_, int dex_) : firstName(firstName_),
                                                                            lastName(lastName_), type(type_),
                                                                            rarity(rarity_),
@@ -16,7 +17,7 @@ General::General(const std::string &firstName_, const std::string &lastName_, in
     fullName = firstName + " " + lastName;
 }
 
-void General::StatCap() {
+void Unit::StatCap() {
     if (melee >= 100) melee = 99;
     else if (melee <= -1) melee = 0;
     if (ranged >= 100) ranged = 99;
@@ -31,30 +32,30 @@ void General::StatCap() {
     else if (dex <= -1) dex = 0;
 }
 
-void General::ArmourPowerCalculation() {
+void Unit::ArmourPowerCalculation() {
     aPower = dex / 10.0 * (armour + 5);
 }
 
-void General::RangedPowerCalculation() {
+void Unit::RangedPowerCalculation() {
     rPower = acc / 25.0 * str / 25.0 * ranged;
 }
 
-void General::MeleePowerCalculation() {
+void Unit::MeleePowerCalculation() {
     mPower = str / 20.0 * dex / 33.3 * melee;
 }
 
-void General::OverallCalculation() {
+void Unit::OverallCalculation() {
     overallPower = (aPower + rPower + mPower) / 3;
 }
 
-void General::UpdatePowers() {
+void Unit::UpdatePowers() {
     Powers.clear();
     Powers.push_back(mPower);
     Powers.push_back(rPower);
     Powers.push_back(aPower);
 }
 
-void General::DisplayFight(const General &enemyGeneral, const std::vector<int> &selfEffPowers,
+void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEffPowers,
                            const std::vector<int> &enemyEffPowers) const {
     std::vector<std::vector<std::string> > table1Content, table2Content;
 
@@ -111,66 +112,41 @@ void General::DisplayFight(const General &enemyGeneral, const std::vector<int> &
     std::cout << std::endl;
 }
 
-int General::FightWith(const General &enemyGeneral, const int overallBoost) const {
+int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const {
+    ///STAGE 1 - FETCH STATS
+
     int result = 1;
-    std::vector<int> enemyPowers = enemyGeneral.getPowers();
+    const std::vector<int>& enemyPowers = enemyUnit.getPowers();
     //Copy so that temporary modifications don't have a permanent effect
     std::vector<int> selfPowers = this->getPowers();
 
-    //Apply garrison boost to defending general
-    for (unsigned long i = 0; i < selfPowers.size(); i++) {
-        selfPowers[i] += overallBoost / garrisonOverallBoostContribution;
-    }
+    ///STAGE 2 - APPLY MODIFICATIONS
 
-    //First of all, we determine if the generals can nullify stats or get bonuses
-    //armour -> ranged (if armour >= 1000, no ranged power can penetrate it)
-    if (selfPowers[2] >= armourToRangedNullifierCertain) {
-        enemyPowers[1] = 0;
-    }
-    //if aPower is at least 416, there might be a chance to nullify ranged using the formula in Formulas.h
-    else if (selfPowers[2] >= armourToRangedNullifierPossible && ArmourToRangedNullification(
-                 enemyPowers[1], selfPowers[2]) == true) {
-        enemyPowers[1] = 0;
-    }
-    //if aPower is low (will balance later), the enemy gets a boost to ranged and melee power.
-    else if (selfPowers[2] <= armourMaximumForBonusMultiplier) {
-        enemyPowers[0] *= meleeBonusMultiplierForLowArmour;
-        enemyPowers[1] *= rangedBonusMultiplierForLowArmour;
-    }
+    ApplyStatModifiers(garrisonOverallBoost, selfPowers);
 
-    if (enemyPowers[2] >= armourToRangedNullifierCertain) {
-        selfPowers[1] = 0;
-    } else if (enemyPowers[2] >= armourToRangedNullifierPossible && ArmourToRangedNullification(
-                   selfPowers[1], enemyPowers[2]) == true) {
-        selfPowers[1] = 0;
-    } else if (enemyPowers[2] <= armourMaximumForBonusMultiplier) {
-        selfPowers[0] *= meleeBonusMultiplierForLowArmour;
-        selfPowers[1] *= rangedBonusMultiplierForLowArmour;
-    }
+    ///STAGE 3 - NULLIFY/BOOST
 
-    //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
-    if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
-        selfPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
-    if (selfPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(selfPowers[1], enemyPowers[0])) {
-        enemyPowers[0] *= rangedToMeleeDebuffMultiplier;
-    }
+    NullifyOrBoost(enemyPowers, selfPowers);
 
-    DisplayFight(enemyGeneral, selfPowers, enemyPowers); //to display the effective stats
+    DisplayFight(enemyUnit, selfPowers, enemyPowers); //to display the effective stats
+
 
     //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!
+    ///STAGE 4: INSTANT WINS
 
-    //If there is a very talented ranged vs a mediocre melee with lesser rangedPower, instant win for the ranged.
-    if (enemyPowers[1] > rangedToMeleeOverpowerFixedAddition && RangedToMeleeInstantWin(
-            enemyPowers[1], selfPowers[0], selfPowers[1]) == true) {
-        result = 0; //loss
+    int instantWin = InstantWinCheck(enemyPowers, selfPowers);
+    //if the defender wins instantly
+    if (instantWin == 1) {
+        result = 1; //won't be 1 forever (after implementing more consequences to win / lose scenarios)
         return result;
     }
-    if (selfPowers[1] > rangedToMeleeOverpowerFixedAddition && RangedToMeleeInstantWin(
-            selfPowers[1], enemyPowers[0], enemyPowers[1]) == true) {
-        result = 1; //win
+    //if the attacker wins instantly
+    if (instantWin == -1) {
+        result = 0;
         return result;
     }
+
+    ///STAGE 5: NORMAL WINS (STANDARD FOR EVERY UNIT)
 
     if (selfPowers[0] > enemyPowers[0]) {
         result = 1;
@@ -202,13 +178,13 @@ int General::FightWith(const General &enemyGeneral, const int overallBoost) cons
     return result;
 }
 
-int General::getType() const { return type; }
+int Unit::getType() const { return type; }
 
-int General::getOverallPower() const { return overallPower; }
+int Unit::getOverallPower() const { return overallPower; }
 
-const std::vector<int> &General::getPowers() const { return Powers; }
+const std::vector<int> &Unit::getPowers() const { return Powers; }
 
-std::vector<std::string> General::getPrintableStats() const {
+std::vector<std::string> Unit::getPrintableStats() const {
     std::vector<std::string> printableStats;
 
     //Convert what I want to show using FTXUI to string
@@ -236,7 +212,7 @@ std::vector<std::string> General::getPrintableStats() const {
     return printableStats;
 }
 
-std::vector<std::string> General::getEffectiveCombatStats(const std::vector<int> &ecs) const {
+std::vector<std::string> Unit::getEffectiveCombatStats(const std::vector<int> &ecs) const {
     std::vector<std::string> combatStats;
 
     const std::string mPowerConverted = std::to_string(ecs[0]);

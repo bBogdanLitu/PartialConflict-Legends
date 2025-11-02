@@ -73,6 +73,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         source/General.cpp
         source/Scout.cpp
         source/Settlement.cpp
+        source/Unit.cpp
+        header/Unit.h
+        source/Captain.cpp
+        header/Captain.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

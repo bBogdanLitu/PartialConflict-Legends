@@ -15,7 +15,7 @@ private:
     int travelCost; //consume the action points of an army passing through by the cost
 
 public:
-    ControlPoint(const Scout& appointedScout_, const std::string& name_, int travelCost_);
+    ControlPoint(const Scout &appointedScout_, const std::string &name_, int travelCost_);
 
     /*void StationArmy(const Army& army) {
         stationedArmy = army;
@@ -27,7 +27,6 @@ public:
         return os;
     }
 };
-
 
 
 #endif //ControlPoint_H

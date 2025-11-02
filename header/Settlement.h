@@ -22,7 +22,7 @@ public:
     Settlement(const Garrison &garrison_, const std::vector<ControlPoint> &controlPoints_, std::string name_,
                int owner_, std::vector<int> neighbours_);
 
-    void StationArmy(const Army& army);
+    void StationArmy(const Army &army);
 
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
     void AddGeneralToArmy(const General &general);
