@@ -28,7 +28,7 @@ int main() {
 
     //I don't want to comment out the Game::Start() method just for a check, and I'm curious whether this will
     //result in a check fail or not.
-    if (true == false && 1.999999f == 2) {
+    if constexpr (true == false && 1.999999f == 2) {
         Game game;
         game.Start();
     }
