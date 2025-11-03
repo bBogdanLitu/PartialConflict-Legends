@@ -6,12 +6,8 @@
 #include "Functions.h"
 #include "Unit.h"
 
-class General : public Unit{
+class General : public Unit {
 private:
-    std::string firstName, lastName, fullName;
-    int type{}, rarity{}, melee{}, ranged{}, armour{}, str{}, acc{}, dex{}, mPower = 0, rPower = 0, aPower = 0, overallPower = 0;
-    std::vector<int> Powers;
-
     void ApplyStatModifiers(int garrisonOverallBoost, std::vector<int> &selfPowers) const override;
 
     void NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int> &selfPowers) const override;

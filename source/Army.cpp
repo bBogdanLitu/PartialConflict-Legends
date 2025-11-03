@@ -124,7 +124,7 @@ unsigned long Army::getUnitCount() const { return assignedUnits.size(); }
 
 //const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
 
-const std::vector<std::shared_ptr<Unit>> & Army::getAssignedUnits() const { return assignedUnits;}
+const std::vector<std::shared_ptr<Unit> > &Army::getAssignedUnits() const { return assignedUnits; }
 
 void Army::DisplayArmy() const {
     std::vector<std::vector<std::string> > tableContent;

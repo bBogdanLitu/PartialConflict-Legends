@@ -6,7 +6,8 @@
 
 class Game {
 private:
-    std::vector<std::shared_ptr<Unit>> StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals, EmperorGenerals;
+    std::vector<std::shared_ptr<Unit> > StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals,
+            EmperorGenerals;
     std::vector<Settlement> Settlements;
     unsigned int ans1 = 0, ans2 = 0;
 

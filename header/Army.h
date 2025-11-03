@@ -8,7 +8,7 @@
 //Can hold up to 3 generals, min of 1.
 class Army {
 private:
-    std::vector<std::shared_ptr<Unit>> assignedUnits;
+    std::vector<std::shared_ptr<Unit> > assignedUnits;
 
     //These attributes shouldn't be modified by the constructor, they are initialized here and updated (eventually) through functions
     int actionPoints = 1, totalOverallPower = 0; //Default
@@ -37,14 +37,14 @@ public:
 
     //[[nodiscard]] const std::vector<General> &getAssignedGenerals() const;
 
-    [[nodiscard]] const std::vector<std::shared_ptr<Unit>> &getAssignedUnits() const;
+    [[nodiscard]] const std::vector<std::shared_ptr<Unit> > &getAssignedUnits() const;
 
     void DisplayArmy() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
         os << "Composition:\n";
-        for (const auto &unit : army.assignedUnits) {
+        for (const auto &unit: army.assignedUnits) {
             os << k << ".\n" << unit;
             k++;
         }
