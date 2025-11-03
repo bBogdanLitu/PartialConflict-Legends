@@ -1,7 +1,7 @@
 #include "../header/Army.h"
 
-int Army::TotalOverallPowerCalculation(const General &modifiedGeneral) {
-    totalOverallPower += modifiedGeneral.getOverallPower();
+int Army::TotalOverallPowerCalculation(const std::shared_ptr<Unit> &unit) {
+    totalOverallPower += unit->getOverallPower();
     return totalOverallPower;
 }
 
@@ -26,15 +26,15 @@ void Army::evaluateFightOutcome(int fightResult, std::vector<int> &remainingFigh
     }
 }
 
-Army::Army(const General &general) {
-    if (assignedGenerals.size() < 3) {
-        assignedGenerals.push_back(general);
-        TotalOverallPowerCalculation(general);
+Army::Army(const std::shared_ptr<Unit> &unit) {
+    if (assignedUnits.size() < 3) {
+        assignedUnits.push_back(unit);
+        TotalOverallPowerCalculation(unit);
     }
 }
 
-void Army::AddGeneral(const General &general) {
-    assignedGenerals.push_back(general);
+void Army::AddUnit(const std::shared_ptr<Unit> &unit) {
+    assignedUnits.push_back(unit);
 }
 
 int Army::Attacked(const Army &attackingArmy, const int overallBoost,
@@ -43,15 +43,17 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     int currentEnemy = 0;
     std::vector<int> remainingAttackers, remainingDefenders, surplusDefenders;
     //We assume that every defender and attacker can be surplus (apriori)
-    for (int i = 0; i < static_cast<int>(this->getGeneralCount()); i++) {
+    for (int i = 0; i < static_cast<int>(this->getUnitCount()); i++) {
         surplusDefenders.push_back(i);
     }
 
     for (const unsigned long currentAlly: battleOrder) {
         //We mark the chosen defender as non-surplus
         surplusDefenders[currentAlly] = -1;
-        int fightResult = this->getAssignedGenerals()[currentAlly].
-                FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);
+        /*int fightResult = this->getAssignedGenerals()[currentAlly].
+                FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);*/
+        int fightResult = this->getAssignedUnits()[currentAlly]->
+                FightWith(*attackingArmy.getAssignedUnits()[currentEnemy], overallBoost);
         //defender combat is boosted by the garrison
         this->evaluateFightOutcome(fightResult, remainingAttackers, remainingDefenders, currentEnemy,
                                    static_cast<int>(currentAlly));
@@ -59,16 +61,16 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     }
 
     //If there are generals that didn't take part because of size difference, we add them to their pools.
-    if (this->getGeneralCount() > attackingArmy.getGeneralCount()) {
+    if (this->getUnitCount() > attackingArmy.getUnitCount()) {
         for (int surplusDefender: surplusDefenders) {
             if (surplusDefender != -1) {
                 remainingDefenders.push_back(surplusDefender);
             }
         }
-    } else if (attackingArmy.getGeneralCount() > this->getGeneralCount()) {
+    } else if (attackingArmy.getUnitCount() > this->getUnitCount()) {
         //Because the attackers use a simple order (0, 1, 2) we can simply add what's left to the remaining pool.
-        for (unsigned long i = attackingArmy.getGeneralCount() - 1;
-             i > armyGeneralsMaximumIndex - (attackingArmy.getGeneralCount() - this->getGeneralCount()); i--) {
+        for (unsigned long i = attackingArmy.getUnitCount() - 1;
+             i > armyGeneralsMaximumIndex - (attackingArmy.getUnitCount() - this->getUnitCount()); i--) {
             remainingAttackers.push_back(static_cast<int>(i));
         }
     }
@@ -84,8 +86,8 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
             //We will attempt to defeat all remaining enemies using our allies.
             //We stop when either they are all defeated or we don't have any allies left.
             do {
-                fightResult = this->getAssignedGenerals()[remainingDefenders[attempts]].FightWith(
-                    attackingArmy.getAssignedGenerals()[remainingAttacker], overallBoost);
+                fightResult = this->getAssignedUnits()[remainingDefenders[attempts]]->FightWith(
+                    *attackingArmy.getAssignedUnits()[remainingAttacker], overallBoost);
                 if (fightResult == 0) {
                     OutputFTXUIText("\nFight won by the attacker.\n\n", generalFightAttackerWinColor);
                     attempts++; //only try going to the next remaining ally if the current loses a battle.
@@ -116,9 +118,13 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
 
 int Army::getTotalOverallPower() const { return totalOverallPower; }
 
-unsigned long Army::getGeneralCount() const { return assignedGenerals.size(); }
+//unsigned long Army::getGeneralCount() const { return assignedGenerals.size(); }
 
-const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
+unsigned long Army::getUnitCount() const { return assignedUnits.size(); }
+
+//const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
+
+const std::vector<std::shared_ptr<Unit>> & Army::getAssignedUnits() const { return assignedUnits;}
 
 void Army::DisplayArmy() const {
     std::vector<std::vector<std::string> > tableContent;
@@ -126,8 +132,8 @@ void Army::DisplayArmy() const {
     tableContent.push_back(armyTableHeaders);
 
     int count = 0;
-    for (const auto &general: assignedGenerals) {
-        std::vector<std::string> tableRow = general.getPrintableStats();
+    for (const auto &unit: assignedUnits) {
+        std::vector<std::string> tableRow = unit->getPrintableStats();
         tableRow.emplace(tableRow.begin(), std::to_string(count));
         tableContent.push_back(tableRow);
 

@@ -11,8 +11,8 @@ void Settlement::StationArmy(const Army &army) {
     stationedArmy = army;
 }
 
-void Settlement::AddGeneralToArmy(const General &general) {
-    stationedArmy.value().AddGeneral(general);
+void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) {
+    stationedArmy.value().AddUnit(unit);
 }
 
 void Settlement::Besieged(const Army &attackingArmy) const {
@@ -27,15 +27,15 @@ void Settlement::Besieged(const Army &attackingArmy) const {
         std::vector<unsigned long> battleOrder;
         //Choosing the order until it is useless to do so.
         for (unsigned long i = 0;
-             i < stationedArmy.value().getGeneralCount() && i < attackingArmy.getGeneralCount();
+             i < stationedArmy.value().getUnitCount() && i < attackingArmy.getUnitCount();
              i++) {
             unsigned long a;
             OutputFTXUIText("Enemy " + std::to_string(i) + " to fight with your: ", userInputExpectedColor);
             std::cin >> a;
             //Sanitizing user input
             sanitizeInputMore(a);
-            if (a >= stationedArmy.value().getGeneralCount()) {
-                a = stationedArmy.value().getGeneralCount() - 1; //capping to the last possible one
+            if (a >= stationedArmy.value().getUnitCount()) {
+                a = stationedArmy.value().getUnitCount() - 1; //capping to the last possible one
             }
             //To prevent assigning one general to fight multiple enemies (at once)
             //If k was equal once, it will be equal the second time (like, for real),

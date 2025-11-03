@@ -8,6 +8,7 @@
 #include "../header/Game.h"
 #include "../header/Settlement.h"
 #include "../header/Functions.h"
+#include "../header/Captain.h"
 
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
@@ -19,23 +20,23 @@ void Game::PopulateGenerals(std::ifstream generalsJson) {
         };
         switch (general.getType()) {
             case 0: {
-                StartingGenerals.push_back(general);
+                StartingGenerals.push_back(general.clone());
                 break;
             }
             case 1: {
-                PlayerGenerals.push_back(general);
+                PlayerGenerals.push_back(general.clone());
                 break;
             }
             case 2: {
-                ContenderGenerals.push_back(general);
+                ContenderGenerals.push_back(general.clone());
                 break;
             }
             case 3: {
-                WarlordGenerals.push_back(general);
+                WarlordGenerals.push_back(general.clone());
                 break;
             }
             case 4: {
-                EmperorGenerals.push_back(general);
+                EmperorGenerals.push_back(general.clone());
                 break;
             }
             default: {
@@ -83,7 +84,7 @@ void Game::CheckGenerals() const {
 }
 
 void Game::DisplayStartingGenerals() const {
-    std::vector<General> Generals = StartingGenerals;
+    auto Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
     std::vector<std::vector<std::string> > tableContent;
     tableContent.push_back(startingGeneralTableHeaders);
@@ -93,7 +94,7 @@ void Game::DisplayStartingGenerals() const {
         std::string countConverted = std::to_string(count);
 
         statsToPrintForEachGeneral.clear();
-        statsToPrintForEachGeneral = general.getPrintableStats();
+        statsToPrintForEachGeneral = general->getPrintableStats();
         statsToPrintForEachGeneral.emplace(statsToPrintForEachGeneral.begin(), countConverted);
         tableContent.push_back(statsToPrintForEachGeneral);
 
@@ -187,11 +188,18 @@ int Game::Start() {
 
 
     //EXAMPLE TO TEST COMBAT
-    Settlements[0].AddGeneralToArmy(PlayerGenerals[5]); //Good general
-    Settlements[0].AddGeneralToArmy(StartingGenerals[4]); //Very weak general
-    Army warlord1Army{WarlordGenerals[1]}; //Weak general, can be beat by the garrison alone
-    warlord1Army.AddGeneral(WarlordGenerals[3]); //Medium general to test some of the functionalities
-    warlord1Army.AddGeneral(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
+
+    //TRYING TO GET A CAPTAIN IN AN ARMY - SUCCESS!
+    Captain captain = {"John", "Pork", 0, 1, 50, 50, 50, 50, 50, 50, 13.1f};
+    Captain enemyCaptain = {"Big, Bad", "Wolf", 0, 1, 60, 60, 60, 60, 60, 50, 0.7f};
+    std::shared_ptr<Unit> captain1 = captain.clone();
+    std::shared_ptr<Unit> captain2 = enemyCaptain.clone();
+
+    Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
+    Settlements[0].AddUnitToArmy(captain1); //Captain to test if any unit can fight with any unit
+    Army warlord1Army{captain2}; //Captain to test if any unit can fight with any unit
+    warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
+    warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
     OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
     //the first attack doesn't require the attacking army to be actually stationed somewhere,
     //it is scripted and just a one-time occurrence.

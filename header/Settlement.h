@@ -25,7 +25,7 @@ public:
     void StationArmy(const Army &army);
 
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
-    void AddGeneralToArmy(const General &general);
+    void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
 
     void Besieged(const Army &attackingArmy) const;
 
