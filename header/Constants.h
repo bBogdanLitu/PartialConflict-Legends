@@ -62,11 +62,11 @@ const inline std::string starterPreTutorial =
 const inline std::string tutorialFirstDefenceText =
                 "Your uprising was noticed by the nearby warlord! Resist his attack and prove your worth.\n\n";
 const inline std::string tutorialFirstDefenceEndText =
-                "The warlord has crushed your dreams... You must rise again and never give up!\n\n";
+        "The warlord has crushed your dreams... You must rise again and never give up!\n\n";
 const inline std::string settlementBesiegeFailedText =
-                " was defended!\n\n";
+        " was defended!\n\n";
 const inline std::string settlementBesiegeSuccessText =
-                " was captured!\n\n";
+        " was captured!\n\n";
 const inline std::string incomingAttackText =
                 "Prepare yourself! An enemy army is approaching:\n";
 const inline std::string settlementStationedArmyText =

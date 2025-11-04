@@ -16,7 +16,7 @@ private:
     std::vector<ControlPoint> ControlPoints;
     std::string name;
     int owner; //0 = player, others are enemies or contenders
-    std::vector<int>neighbours; //the index of neighbouring settlements (in the vector)
+    std::vector<int> neighbours; //the index of neighbouring settlements (in the vector)
 
 public:
     Settlement(const Garrison &garrison_, std::string name_, int owner_);

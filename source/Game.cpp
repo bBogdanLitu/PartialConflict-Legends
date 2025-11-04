@@ -207,7 +207,8 @@ int Game::Start() {
     //TRYING TO GET A CAPTAIN IN AN ARMY - SUCCESS!
 
     Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
-    Settlements[0].AddUnitToArmy(Captains[Captains.size()-2]); //Captain to test if every unit can fight with every unit
+    Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]);
+    //Captain to test if every unit can fight with every unit
     Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
     warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
     warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
@@ -220,13 +221,13 @@ int Game::Start() {
 
     //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
 
-    for (unsigned long i = 0; i < Settlements.size() ; i++) {
+    for (unsigned long i = 0; i < Settlements.size(); i++) {
         Settlements[i].DisplaySettlement(i);
     }
 
     //Temporary ending to the game
     OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
-    std::cout<<"\nThe game will end when you press enter.\n";
+    std::cout << "\nThe game will end when you press enter.\n";
     std::string temp;
     OutputFTXUIText(enterToContinueText, userInputExpectedColor);
     std::cin.ignore(); //Flush \n from the buffer

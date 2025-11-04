@@ -1,8 +1,9 @@
 #include "../header/Settlement.h"
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_) : stationedGarrison(garrison_),
-                                                                                    name(std::move(name_)),
-                                                                                    owner(owner_) {}
+    name(std::move(name_)),
+    owner(owner_) {
+}
 
 void Settlement::StationArmy(const Army &army) {
     stationedArmy = army;
