@@ -4,62 +4,27 @@
     "gridX": 0,
     "gridY": 0,
     "owner": 0,
-    "startingGarrisonLevel": 1,
-    "cpCount": 1,
-    "controlPoints": [
-      {
-        "name": "Pod",
-        "connectionNumber": 1,
-        "connections": [
-          1
-        ],
-        "cost": 1,
-        "scoutViewRange": 1
-      }
-    ]
+    "startingGarrisonLevel": 1
   },
   {
     "name": "Vlasca",
     "gridX": 0,
     "gridY": 1,
     "owner": 1,
-    "startingGarrisonLevel": 0,
-    "cpCount": 2,
-    "controlPoints": [
-      {
-        "name": "Biserica",
-        "connectionNumber": 1,
-        "connections": [
-          2
-        ],
-        "cost": 1,
-        "scoutViewRange": 1
-      },
-      {
-        "name": "Gara",
-        "connectionNumber": 1,
-        "connections": [
-          3
-        ],
-        "cost": 1,
-        "scoutViewRange": 1
-      }
-    ]
+    "startingGarrisonLevel": 0
   },
   {
     "name": "Fetesti",
     "gridX": 0,
     "gridY": 2,
-    "owner": 1,
-    "startingGarrisonLevel": 1,
-    "cpCount": 0
+    "owner": 2,
+    "startingGarrisonLevel": 1
   },
   {
     "name": "Colonisti",
     "gridX": 1,
     "gridY": 1,
     "owner": 1,
-    "startingGarrisonLevel": 1,
-    "cpCount": 0
+    "startingGarrisonLevel": 1
   }
 ]

@@ -1,14 +1,19 @@
 #include "../header/Settlement.h"
 
-Settlement::Settlement(const Garrison &garrison_, const std::vector<ControlPoint> &controlPoints_,
-                       std::string name_, int owner_, std::vector<int> neighbours_) : stationedGarrison(garrison_),
-    controlPoints(controlPoints_),
-    name(std::move(name_)),
-    owner(owner_), neighbours(std::move(neighbours_)) {
-}
+Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_) : stationedGarrison(garrison_),
+                                                                                    name(std::move(name_)),
+                                                                                    owner(owner_) {}
 
 void Settlement::StationArmy(const Army &army) {
     stationedArmy = army;
+}
+
+void Settlement::AddControlPoint(const ControlPoint &controlPoint) {
+    ControlPoints.push_back(controlPoint);
+}
+
+void Settlement::AddNeighbour(int neighbourIndex) {
+    neighbours.push_back(neighbourIndex);
 }
 
 void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) {
@@ -71,7 +76,7 @@ void Settlement::Besieged(const Army &attackingArmy) const {
     }
 }
 
-void Settlement::DisplaySettlement() const {
+void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) const {
     std::vector<std::vector<std::string> > tableContent;
     std::vector<std::string> tableRow;
     std::string neighboursConverted;
@@ -79,6 +84,8 @@ void Settlement::DisplaySettlement() const {
     tableContent.push_back(settlementTableHeaders);
 
     //Populating the (only) row
+    std::string indexConverted = std::to_string(indexInTheSettlementVector);
+    tableRow.push_back(indexConverted);
     tableRow.push_back(name);
     if (owner == 0) {
         tableRow.push_back("You");
@@ -91,7 +98,7 @@ void Settlement::DisplaySettlement() const {
     } else {
         tableRow.push_back("No");
     }
-    tableRow.push_back(std::to_string(controlPoints.size()));
+    tableRow.push_back(std::to_string(ControlPoints.size()));
     for (unsigned long i = 0; i < neighbours.size(); i++) {
         neighboursConverted += std::to_string(neighbours[i]) + " ";
     }

@@ -40,6 +40,9 @@ constexpr float rangedToMeleeDebuffRequiredMultiplier = 1.5;
 constexpr int rangedToMeleeDebuffFixedAddition =
         rangedToMeleeOverpowerFixedAdditionBase * rangedToMeleeOverpowerRequiredMultiplier;
 constexpr float rangedToMeleeDebuffMultiplier = 0.9f;
+constexpr float captainInitialHandicapMultiplier = 0.7f;
+constexpr float captainFirstUpgradeHandicapMultiplier = 0.8f;
+constexpr float captainSecondUpgradeHandicapMultiplier = 0.9f;
 const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
 const inline std::string balanceCheckText = "Would you like to see General types? (1/0)\n";
@@ -58,10 +61,12 @@ const inline std::string starterPreTutorial =
                 "The game will now begin. Good luck!\n\n";
 const inline std::string tutorialFirstDefenceText =
                 "Your uprising was noticed by the nearby warlord! Resist his attack and prove your worth.\n\n";
+const inline std::string tutorialFirstDefenceEndText =
+                "The warlord has crushed your dreams... You must rise again and never give up!\n\n";
 const inline std::string settlementBesiegeFailedText =
-                " was defended!\n";
+                " was defended!\n\n";
 const inline std::string settlementBesiegeSuccessText =
-                " was captured!\n";
+                " was captured!\n\n";
 const inline std::string incomingAttackText =
                 "Prepare yourself! An enemy army is approaching:\n";
 const inline std::string settlementStationedArmyText =
@@ -82,7 +87,7 @@ const inline std::vector<std::string> startingGeneralTableHeaders =
 };
 const inline std::vector<std::string> settlementTableHeaders =
 {
-    "Name", "Owned by", "Garrison OVR", "Has Army", "Control Points #", "Neighbours"
+    "Index", "Name", "Owned by", "Garrison OVR", "Has Army", "Control Points #", "Neighbours"
 };
 const inline std::vector<std::string> armyTableHeaders =
 {

@@ -48,28 +48,41 @@ void Game::PopulateGenerals(std::ifstream generalsJson) {
 }
 
 void Game::PopulateSettlements(std::ifstream settlementsJson) {
-    std::vector<ControlPoint> ControlPoints;
     nlohmann::json data = nlohmann::json::parse(settlementsJson);
-
     for (const auto &i: data) {
-        std::vector<int> neighbours;
-        //If there are control points owned by this settlement
-        for (int k = 0; k < i["cpCount"]; k++) {
-            Scout scout{i["controlPoints"][k]["scoutViewRange"]}; //We create a scout for each one of them
-            ControlPoint controlPoint{scout, i["controlPoints"][k]["name"], i["controlPoints"][k]["cost"]};
-            ControlPoints.push_back(controlPoint); //And create the control point that will be added to the settlement
-            for (int p = 0; p < i["controlPoints"][k]["connectionNumber"]; p++) {
-                //We also take into account the neighbours (written in settlements.json),
-                //memorised by their index that they would get in the Settlements std::vector.
-                neighbours.push_back(i["controlPoints"][k]["connections"][p]);
-            }
-        }
         Garrison garrison(i["startingGarrisonLevel"]); //Create the garrison according to config
-        Settlement settlement{garrison, ControlPoints, i["name"], i["owner"], neighbours};
+        Settlement settlement{garrison, i["name"], i["owner"]};
         Settlements.push_back(settlement); //Settlement is created and added to this collection
-        ControlPoints.clear(); //So that we don't have every settlement controlling every control point !!
     }
     settlementsJson.close();
+}
+
+void Game::PopulateControlPoints(std::ifstream controlPointsJson) {
+    nlohmann::json data = nlohmann::json::parse(controlPointsJson);
+    for (const auto &i: data) {
+        Scout scout{i["scoutViewRange"]};
+        ControlPoint controlPoint{scout, i["name"], i["ownedBy"]};
+
+        Settlements[i["ownedBy"]].AddControlPoint(controlPoint);
+
+        //Add the connection to both the Settlements' neighbour list
+        Settlements[i["ownedBy"]].AddNeighbour(i["connectedTo"]);
+        Settlements[i["connectedTo"]].AddNeighbour(i["ownedBy"]);
+    }
+    controlPointsJson.close();
+}
+
+void Game::PopulateCaptains(std::ifstream captainsJson) {
+    nlohmann::json data = nlohmann::json::parse(captainsJson);
+    for (const auto &i: data) {
+        Captain captain{
+            i["firstName"], i["lastName"], i["type"], i["rarity"],
+            i["melee"], i["ranged"], i["armour"],
+            i["strength"], i["accuracy"], i["dexterity"], captainInitialHandicapMultiplier
+        };
+        Captains.push_back(captain.clone());
+    }
+    captainsJson.close();
 }
 
 void Game::CheckGenerals() const {
@@ -131,19 +144,21 @@ void Game::DisplayStartingGenerals() const {
 }
 
 int Game::Start() {
-    std::ifstream generalsJson, settlementsJson;
+    std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson;
 
     generalsJson.open("generals.json");
     settlementsJson.open("settlements.json");
+    controlPointsJson.open("controlPoints.json");
+    captainsJson.open("captains.json");
 
-    if (!generalsJson || !settlementsJson) {
+    if (!generalsJson || !settlementsJson || !captainsJson || !controlPointsJson) {
         std::cerr << "File not found." << std::endl;
         return -1;
     }
     PopulateGenerals(std::move(generalsJson));
-    generalsJson.close();
     PopulateSettlements(std::move(settlementsJson));
-    settlementsJson.close();
+    PopulateControlPoints(std::move(controlPointsJson));
+    PopulateCaptains(std::move(captainsJson));
 
     if (WarlordGenerals.size() < warlordMinimumGenerals) {
         std::cout << warlordCountWarningText;
@@ -183,21 +198,17 @@ int Game::Start() {
     Settlements[0].StationArmy(starterArmy);
 
     OutputFTXUIText(starterPostChoiceText, importantGameInformationColor);
-    Settlements[0].DisplaySettlement();
+    Settlements[0].DisplaySettlement(0);
     OutputFTXUIText(starterPreTutorial, gameAnnouncementsColor);
 
 
     //EXAMPLE TO TEST COMBAT
 
     //TRYING TO GET A CAPTAIN IN AN ARMY - SUCCESS!
-    Captain captain = {"John", "Pork", 0, 1, 50, 50, 50, 50, 50, 50, 13.1f};
-    Captain enemyCaptain = {"Big, Bad", "Wolf", 0, 1, 60, 60, 60, 60, 60, 50, 0.7f};
-    std::shared_ptr<Unit> captain1 = captain.clone();
-    std::shared_ptr<Unit> captain2 = enemyCaptain.clone();
 
     Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
-    Settlements[0].AddUnitToArmy(captain1); //Captain to test if any unit can fight with any unit
-    Army warlord1Army{captain2}; //Captain to test if any unit can fight with any unit
+    Settlements[0].AddUnitToArmy(Captains[Captains.size()-2]); //Captain to test if every unit can fight with every unit
+    Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
     warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
     warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
     OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
@@ -207,6 +218,19 @@ int Game::Start() {
     warlord1Army.DisplayArmy();
     Settlements[0].Besieged(warlord1Army);
 
+    //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
+
+    for (unsigned long i = 0; i < Settlements.size() ; i++) {
+        Settlements[i].DisplaySettlement(i);
+    }
+
+    //Temporary ending to the game
+    OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
+    std::cout<<"\nThe game will end when you press enter.\n";
+    std::string temp;
+    OutputFTXUIText(enterToContinueText, userInputExpectedColor);
+    std::cin.ignore(); //Flush \n from the buffer
+    std::getline(std::cin, temp); //Wait until the player wants to continue
 
     std::cout << "\n\n\n";
     //Testarea cc si op=

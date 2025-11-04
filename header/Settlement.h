@@ -13,16 +13,22 @@ class Settlement {
 private:
     std::optional<Army> stationedArmy;
     Garrison stationedGarrison;
-    std::vector<ControlPoint> controlPoints;
+    std::vector<ControlPoint> ControlPoints;
     std::string name;
     int owner; //0 = player, others are enemies or contenders
-    std::vector<int> neighbours; //the index of neighbouring settlements (in the vector)
+    std::vector<int>neighbours; //the index of neighbouring settlements (in the vector)
 
 public:
-    Settlement(const Garrison &garrison_, const std::vector<ControlPoint> &controlPoints_, std::string name_,
-               int owner_, std::vector<int> neighbours_);
+    Settlement(const Garrison &garrison_, std::string name_, int owner_);
 
     void StationArmy(const Army &army);
+
+    //Because the settlements are added before the control points by the new logic.
+    void AddControlPoint(const ControlPoint &controlPoint);
+
+    //This allows me to know how everything is connected to what
+    void AddNeighbour(int neighbourIndex);
+
 
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
     void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
@@ -46,7 +52,7 @@ public:
         stationedArmy = std::nullopt;
     }*/
 
-    void DisplaySettlement() const;
+    void DisplaySettlement(unsigned long indexInTheSettlementVector) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;
@@ -56,7 +62,7 @@ public:
         }
         os << settlement.stationedGarrison;
         os << "List of attached control points:\n";
-        for (const auto &i: settlement.controlPoints) {
+        for (const auto &i: settlement.ControlPoints) {
             os << k << ".\n" << i << "\n";
             k++;
         }

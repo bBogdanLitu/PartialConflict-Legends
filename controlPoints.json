@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Pod",
+    "ownedBy": 0,
+    "connectedTo": 1,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Biserica",
+    "ownedBy": 1,
+    "connectedTo": 2,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Gara",
+    "ownedBy": 1,
+    "connectedTo": 3,
+    "cost": 1,
+    "scoutViewRange": 1
+  }
+]
