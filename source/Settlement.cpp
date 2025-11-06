@@ -1,9 +1,9 @@
 #include "../header/Settlement.h"
 
-Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_) : stationedGarrison(garrison_),
+Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_, long int income_) : stationedGarrison(garrison_),
     name(std::move(name_)),
-    owner(owner_) {
-}
+    owner(owner_),
+    income(income_) {}
 
 void Settlement::StationArmy(const Army &army) {
     stationedArmy = army;
@@ -19,6 +19,14 @@ void Settlement::AddNeighbour(int neighbourIndex) {
 
 void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) {
     stationedArmy.value().AddUnit(unit);
+}
+
+int Settlement::getOwner() const {
+    return owner;
+}
+
+long int Settlement::getIncome() const {
+    return income;
 }
 
 void Settlement::Besieged(const Army &attackingArmy) const {

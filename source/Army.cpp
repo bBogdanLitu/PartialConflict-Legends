@@ -122,6 +122,18 @@ int Army::getTotalOverallPower() const { return totalOverallPower; }
 
 unsigned long Army::getUnitCount() const { return assignedUnits.size(); }
 
+int Army::useActionPoint() {
+    if (currentActionPoints > 0) {
+        currentActionPoints--;
+        return 1; //Action point depleted successfully
+    }
+    return -1; //Action points already depleted
+}
+
+void Army::resetActionPoints() {
+    currentActionPoints = defaultActionPoints;
+}
+
 //const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
 
 const std::vector<std::shared_ptr<Unit> > &Army::getAssignedUnits() const { return assignedUnits; }

@@ -9,6 +9,9 @@
 #include "../header/Settlement.h"
 #include "../header/Functions.h"
 #include "../header/Captain.h"
+#include "ftxui/component/component.hpp"
+#include "ftxui/component/component_options.hpp"
+#include "ftxui/component/screen_interactive.hpp"
 
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
@@ -51,7 +54,7 @@ void Game::PopulateSettlements(std::ifstream settlementsJson) {
     nlohmann::json data = nlohmann::json::parse(settlementsJson);
     for (const auto &i: data) {
         Garrison garrison(i["startingGarrisonLevel"]); //Create the garrison according to config
-        Settlement settlement{garrison, i["name"], i["owner"]};
+        Settlement settlement{garrison, i["name"], i["owner"], i["income"]};
         Settlements.push_back(settlement); //Settlement is created and added to this collection
     }
     settlementsJson.close();
@@ -143,6 +146,38 @@ void Game::DisplayStartingGenerals() const {
     std::cout << std::endl;
 }
 
+void Game::ResetArmiesActionPoints() const {
+    for (const auto &i: Settlements) {
+        //If the settlement is owned by the player and it has an army
+        if (i.getOwner() == 0 && i.getStationedArmy() != std::nullopt) {
+            //We reset that army's action points to the default value
+            i.getStationedArmy()->resetActionPoints();
+        }
+    }
+}
+
+void Game::CollectIncomeFromSettlements() {
+    for (const auto &i: Settlements) {
+        //If the settlement is owned by the player
+        if (i.getOwner() == 0) {
+            //We add that income (or subtract if it's negative, duh) to the total balance of the player
+            sarmale += i.getIncome();
+        }
+    }
+}
+
+//FOR LATER
+//It is too much of a headache to try to implement this when I don't even properly populate every Warlord army :)
+/*void Game::TickAttackCountdown() {
+}*/
+
+void Game::NextTurn() {
+    currentTurn++;
+    ResetArmiesActionPoints();
+    CollectIncomeFromSettlements();
+    //TickAttackCountdown();
+}
+
 int Game::Start() {
     std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson;
 
@@ -168,6 +203,135 @@ int Game::Start() {
         std::cout << emperorCountWarningText;
         return -1;
     }
+
+    //TEMPORARILY UNDER CONSTRUCTION
+
+    //NEW STUFF FOR PLAYING THE GAME
+
+    //Initial welcome screen and prompts to check stuff or start the game
+    OutputFTXUIText(welcomeText, gameAnnouncementsColor);
+    OutputFTXUIText(balanceCheckText, userInputExpectedColor);
+    std::cin >> ans1;
+    sanitizeInputMore(ans1);
+    if (ans1 > 1) {
+        ans1 = 0;
+    } else if (ans1 == 1) {
+        std::string temp;
+        CheckGenerals();
+        OutputFTXUIText(enterToContinueText, userInputExpectedColor);
+        std::cin.ignore(); //Flush \n from the buffer
+        std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
+    }
+    std::cout << "\n\n\n";
+
+    //The loop that displays and makes the game work
+    using namespace ftxui;
+
+    auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
+
+    //FUNCTIONS AND STYLES
+    auto onNextTurnButtonClick = [&] {
+        NextTurn();
+    };
+
+    auto onExitButtonClick = [&] {
+        screen.Exit();
+    };
+
+    auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+                                               Color::Default, Color::White);
+
+    auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
+                                            Color::Default, Color::Red);
+
+
+    //ACTUAL STUFF TO BE RENDERED
+
+    /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
+    *  The bigger container that is gameContainer HAS to have all I want to be in it AS CHILDREN.
+    *  The stuff I do in renderer is just for choosing how to properly display what I want to.
+    *  If the things I want to display are not children of the component written in Renderer(..., lambda function),
+    *  then I am only able to display their "skeletons", because the functionality will not be there.
+    *
+    *  VERY IMPORTANT:
+    *  If a container has elements (e.g. text, paragraph), not components (e.g. buttons) in it, then it is inherently NOT SCROLLABLE!
+    *  This can be fixed by appending (with '|') a focusPositionRelative to the container,
+    *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
+    */
+
+
+    //container with the buttons I want to use
+    auto gameStateButtonsContainer = Container::Horizontal({});
+
+    auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
+    gameStateButtonsContainer->Add(nextTurnButton);
+
+    auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
+    gameStateButtonsContainer->Add(exitButton);
+
+    //container where all the feedback is - made scrollable using | focusPositionRelative
+    auto gameFlowContainer = Container::Vertical({});
+
+    std::string msg;
+    auto a = paragraph("aaaaaaaaaaaa");
+    gameFlowContainer->Add(Renderer([a] { return a; }));
+    for (int i = 0; i < 1000; i++) {
+        std::string b;
+        gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
+    }
+
+    //to scroll text because it is insanely hard apparently
+    float focus_y = 0.5f;
+    float step = 0.01f;
+    float upperLimit = 1.f;
+    float lowerLimit = 0.f;
+
+    //container to have all things related to game display in it
+    auto gameContainer = Container::Horizontal({});
+    gameContainer->Add(gameFlowContainer);
+    gameContainer->Add(gameStateButtonsContainer);
+
+    //Render the components
+    auto renderer = Renderer(gameContainer, [&] {
+           return vbox({
+                    hbox({
+                        text("Current turn: "),
+                        text(std::to_string(currentTurn)),
+                    }),
+                    separator(),
+                    gameFlowContainer->Render()
+                        | focusPositionRelative(0.f, focus_y) //make it scrollable only on the y-axis
+                        | vscroll_indicator //to indicate where we are
+                        | frame //allows for a component to overflow with content (which is later made scrollable)
+                        | size(HEIGHT, LESS_THAN, Terminal::Size().dimy / 100.0f * 80),
+                    separator(),
+                    gameStateButtonsContainer->Render()
+                        | frame
+                        |size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 5),
+                    })
+                    | size(WIDTH, EQUAL, Terminal::Size().dimx);
+
+    });
+
+    //Because I define my own scrolling logic, I have to add an Event Catcher to the renderer
+    renderer |= CatchEvent([&](Event event) {
+    if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
+                             event.mouse().button == Mouse::WheelDown)) {
+        //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
+      if (event.mouse().button == Mouse::WheelDown) {
+        focus_y = std::min(upperLimit, focus_y + step); //Go up
+      } else {
+        focus_y = std::max(lowerLimit, focus_y - step); //Go down
+      }
+      return true;
+    }
+    return false;
+  });
+
+    //Display what we render
+    screen.Loop(renderer);
+
+    //To get the BIFE
     //Actual start of the game after all checks
     OutputFTXUIText(welcomeText, gameAnnouncementsColor);
     OutputFTXUIText(balanceCheckText, userInputExpectedColor);
@@ -232,6 +396,7 @@ int Game::Start() {
     OutputFTXUIText(enterToContinueText, userInputExpectedColor);
     std::cin.ignore(); //Flush \n from the buffer
     std::getline(std::cin, temp); //Wait until the player wants to continue
+
 
     std::cout << "\n\n\n";
     //Testarea cc si op=

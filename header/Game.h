@@ -10,6 +10,8 @@ private:
             EmperorGenerals, Captains;
     std::vector<Settlement> Settlements;
     unsigned int ans1 = 0, ans2 = 0;
+    unsigned long currentTurn = 0;
+    long int sarmale = 0; //this is the 'gold' of my game
 
     void PopulateGenerals(std::ifstream generalsJson);
 
@@ -22,6 +24,16 @@ private:
     void CheckGenerals() const;
 
     void DisplayStartingGenerals() const;
+
+    void ResetArmiesActionPoints() const;
+
+    void CollectIncomeFromSettlements();
+
+    void TickAttackCountdown();
+
+    void NextTurn();
+
+
 
 public:
     int Start();

@@ -4,6 +4,7 @@
     "gridX": 0,
     "gridY": 0,
     "owner": 0,
+    "income": 2,
     "startingGarrisonLevel": 1
   },
   {
@@ -11,6 +12,7 @@
     "gridX": 0,
     "gridY": 1,
     "owner": 1,
+    "income": -1,
     "startingGarrisonLevel": 0
   },
   {
@@ -18,6 +20,7 @@
     "gridX": 0,
     "gridY": 2,
     "owner": 2,
+    "income": 1,
     "startingGarrisonLevel": 1
   },
   {
@@ -25,6 +28,7 @@
     "gridX": 1,
     "gridY": 1,
     "owner": 1,
+    "income": -1,
     "startingGarrisonLevel": 1
   }
 ]

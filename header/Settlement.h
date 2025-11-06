@@ -16,10 +16,11 @@ private:
     std::vector<ControlPoint> ControlPoints;
     std::string name;
     int owner; //0 = player, others are enemies or contenders
+    long int income;
     std::vector<int> neighbours; //the index of neighbouring settlements (in the vector)
 
 public:
-    Settlement(const Garrison &garrison_, std::string name_, int owner_);
+    Settlement(const Garrison &garrison_, std::string name_, int owner_, long int income_);
 
     void StationArmy(const Army &army);
 
@@ -35,12 +36,16 @@ public:
 
     void Besieged(const Army &attackingArmy) const;
 
-    /*[[nodiscard]] std::optional<Army> getStationedArmy() const {
+    [[nodiscard]] int getOwner() const;
+
+    [[nodiscard]] long int getIncome() const;
+
+    [[nodiscard]] std::optional<Army> getStationedArmy() const {
         if (stationedArmy.has_value()) {
             return stationedArmy.value();
         }
         return std::nullopt;
-    }*/
+    }
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
         controlPoints[index].StationArmy(army);
