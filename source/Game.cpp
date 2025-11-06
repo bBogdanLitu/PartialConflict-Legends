@@ -227,6 +227,7 @@ int Game::Start() {
     //The loop that displays and makes the game work
     using namespace ftxui;
 
+
     auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
     //FUNCTIONS AND STYLES
@@ -243,8 +244,6 @@ int Game::Start() {
 
     auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
                                             Color::Default, Color::Red);
-
-
     //ACTUAL STUFF TO BE RENDERED
 
     /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
@@ -273,7 +272,7 @@ int Game::Start() {
     auto gameFlowContainer = Container::Vertical({});
     auto a = paragraph("aaaaaaaaaaaa");
     gameFlowContainer->Add(Renderer([a] { return a; }));
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 400; i++) {
         std::string b;
         gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
     }
@@ -310,11 +309,17 @@ int Game::Start() {
                | size(WIDTH, EQUAL, Terminal::Size().dimx);
     });
 
+    //Solutie temporara pentru iesire din program (comment in romana rare occurrence)
+    std::thread auto_close([&] {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        screen.Exit();
+    });
+
     //Because I define my own scrolling logic, I have to add an Event Catcher to the renderer
     renderer |= CatchEvent([&](Event event) {
         if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
                                  event.mouse().button == Mouse::WheelDown)) {
-            //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
+            //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSE
             if (event.mouse().button == Mouse::WheelDown) {
                 focus_y = std::min(upperLimit, focus_y + step); //Go up
             } else {
@@ -324,20 +329,8 @@ int Game::Start() {
         }
         return false;
     });
-
-    //Because we are running smoke tests that get stuck here
-    //Handle the 'q' key to exit
-    renderer |= CatchEvent([&](Event event) {
-        if (event == Event::Character('q')) {
-            screen.Exit();
-            return true;
-        }
-        return false;
-    });
-
     //Display what we render
     screen.Loop(renderer);
-
     //To get the BIFE
     //Actual start of the game after all checks
     OutputFTXUIText(welcomeText, gameAnnouncementsColor);
