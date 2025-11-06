@@ -33,8 +33,6 @@ private:
 
     void NextTurn();
 
-
-
 public:
     int Start();
 };
