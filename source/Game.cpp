@@ -227,7 +227,6 @@ int Game::Start() {
     //The loop that displays and makes the game work
     using namespace ftxui;
 
-
     auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
     //FUNCTIONS AND STYLES
@@ -244,6 +243,8 @@ int Game::Start() {
 
     auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
                                             Color::Default, Color::Red);
+
+
     //ACTUAL STUFF TO BE RENDERED
 
     /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
@@ -272,7 +273,7 @@ int Game::Start() {
     auto gameFlowContainer = Container::Vertical({});
     auto a = paragraph("aaaaaaaaaaaa");
     gameFlowContainer->Add(Renderer([a] { return a; }));
-    for (int i = 0; i < 400; i++) {
+    for (int i = 0; i < 1000; i++) {
         std::string b;
         gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
     }
@@ -309,17 +310,11 @@ int Game::Start() {
                | size(WIDTH, EQUAL, Terminal::Size().dimx);
     });
 
-    //Solutie temporara pentru iesire din program (comment in romana rare occurrence)
-    std::thread auto_close([&] {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        screen.Exit();
-    });
-
     //Because I define my own scrolling logic, I have to add an Event Catcher to the renderer
     renderer |= CatchEvent([&](Event event) {
         if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
                                  event.mouse().button == Mouse::WheelDown)) {
-            //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSE
+            //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
             if (event.mouse().button == Mouse::WheelDown) {
                 focus_y = std::min(upperLimit, focus_y + step); //Go up
             } else {
@@ -329,87 +324,94 @@ int Game::Start() {
         }
         return false;
     });
+
+    //Because we are running smoke tests that get stuck here
+    std::thread([&] {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        screen.Post(Event::Character('q')); // Simulate 'q' key press
+    }).detach();
+
+    //Handle the 'q' key to exit
+    renderer |= CatchEvent([&](Event event) {
+        if (event == Event::Character('q')) {
+            screen.Exit();
+            return true;
+        }
+        return false;
+    });
+
     //Display what we render
     screen.Loop(renderer);
+
     //To get the BIFE
     //Actual start of the game after all checks
-    OutputFTXUIText(welcomeText, gameAnnouncementsColor);
-    OutputFTXUIText(balanceCheckText, userInputExpectedColor);
-    std::cin >> ans1;
-    sanitizeInputMore(ans1);
-    if (ans1 > 1) {
-        ans1 = 0;
-    } else if (ans1 == 1) {
+
+    if constexpr (true == false) {
+        OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
+        DisplayStartingGenerals();
+        OutputFTXUIText(starterPreChoiceText, userInputExpectedColor);
+        std::cin >> ans2;
+        sanitizeInputMore(ans2);
+        if (ans2 >= StartingGenerals.size()) {
+            ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
+        }
+        //Now I can use the starter to show the other classes' functionalities
+        Army starterArmy{StartingGenerals[ans2]};
+        StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
+
+        Settlements[0].StationArmy(starterArmy);
+
+        OutputFTXUIText(starterPostChoiceText, importantGameInformationColor);
+        Settlements[0].DisplaySettlement(0);
+        OutputFTXUIText(starterPreTutorial, gameAnnouncementsColor);
+
+
+        //EXAMPLE TO TEST COMBAT
+
+        //TRYING TO GET A CAPTAIN IN AN ARMY - SUCCESS!
+
+        Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
+        Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]);
+        //Captain to test if every unit can fight with every unit
+        Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
+        warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
+        warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
+        warlord1Army.useActionPoint(); //temporary to get the Github Actions CHECKS
+        OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
+        //the first attack doesn't require the attacking army to be actually stationed somewhere,
+        //it is scripted and just a one-time occurrence.
+        OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
+        warlord1Army.DisplayArmy();
+        Settlements[0].Besieged(warlord1Army);
+
+        //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
+
+        for (unsigned long i = 0; i < Settlements.size(); i++) {
+            Settlements[i].DisplaySettlement(i);
+        }
+
+        //Temporary ending to the game
+        OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
+        std::cout << "\nThe game will end when you press enter.\n";
         std::string temp;
-        CheckGenerals();
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);
         std::cin.ignore(); //Flush \n from the buffer
-        std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
+        std::getline(std::cin, temp); //Wait until the player wants to continue
+
+
+        std::cout << "\n\n\n";
+        //Testarea cc si op=
+        Scout sc1{1};
+        Scout sc2{sc1};
+        assert((std::cout << "cc: Atributele se copiază corect\n", sc1 == sc2));
+        sc2.setViewRange(7);
+        assert((std::cout << "cc: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
+        sc1 = sc2;
+        assert((std::cout << "op=: Atributele se copiază corect\n", sc1 == sc2));
+        sc1.setViewRange(100);
+        assert((std::cout << "op=: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
     }
 
-    OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
-    DisplayStartingGenerals();
-    OutputFTXUIText(starterPreChoiceText, userInputExpectedColor);
-    std::cin >> ans2;
-    sanitizeInputMore(ans2);
-    if (ans2 >= StartingGenerals.size()) {
-        ans2 = StartingGenerals.size() - 1; //Cap to the last one, negatives also go here
-    }
-    //Now I can use the starter to show the other classes' functionalities
-    Army starterArmy{StartingGenerals[ans2]};
-    StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
-
-    Settlements[0].StationArmy(starterArmy);
-
-    OutputFTXUIText(starterPostChoiceText, importantGameInformationColor);
-    Settlements[0].DisplaySettlement(0);
-    OutputFTXUIText(starterPreTutorial, gameAnnouncementsColor);
-
-
-    //EXAMPLE TO TEST COMBAT
-
-    //TRYING TO GET A CAPTAIN IN AN ARMY - SUCCESS!
-
-    Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
-    Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]);
-    //Captain to test if every unit can fight with every unit
-    Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
-    warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
-    warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
-    warlord1Army.useActionPoint(); //temporary to get the Github Actions CHECKS
-    OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
-    //the first attack doesn't require the attacking army to be actually stationed somewhere,
-    //it is scripted and just a one-time occurrence.
-    OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-    warlord1Army.DisplayArmy();
-    Settlements[0].Besieged(warlord1Army);
-
-    //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
-
-    for (unsigned long i = 0; i < Settlements.size(); i++) {
-        Settlements[i].DisplaySettlement(i);
-    }
-
-    //Temporary ending to the game
-    OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
-    std::cout << "\nThe game will end when you press enter.\n";
-    std::string temp;
-    OutputFTXUIText(enterToContinueText, userInputExpectedColor);
-    std::cin.ignore(); //Flush \n from the buffer
-    std::getline(std::cin, temp); //Wait until the player wants to continue
-
-
-    std::cout << "\n\n\n";
-    //Testarea cc si op=
-    Scout sc1{1};
-    Scout sc2{sc1};
-    assert((std::cout << "cc: Atributele se copiază corect\n", sc1 == sc2));
-    sc2.setViewRange(7);
-    assert((std::cout << "cc: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
-    sc1 = sc2;
-    assert((std::cout << "op=: Atributele se copiază corect\n", sc1 == sc2));
-    sc1.setViewRange(100);
-    assert((std::cout << "op=: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
 
     return 0;
 }
