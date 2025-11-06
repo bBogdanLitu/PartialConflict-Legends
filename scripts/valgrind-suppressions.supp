@@ -1,8 +1,16 @@
 {
-   ioctl_TCSET_uninit_general
+   <ftxui_tcsetattr1>
    Memcheck:Param
-   ioctl(TCSET*)
+   ioctl(TCSET{S,SW,SF})
    fun:tcsetattr
    ...
-   obj:*/libftxui*
+   fun:main
+}
+{
+   <ftxui_tcsetattr2>
+   Memcheck:Param
+   ioctl(TCSET{S,SW,SF})
+   fun:tcsetattr
+   ...
+   fun:Game::Start()
 }
