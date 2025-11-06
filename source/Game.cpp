@@ -326,12 +326,7 @@ int Game::Start() {
     });
 
     //Because we are running smoke tests that get stuck here
-    std::thread([&] {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        screen.Post(Event::Character('q')); // Simulate 'q' key press
-    }).detach();
-
-    // Handle the 'q' key to exit
+    //Handle the 'q' key to exit
     renderer |= CatchEvent([&](Event event) {
         if (event == Event::Character('q')) {
             screen.Exit();
