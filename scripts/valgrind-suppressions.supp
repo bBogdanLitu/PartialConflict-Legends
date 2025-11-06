@@ -1,16 +1,26 @@
 {
-   <ftxui_tcsetattr1>
+   ftxui_tcsetattr1
    Memcheck:Param
-   ioctl(TCSET{S,SW,SF})
+   ioctl(TCSETSF)
    fun:tcsetattr
    ...
    fun:main
 }
+
 {
-   <ftxui_tcsetattr2>
+   ftxui_tcsetattr2
    Memcheck:Param
-   ioctl(TCSET{S,SW,SF})
+   ioctl(TCSETS)
    fun:tcsetattr
    ...
-   fun:Game::Start()
+   fun:main
+}
+
+{
+   ftxui_tcsetattr3
+   Memcheck:Param
+   ioctl(TCSETSW)
+   fun:tcsetattr
+   ...
+   fun:main
 }
