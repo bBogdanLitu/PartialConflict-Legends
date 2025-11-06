@@ -1,25 +1,7 @@
 {
-   ftxui_tcsetattr1
+   <ftxui_tcsetattr>
    Memcheck:Param
-   ioctl(TCSETSF)
-   fun:tcsetattr
-   ...
-   fun:main
-}
-
-{
-   ftxui_tcsetattr2
-   Memcheck:Param
-   ioctl(TCSETS)
-   fun:tcsetattr
-   ...
-   fun:main
-}
-
-{
-   ftxui_tcsetattr3
-   Memcheck:Param
-   ioctl(TCSETSW)
+   ioctl(TCSET{S,SW,SF})
    fun:tcsetattr
    ...
    fun:main
