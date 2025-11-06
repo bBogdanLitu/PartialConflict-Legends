@@ -4,7 +4,5 @@
    ioctl(TCSET{S,SW,SF})
    fun:tcsetattr
    ...
-   fun:Game::Start()
-   ...
    fun:main
 }
