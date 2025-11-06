@@ -331,7 +331,7 @@ int Game::Start() {
         screen.Post(Event::Character('q')); // Simulate 'q' key press
     }).detach();
 
-    // Handle the 'q' key to exit
+    //Handle the 'q' key to exit
     renderer |= CatchEvent([&](Event event) {
         if (event == Event::Character('q')) {
             screen.Exit();
@@ -345,20 +345,6 @@ int Game::Start() {
 
     //To get the BIFE
     //Actual start of the game after all checks
-    OutputFTXUIText(welcomeText, gameAnnouncementsColor);
-    OutputFTXUIText(balanceCheckText, userInputExpectedColor);
-    std::cin >> ans1;
-    sanitizeInputMore(ans1);
-    if (ans1 > 1) {
-        ans1 = 0;
-    } else if (ans1 == 1) {
-        std::string temp;
-        CheckGenerals();
-        OutputFTXUIText(enterToContinueText, userInputExpectedColor);
-        std::cin.ignore(); //Flush \n from the buffer
-        std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
-    }
-
     OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
     DisplayStartingGenerals();
     OutputFTXUIText(starterPreChoiceText, userInputExpectedColor);
