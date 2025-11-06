@@ -1,8 +1,24 @@
 {
-   <ftxui_tcsetattr>
+   ftxui_tcsetattr_uninit
    Memcheck:Param
-   ioctl(TCSET{S,SW,SF})
+   ioctl(TCSETS)
    fun:tcsetattr
-   ...
-   fun:main
+   fun:_ZN5ftxui18ScreenInteractive7InstallEv
+   obj:*vgpreload_memcheck-amd64-linux.so
+}
+{
+   ftxui_tcsetattr_uninit_sw
+   Memcheck:Param
+   ioctl(TCSETSW)
+   fun:tcsetattr
+   fun:_ZN5ftxui18ScreenInteractive7InstallEv
+   obj:*vgpreload_memcheck-amd64-linux.so
+}
+{
+   ftxui_tcsetattr_uninit_sf
+   Memcheck:Param
+   ioctl(TCSETSF)
+   fun:tcsetattr
+   fun:_ZN5ftxui18ScreenInteractive7InstallEv
+   obj:*vgpreload_memcheck-amd64-linux.so
 }
