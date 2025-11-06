@@ -9,9 +9,9 @@
 #include "../header/Settlement.h"
 #include "../header/Functions.h"
 #include "../header/Captain.h"
-#include "ftxui/component/component.hpp"
-#include "ftxui/component/component_options.hpp"
-#include "ftxui/component/screen_interactive.hpp"
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_options.hpp>
+#include <ftxui/component/screen_interactive.hpp>
 
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
