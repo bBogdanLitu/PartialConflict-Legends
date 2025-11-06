@@ -110,14 +110,14 @@ jobs:
       matrix:
         include:
           #- os: ubuntu-22.04
-          #  c: clang-18
-          #  cxx: clang++-18
-          #  clang_ver: "18"
-          #  clang_ver_full: "18.1.8"
-          #  name: "MSan: Ubuntu 22.04 Clang 18"
-          #  cmake_flags: "-DUSE_MSAN=ON"
-          #  cmake_generator: Ninja
-          #  runs_msan: true
+          #c: clang-18
+          #cxx: clang++-18
+          #clang_ver: "18"
+          #clang_ver_full: "18.1.8"
+          #name: "MSan: Ubuntu 22.04 Clang 18"
+          #cmake_flags: "-DUSE_MSAN=ON"
+          #cmake_generator: Ninja
+          #runs_msan: true
 
             # renovate: depName=ubuntu
           - os: ubuntu-22.04
