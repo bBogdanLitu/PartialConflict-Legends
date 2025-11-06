@@ -271,8 +271,6 @@ int Game::Start() {
 
     //container where all the feedback is - made scrollable using | focusPositionRelative
     auto gameFlowContainer = Container::Vertical({});
-
-    std::string msg;
     auto a = paragraph("aaaaaaaaaaaa");
     gameFlowContainer->Add(Renderer([a] { return a; }));
     for (int i = 0; i < 1000; i++) {
@@ -329,17 +327,17 @@ int Game::Start() {
 
     //Because we are running smoke tests that get stuck here
     std::thread([&] {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    screen.Post(Event::Character('q')); // Simulate 'q' key press
-  }).detach();
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        screen.Post(Event::Character('q')); // Simulate 'q' key press
+    }).detach();
 
     // Handle the 'q' key to exit
     renderer |= CatchEvent([&](Event event) {
-      if (event == Event::Character('q')) {
-        screen.Exit();
-        return true;
-      }
-      return false;
+        if (event == Event::Character('q')) {
+            screen.Exit();
+            return true;
+        }
+        return false;
     });
 
     //Display what we render
