@@ -20,6 +20,7 @@ run_valgrind() {
              --track-origins=yes \
              --error-exitcode=1 \
              --suppressions=./scripts/valgrind-suppressions.supp \
+             --gen-suppressions=all \
              ./"${BIN_DIR}"/"${EXECUTABLE_NAME}"
 }
 
