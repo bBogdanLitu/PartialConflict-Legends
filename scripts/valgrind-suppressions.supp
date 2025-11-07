@@ -11,15 +11,6 @@
    Memcheck:Param
    ioctl(TCSET{S,SW,SF})
    fun:tcsetattr
-   fun:_ZZN5ftxui17ScreenInteractive7InstallEvENKUlvE2_clEv
-   fun:_ZSt13__invoke_implIvRZN5ftxui17ScreenInteractive7InstallEvEUlvE2_JEET_St14__invoke_otherOT0_DpOT1_
-   fun:_ZSt10__invoke_rIvRZN5ftxui17ScreenInteractive7InstallEvEUlvE2_JEENSt9enable_ifIX16is_invocable_r_vIT_T0_DpT1_EES5_E4typeEOS6_DpOS7_
-   fun:_ZNSt17_Function_handlerIFvvEZN5ftxui17ScreenInteractive7InstallEvEUlvE2_E9_M_invokeERKSt9_Any_data
-   fun:_ZNKSt8functionIFvvEEclEv
-   fun:_ZN5ftxui12_GLOBAL__N_16OnExitEv
-   fun:_ZN5ftxui17ScreenInteractive9UninstallEv
-   fun:_ZN5ftxui17ScreenInteractive8PostMainEv
-   fun:_ZN5ftxui4LoopD1Ev
-   fun:_ZN5ftxui17ScreenInteractive4LoopESt10shared_ptrINS_13ComponentBaseEE
+   ...
    fun:_ZN4Game5StartEv
 }
