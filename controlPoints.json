@@ -1,23 +1,107 @@
 [
   {
-    "name": "Pod",
+    "name": "Bridge",
     "ownedBy": 0,
     "connectedTo": 1,
     "cost": 1,
     "scoutViewRange": 1
   },
   {
-    "name": "Biserica",
+    "name": "Church",
     "ownedBy": 1,
     "connectedTo": 2,
     "cost": 1,
     "scoutViewRange": 1
   },
   {
-    "name": "Gara",
+    "name": "Railway Station",
     "ownedBy": 1,
     "connectedTo": 3,
     "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Portal",
+    "ownedBy": 3,
+    "connectedTo": 4,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Port",
+    "ownedBy": 4,
+    "connectedTo": 5,
+    "cost": 2,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Airport",
+    "ownedBy": 4,
+    "connectedTo": 6,
+    "cost": 2,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Mountain",
+    "ownedBy": 5,
+    "connectedTo": 7,
+    "cost": 2,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "War Zone",
+    "ownedBy": 6,
+    "connectedTo": 9,
+    "cost": 3,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Highway",
+    "ownedBy": 7,
+    "connectedTo": 10,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Heaven's Gates",
+    "ownedBy": 9,
+    "connectedTo": 8,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Baguettefromage",
+    "ownedBy": 9,
+    "connectedTo": 11,
+    "cost": 1,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Downgrade-inator",
+    "ownedBy": 10,
+    "connectedTo": 12,
+    "cost": 2,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Make-life-shitter-somehow-inator",
+    "ownedBy": 11,
+    "connectedTo": 14,
+    "cost": 3,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Molotov-Ribbentrop",
+    "ownedBy": 12,
+    "connectedTo": 13,
+    "cost": 2,
+    "scoutViewRange": 1
+  },
+  {
+    "name": "Whatever",
+    "ownedBy": 13,
+    "connectedTo": 14,
+    "cost": 3,
     "scoutViewRange": 1
   }
 ]

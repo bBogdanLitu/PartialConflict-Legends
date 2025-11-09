@@ -30,5 +30,93 @@
     "owner": 1,
     "income": -1,
     "startingGarrisonLevel": 1
+  },
+  {
+    "name": "Pireu",
+    "gridX": 2,
+    "gridY": 1,
+    "owner": 2,
+    "income": 1,
+    "startingGarrisonLevel": 1
+  },
+  {
+    "name": "Roma",
+    "gridX": 3,
+    "gridY": 0,
+    "owner": 2,
+    "income": 2,
+    "startingGarrisonLevel": 1
+  },
+  {
+    "name": "Detroit",
+    "gridX": 2,
+    "gridY": 2,
+    "owner": 3,
+    "income": -3,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Wolfsburg",
+    "gridX": 3,
+    "gridY": 0,
+    "owner": 3,
+    "income": 1,
+    "startingGarrisonLevel": 1
+  },
+  {
+    "name": "O'Block",
+    "gridX": 3,
+    "gridY": 1,
+    "owner": 4,
+    "income": -99,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Chicago",
+    "gridX": 3,
+    "gridY": 2,
+    "owner": 3,
+    "income": 5,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Vienna",
+    "gridX": 4,
+    "gridY": 0,
+    "owner": 5,
+    "income": 10,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Toulouse",
+    "gridX": 4,
+    "gridY": 2,
+    "owner": 3,
+    "income": 5,
+    "startingGarrisonLevel": 2
+  },
+  {
+    "name": "Frankfurt",
+    "gridX": 6,
+    "gridY": 0,
+    "owner": 5,
+    "income": 4,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Moscow",
+    "gridX": 6,
+    "gridY": 1,
+    "owner": 5,
+    "income": 14,
+    "startingGarrisonLevel": 3
+  },
+  {
+    "name": "Birmingham",
+    "gridX": 6,
+    "gridY": 3,
+    "owner": 5,
+    "income": -10,
+    "startingGarrisonLevel": 3
   }
 ]

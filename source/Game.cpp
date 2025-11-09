@@ -236,14 +236,7 @@ int Game::Start() {
 
         auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
-        //FUNCTIONS AND STYLES
-        auto onNextTurnButtonClick = [&] {
-            NextTurn();
-        };
-
-        auto onExitButtonClick = [&] {
-            screen.Exit();
-        };
+        //STYLES
 
         auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                     Color::Default, Color::White);
@@ -266,16 +259,6 @@ int Game::Start() {
         *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
         */
 
-
-        //container with the buttons I want to use
-        auto gameStateButtonsContainer = Container::Horizontal({});
-
-        auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
-        gameStateButtonsContainer->Add(nextTurnButton);
-
-        auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
-        gameStateButtonsContainer->Add(exitButton);
-
         //container where all the feedback is - made scrollable using | focusPositionRelative
         auto gameFlowContainer = Container::Vertical({});
         auto a = paragraph("aaaaaaaaaaaa");
@@ -290,6 +273,29 @@ int Game::Start() {
         float step = 0.01f;
         float upperLimit = 1.f;
         float lowerLimit = 0.f;
+
+        //container with the buttons I want to use
+
+        auto onNextTurnButtonClick = [&] {
+            NextTurn();
+            gameFlowContainer->Add(Renderer([&] {
+                return paragraph("nextTurnPressed") | bold | color(Color::BlueViolet);
+            }));
+        };
+
+        auto onExitButtonClick = [&] {
+            screen.Exit();
+        };
+
+        auto gameStateButtonsContainer = Container::Horizontal({});
+
+        auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
+        gameStateButtonsContainer->Add(nextTurnButton);
+
+        auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
+        gameStateButtonsContainer->Add(exitButton);
+
+
 
         //container to have all things related to game display in it
         auto gameContainer = Container::Horizontal({});
@@ -372,11 +378,6 @@ int Game::Start() {
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
         warlord1Army.DisplayArmy();
         Settlements[0].Besieged(warlord1Army);
-
-
-        //will it crapa? - yes
-        int *a = new int;
-        a[1] = 2;
 
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
 
