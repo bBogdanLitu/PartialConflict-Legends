@@ -334,8 +334,7 @@ int Game::Start() {
 
         //Display what we render
         screen.Loop(renderer);
-    }
-    else {
+    } else {
         //Normal branch
         OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
         DisplayStartingGenerals();

@@ -47,7 +47,8 @@ const inline std::string welcomeText =
         "Welcome to Partial Conflict: Legends!\nThe game will commence after a few initial choices\n";
 const inline std::string balanceCheckText = "Would you like to see General types? (1/0)\n";
 const inline std::string enterToContinueText = "\nHit ENTER when you want to continue!\n";
-const inline std::string ftxuiConfirmationText = "\nDo you want to use an interactive console through FTXUI? (1 - recommended / 0 - not recommended)\n";
+const inline std::string ftxuiConfirmationText =
+        "\nDo you want to use an interactive console through FTXUI? (1 - recommended / 0 - not recommended)\n";
 const inline std::string warlordCountWarningText =
         "Your generals.json doesn't meet the expectations: 66 Generals for Warlords (type 3)";
 const inline std::string emperorCountWarningText =
