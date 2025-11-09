@@ -224,129 +224,119 @@ int Game::Start() {
     }
     std::cout << "\n\n\n";
 
-    //The loop that displays and makes the game work
-    using namespace ftxui;
+    OutputFTXUIText(ftxuiConfirmationText, userInputExpectedColor);
+    std::cin >> ans1;
+    sanitizeInputMore(ans1);
+    if (ans1 > 1) {
+        ans1 = 1;
+    } else if (ans1 == 1) {
+        //FTXUI branch
+        //The loop that displays and makes the game work
+        using namespace ftxui;
 
-    auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
+        auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
-    //FUNCTIONS AND STYLES
-    auto onNextTurnButtonClick = [&] {
-        NextTurn();
-    };
+        //FUNCTIONS AND STYLES
+        auto onNextTurnButtonClick = [&] {
+            NextTurn();
+        };
 
-    auto onExitButtonClick = [&] {
-        screen.Exit();
-    };
-
-    auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
-                                                Color::Default, Color::White);
-
-    auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
-                                            Color::Default, Color::Red);
-
-
-    //ACTUAL STUFF TO BE RENDERED
-
-    /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
-    *  The bigger container that is gameContainer HAS to have all I want to be in it AS CHILDREN.
-    *  The stuff I do in renderer is just for choosing how to properly display what I want to.
-    *  If the things I want to display are not children of the component written in Renderer(..., lambda function),
-    *  then I am only able to display their "skeletons", because the functionality will not be there.
-    *
-    *  VERY IMPORTANT:
-    *  If a container has elements (e.g. text, paragraph), not components (e.g. buttons) in it, then it is inherently NOT SCROLLABLE!
-    *  This can be fixed by appending (with '|') a focusPositionRelative to the container,
-    *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
-    */
-
-
-    //container with the buttons I want to use
-    auto gameStateButtonsContainer = Container::Horizontal({});
-
-    auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
-    gameStateButtonsContainer->Add(nextTurnButton);
-
-    auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
-    gameStateButtonsContainer->Add(exitButton);
-
-    //container where all the feedback is - made scrollable using | focusPositionRelative
-    auto gameFlowContainer = Container::Vertical({});
-    auto a = paragraph("aaaaaaaaaaaa");
-    gameFlowContainer->Add(Renderer([a] { return a; }));
-    for (int i = 0; i < 1000; i++) {
-        std::string b;
-        gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
-    }
-
-    //to scroll text because it is insanely hard apparently
-    float focus_y = 0.5f;
-    float step = 0.01f;
-    float upperLimit = 1.f;
-    float lowerLimit = 0.f;
-
-    //container to have all things related to game display in it
-    auto gameContainer = Container::Horizontal({});
-    gameContainer->Add(gameFlowContainer);
-    gameContainer->Add(gameStateButtonsContainer);
-
-    //Render the components
-    auto renderer = Renderer(gameContainer, [&] {
-        return vbox({
-                   hbox({
-                       text("Current turn: "),
-                       text(std::to_string(currentTurn)),
-                   }),
-                   separator(),
-                   gameFlowContainer->Render()
-                   | focusPositionRelative(0.f, focus_y) //make it scrollable only on the y-axis
-                   | vscroll_indicator //to indicate where we are
-                   | frame //allows for a component to overflow with content (which is later made scrollable)
-                   | size(HEIGHT, LESS_THAN, Terminal::Size().dimy / 100.0f * 80),
-                   separator(),
-                   gameStateButtonsContainer->Render()
-                   | frame
-                   | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 5),
-               })
-               | size(WIDTH, EQUAL, Terminal::Size().dimx);
-    });
-
-    //Because I define my own scrolling logic, I have to add an Event Catcher to the renderer
-    renderer |= CatchEvent([&](Event event) {
-        if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
-                                 event.mouse().button == Mouse::WheelDown)) {
-            //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
-            if (event.mouse().button == Mouse::WheelDown) {
-                focus_y = std::min(upperLimit, focus_y + step); //Go up
-            } else {
-                focus_y = std::max(lowerLimit, focus_y - step); //Go down
-            }
-            return true;
-        }
-        return false;
-    });
-
-    //Because we are running smoke tests that get stuck here
-    std::thread([&] {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        screen.Post(Event::Character('q')); // Simulate 'q' key press
-    }).detach();
-
-    //Handle the 'q' key to exit
-    renderer |= CatchEvent([&](Event event) {
-        if (event == Event::Character('q')) {
+        auto onExitButtonClick = [&] {
             screen.Exit();
-            return true;
+        };
+
+        auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+                                                    Color::Default, Color::White);
+
+        auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
+                                                Color::Default, Color::Red);
+
+
+        //ACTUAL STUFF TO BE RENDERED
+
+        /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
+        *  The bigger container that is gameContainer HAS to have all I want to be in it AS CHILDREN.
+        *  The stuff I do in renderer is just for choosing how to properly display what I want to.
+        *  If the things I want to display are not children of the component written in Renderer(..., lambda function),
+        *  then I am only able to display their "skeletons", because the functionality will not be there.
+        *
+        *  VERY IMPORTANT:
+        *  If a container has elements (e.g. text, paragraph), not components (e.g. buttons) in it, then it is inherently NOT SCROLLABLE!
+        *  This can be fixed by appending (with '|') a focusPositionRelative to the container,
+        *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
+        */
+
+
+        //container with the buttons I want to use
+        auto gameStateButtonsContainer = Container::Horizontal({});
+
+        auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
+        gameStateButtonsContainer->Add(nextTurnButton);
+
+        auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
+        gameStateButtonsContainer->Add(exitButton);
+
+        //container where all the feedback is - made scrollable using | focusPositionRelative
+        auto gameFlowContainer = Container::Vertical({});
+        auto a = paragraph("aaaaaaaaaaaa");
+        gameFlowContainer->Add(Renderer([a] { return a; }));
+        for (int i = 0; i < 1000; i++) {
+            std::string b;
+            gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
         }
-        return false;
-    });
 
-    //Display what we render
-    screen.Loop(renderer);
+        //to scroll text because it is insanely hard apparently
+        float focus_y = 0.5f;
+        float step = 0.01f;
+        float upperLimit = 1.f;
+        float lowerLimit = 0.f;
 
-    //To get the BIFE
-    //Actual start of the game after all checks
+        //container to have all things related to game display in it
+        auto gameContainer = Container::Horizontal({});
+        gameContainer->Add(gameFlowContainer);
+        gameContainer->Add(gameStateButtonsContainer);
 
-    if constexpr (true == false) {
+        //Render the components
+        auto renderer = Renderer(gameContainer, [&] {
+            return vbox({
+                       hbox({
+                           text("Current turn: "),
+                           text(std::to_string(currentTurn)),
+                       }),
+                       separator(),
+                       gameFlowContainer->Render()
+                       | focusPositionRelative(0.f, focus_y) //make it scrollable only on the y-axis
+                       | vscroll_indicator //to indicate where we are
+                       | frame //allows for a component to overflow with content (which is later made scrollable)
+                       | size(HEIGHT, LESS_THAN, Terminal::Size().dimy / 100.0f * 80),
+                       separator(),
+                       gameStateButtonsContainer->Render()
+                       | frame
+                       | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 5),
+                   })
+                   | size(WIDTH, EQUAL, Terminal::Size().dimx);
+        });
+
+        //Because I define my own scrolling logic, I have to add an Event Catcher to the renderer
+        renderer |= CatchEvent([&](Event event) {
+            if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
+                                     event.mouse().button == Mouse::WheelDown)) {
+                //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
+                if (event.mouse().button == Mouse::WheelDown) {
+                    focus_y = std::min(upperLimit, focus_y + step); //Go up
+                } else {
+                    focus_y = std::max(lowerLimit, focus_y - step); //Go down
+                }
+                return true;
+            }
+            return false;
+        });
+
+        //Display what we render
+        screen.Loop(renderer);
+    }
+    else {
+        //Normal branch
         OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
         DisplayStartingGenerals();
         OutputFTXUIText(starterPreChoiceText, userInputExpectedColor);
@@ -384,6 +374,11 @@ int Game::Start() {
         warlord1Army.DisplayArmy();
         Settlements[0].Besieged(warlord1Army);
 
+
+        //will it crapa? - yes
+        int *a = new int;
+        a[1] = 2;
+
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
 
         for (unsigned long i = 0; i < Settlements.size(); i++) {
@@ -411,6 +406,10 @@ int Game::Start() {
         sc1.setViewRange(100);
         assert((std::cout << "op=: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
     }
+
+
+
+
 
 
     return 0;
