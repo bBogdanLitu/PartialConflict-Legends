@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "Settlement.h"
+#include "ftxui/component/loop.hpp"
 
 class Game {
 private:
@@ -29,12 +30,14 @@ private:
 
     void CollectIncomeFromSettlements();
 
-    void TickAttackCountdown();
+    //void TickAttackCountdown();
 
     void NextTurn();
 
 public:
     int Start();
+
+    static void AddElementToFTXUIContainer(const ftxui::Component& gameFlowWindow, const ftxui::Element& thingToAdd) ;
 };
 
 #endif //Game_H

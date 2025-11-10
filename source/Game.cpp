@@ -222,31 +222,16 @@ int Game::Start() {
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
     }
-    std::cout << "\n\n\n";
+    std::cout << "\n";
 
     OutputFTXUIText(ftxuiConfirmationText, userInputExpectedColor);
     std::cin >> ans1;
+    std::cout << "\n\n\n";
     sanitizeInputMore(ans1);
     if (ans1 > 1) {
         ans1 = 1;
     } else if (ans1 == 1) {
         //FTXUI branch
-        //The loop that displays and makes the game work
-        using namespace ftxui;
-
-        auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
-
-        //STYLES
-
-        auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
-                                                    Color::Default, Color::White);
-
-        auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
-                                                Color::Default, Color::Red);
-
-
-        //ACTUAL STUFF TO BE RENDERED
-
         /*BRIEF EXPLANATION AFTER FUCKING AROUND AND FINDING OUT:
         *  The bigger container that is gameContainer HAS to have all I want to be in it AS CHILDREN.
         *  The stuff I do in renderer is just for choosing how to properly display what I want to.
@@ -258,15 +243,7 @@ int Game::Start() {
         *  This can be fixed by appending (with '|') a focusPositionRelative to the container,
         *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
         */
-
-        //container where all the feedback is - made scrollable using | focusPositionRelative
-        auto gameFlowContainer = Container::Vertical({});
-        auto a = paragraph("aaaaaaaaaaaa");
-        gameFlowContainer->Add(Renderer([a] { return a; }));
-        for (int i = 0; i < 1000; i++) {
-            std::string b;
-            gameFlowContainer->Add(Renderer([b, i] { return paragraph("bbbbbbb" + std::to_string(i)); }));
-        }
+        using namespace ftxui;
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
@@ -274,20 +251,50 @@ int Game::Start() {
         float upperLimit = 1.f;
         float lowerLimit = 0.f;
 
-        //container with the buttons I want to use
+        auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
+
+        //container where all the feedback is - made scrollable using | focusPositionRelative
+        auto gameFlowContainer = Container::Vertical({});
+
+        //container with the game control buttons I want to use
+        auto gameStateButtonsContainer = Container::Horizontal({});
+
+        //container to have all things related to game display in it
+        auto gameContainer = Container::Horizontal({});
+
+        //container for the contextual buttons that can be used
+        auto gameContextualButtonsContainer = Container::Horizontal({});
+
+        //STYLES FOR BUTTONS
+
+        auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+                                                    Color::Default, Color::White);
+
+        auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
+                                                Color::Default, Color::Red);
+
+        auto testStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+                                                    Color::Default, Color::White);
+
+        //FUNCTIONS FOR BUTTONS
 
         auto onNextTurnButtonClick = [&] {
             NextTurn();
-            gameFlowContainer->Add(Renderer([&] {
-                return paragraph("nextTurnPressed") | bold | color(Color::BlueViolet);
-            }));
+            gameFlowContainer->DetachAllChildren(); //clear last turn output
+            AddElementToFTXUIContainer(gameFlowContainer, paragraph("next turn started") | color(beautifulBlue));
+            focus_y = upperLimit; //So we see the last thing added
         };
 
         auto onExitButtonClick = [&] {
             screen.Exit();
         };
 
-        auto gameStateButtonsContainer = Container::Horizontal({});
+        auto onTestButtonClick = [&] {
+            AddElementToFTXUIContainer(gameFlowContainer, paragraph("stuff happening " + std::to_string(currentTurn))
+                | color(importantGameInformationColor));
+        };
+
+        //GAME STATE CONTROL BUTTONS
 
         auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
         gameStateButtonsContainer->Add(nextTurnButton);
@@ -295,30 +302,34 @@ int Game::Start() {
         auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
         gameStateButtonsContainer->Add(exitButton);
 
+        //Adding all containers to the main one
 
-
-        //container to have all things related to game display in it
-        auto gameContainer = Container::Horizontal({});
         gameContainer->Add(gameFlowContainer);
         gameContainer->Add(gameStateButtonsContainer);
+        gameContainer->Add(gameContextualButtonsContainer);
 
-        //Render the components
+        //Render the general layout of the game window
         auto renderer = Renderer(gameContainer, [&] {
             return vbox({
+                       separator(),
                        hbox({
-                           text("Current turn: "),
+                           text("Current turn: ") | color(gameAnnouncementsColor),
                            text(std::to_string(currentTurn)),
                        }),
+                       gameContextualButtonsContainer->Render()
+                       | frame
+                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
                        separator(),
                        gameFlowContainer->Render()
                        | focusPositionRelative(0.f, focus_y) //make it scrollable only on the y-axis
                        | vscroll_indicator //to indicate where we are
                        | frame //allows for a component to overflow with content (which is later made scrollable)
-                       | size(HEIGHT, LESS_THAN, Terminal::Size().dimy / 100.0f * 80),
+                       | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 85),
                        separator(),
                        gameStateButtonsContainer->Render()
                        | frame
-                       | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 5),
+                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
+                       separator(),
                    })
                    | size(WIDTH, EQUAL, Terminal::Size().dimx);
         });
@@ -327,19 +338,38 @@ int Game::Start() {
         renderer |= CatchEvent([&](Event event) {
             if (event.is_mouse() && (event.mouse().button == Mouse::WheelUp ||
                                      event.mouse().button == Mouse::WheelDown)) {
-                //I HAVE LITERALLY NO IDEA WHY THESE ARE INVERSED
+                //Inverse because the terminal has 0 at the bottom and 1 at the top
                 if (event.mouse().button == Mouse::WheelDown) {
-                    focus_y = std::min(upperLimit, focus_y + step); //Go up
+                    focus_y = std::min(upperLimit, focus_y + step); //Go down (in the terminal)
                 } else {
-                    focus_y = std::max(lowerLimit, focus_y - step); //Go down
+                    focus_y = std::max(lowerLimit, focus_y - step); //Go up (in the terminal)
                 }
                 return true;
             }
             return false;
         });
 
-        //Display what we render
+        //Actually displaying stuff in the gameFlowContainer
+        //This is where I can basically add whatever needs to be shown to the player throughout the game.
+
+        /*
+        for (int i = 0; i < 1000; i++) {
+            //function to add whatever element I want to the flow container (useful for later)
+            AddStuffToFTXUIContainer(gameFlowContainer, paragraph("bbbbbbb" + std::to_string(i)));
+        }
+        */
+
+        //test to add buttons
+        auto testButton = Button("Press me!", onTestButtonClick, testStyle);
+        gameContextualButtonsContainer->Add(testButton);
+
+
+
+
+
+        //Display what we render AND ALL THE CHANGES
         screen.Loop(renderer);
+
     } else {
         //Normal branch
         OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
@@ -413,4 +443,10 @@ int Game::Start() {
 
 
     return 0;
+}
+
+void Game::AddElementToFTXUIContainer(const ftxui::Component& gameFlowWindow, const ftxui::Element& thingToAdd) {
+    gameFlowWindow->Add(ftxui::Renderer([thingToAdd] {
+        return thingToAdd;
+    }));
 }
