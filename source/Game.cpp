@@ -274,7 +274,7 @@ int Game::Start() {
                                                 Color::Default, Color::Red);
 
         auto testStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
-                                                    Color::Default, Color::White);
+                                                Color::Default, Color::White);
 
         //FUNCTIONS FOR BUTTONS
 
@@ -291,7 +291,7 @@ int Game::Start() {
 
         auto onTestButtonClick = [&] {
             AddElementToFTXUIContainer(gameFlowContainer, paragraph("stuff happening " + std::to_string(currentTurn))
-                | color(importantGameInformationColor));
+                                                          | color(importantGameInformationColor));
         };
 
         //GAME STATE CONTROL BUTTONS
@@ -362,9 +362,6 @@ int Game::Start() {
         //test to add buttons
         auto testButton = Button("Press me!", onTestButtonClick, testStyle);
         gameContextualButtonsContainer->Add(testButton);
-
-
-
 
 
         //Display what we render AND ALL THE CHANGES
@@ -438,14 +435,10 @@ int Game::Start() {
     }
 
 
-
-
-
-
     return 0;
 }
 
-void Game::AddElementToFTXUIContainer(const ftxui::Component& gameFlowWindow, const ftxui::Element& thingToAdd) {
+void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd) {
     gameFlowWindow->Add(ftxui::Renderer([thingToAdd] {
         return thingToAdd;
     }));

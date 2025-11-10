@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "Settlement.h"
-#include "ftxui/component/loop.hpp"
+#include <ftxui/component/loop.hpp>
 
 class Game {
 private:
@@ -37,7 +37,7 @@ private:
 public:
     int Start();
 
-    static void AddElementToFTXUIContainer(const ftxui::Component& gameFlowWindow, const ftxui::Element& thingToAdd) ;
+    static void AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd);
 };
 
 #endif //Game_H
