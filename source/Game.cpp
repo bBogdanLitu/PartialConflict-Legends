@@ -99,7 +99,7 @@ void Game::CheckGenerals() const {
     std::cout << "Emperor general pool: " << EmperorGenerals.size() << std::endl;
 }
 
-void Game::DisplayStartingGenerals() const {
+ftxui::Table Game::CreateStartingGeneralsTable() const {
     auto Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
     std::vector<std::vector<std::string> > tableContent;
@@ -137,13 +137,34 @@ void Game::DisplayStartingGenerals() const {
     content.DecorateCellsAlternateRow(color(Color::Cyan), 3, 1);
     content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
 
+    return table;
+}
+
+void Game::DisplayStartingGenerals() const {
+    using namespace ftxui;
+
+    Table table = CreateStartingGeneralsTable();
+
     auto document = table.Render();
+
+    //Legacy rendering logic for the normal branch
     auto screen =
             Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
     //Non-blocking output, I don't want to have to output every single thing using FTXUI and its messy scrolling, maybe later
     Render(screen, document);
     screen.Print();
     std::cout << std::endl;
+}
+
+ftxui::Element Game::FTXUIDisplayStaringGenerals() const {
+    using namespace ftxui;
+
+    Table table = CreateStartingGeneralsTable();
+
+    auto document = table.Render();
+
+    //New rendering logic
+    return document;
 }
 
 void Game::ResetArmiesActionPoints() const {
@@ -245,6 +266,13 @@ int Game::Start() {
         */
         using namespace ftxui;
 
+        //where to store input temporarily
+        std::string tempInput;
+
+        //variables that will be used
+        unsigned long startingGeneralChosenIndex = 0;
+        bool checkSettlementClicked = false;
+
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
         float step = 0.01f;
@@ -265,8 +293,10 @@ int Game::Start() {
         //container for the contextual buttons that can be used
         auto gameContextualButtonsContainer = Container::Horizontal({});
 
-        //STYLES FOR BUTTONS
+        //container for all the inputs that will appear in the game
+        auto gameInputContainer = Container::Horizontal({});
 
+        //STYLES
         auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                     Color::Default, Color::White);
 
@@ -275,6 +305,22 @@ int Game::Start() {
 
         auto testStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                 Color::Default, Color::White);
+
+        //for inputs
+        InputOption inputOption = InputOption::Spacious();
+        inputOption.transform = [](InputState state) {
+            state.element |= color(userInputExpectedColor);
+            if (state.focused) {
+                state.element |= bgcolor(Color::Default);
+            }
+            else if (state.hovered) {
+                state.element |= bgcolor(Color::Grey15);
+            }
+            else {
+                state.element |= bgcolor(Color::Grey27);
+            }
+            return state.element;
+        };
 
         //FUNCTIONS FOR BUTTONS
 
@@ -294,6 +340,28 @@ int Game::Start() {
                                                           | color(importantGameInformationColor));
         };
 
+        auto onCheckSettlementsButtonClick = [&] {
+            AddElementToFTXUIContainer(gameFlowContainer, paragraph("These are your settlements: \n"));
+            //Get all player owned settlements and display their information
+            for (unsigned long i = 0; i < Settlements.size(); i++) {
+                if (Settlements[i].getOwner() == 0) {
+                    AddElementToFTXUIContainer(gameFlowContainer, Settlements[i].FTXUIDisplaySettlement(i));
+                    focus_y = upperLimit; //auto-scroll to see the bottom of the output
+                }
+            }
+            if (checkSettlementClicked == false) {
+                //after it being clicked the first time, we can continue the tutorial
+                AddElementToFTXUIContainer(gameFlowContainer,
+                                           paragraph(starterPreTutorial) | color(gameAnnouncementsColor));
+                AddElementToFTXUIContainer(gameFlowContainer,
+                                           paragraph(tutorialFirstDefenceText) | color(storyRelatedTextColor));
+                AddElementToFTXUIContainer(gameFlowContainer,
+                                           paragraph(
+                                               "This is where this process temporarily stops. I have to figure out what I want to do with this more potent display..."));
+            }
+            checkSettlementClicked = true;
+        };
+
         //GAME STATE CONTROL BUTTONS
 
         auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
@@ -302,11 +370,13 @@ int Game::Start() {
         auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
         gameStateButtonsContainer->Add(exitButton);
 
+
         //Adding all containers to the main one
 
         gameContainer->Add(gameFlowContainer);
         gameContainer->Add(gameStateButtonsContainer);
         gameContainer->Add(gameContextualButtonsContainer);
+        gameContainer->Add(gameInputContainer);
 
         //Render the general layout of the game window
         auto renderer = Renderer(gameContainer, [&] {
@@ -316,6 +386,7 @@ int Game::Start() {
                            text("Current turn: ") | color(gameAnnouncementsColor),
                            text(std::to_string(currentTurn)),
                        }),
+                       separator(),
                        gameContextualButtonsContainer->Render()
                        | frame
                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
@@ -326,6 +397,9 @@ int Game::Start() {
                        | frame //allows for a component to overflow with content (which is later made scrollable)
                        | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 85),
                        separator(),
+                       gameInputContainer->Render()
+                       | frame
+                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
                        gameStateButtonsContainer->Render()
                        | frame
                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
@@ -359,10 +433,55 @@ int Game::Start() {
         }
         */
 
-        //test to add buttons
+        //Add contextual buttons
         auto testButton = Button("Press me!", onTestButtonClick, testStyle);
+        auto checkSettlementsButton = Button("Check settlements", onCheckSettlementsButtonClick, testStyle);
         gameContextualButtonsContainer->Add(testButton);
 
+        //Game intro
+        AddElementToFTXUIContainer(gameFlowContainer, paragraph(beginningGeneralText) | color(gameAnnouncementsColor));
+        AddElementToFTXUIContainer(gameFlowContainer, FTXUIDisplayStaringGenerals());
+
+        //Every time I want to listen to input from the user, I will have to add an input such as this one
+        Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption);
+
+        //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
+        //I can only return true on what I am certain I don't want, then return false for anything else.
+        starterGeneralInput |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+        //I only want to prevent/repurpose enter, anything else can go through (and to other catchers, eventually)
+        starterGeneralInput |= CatchEvent([&](const Event& event) {
+           if (event == Event::Return) {
+               if (!tempInput.empty()) {
+                   startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
+                   if (startingGeneralChosenIndex >= StartingGenerals.size()) {
+                       //too high, reset and try again
+                       AddElementToFTXUIContainer(gameFlowContainer, paragraph("try again! min: 0, max: " + std::to_string(StartingGenerals.size()-1)));
+                       tempInput = "";
+                   }
+                   else {
+                       //in range, can proceed
+                       gameInputContainer->DetachAllChildren(); //remove input from the gameContainer
+                       gameFlowContainer->DetachAllChildren(); //remove text that becomes useless
+
+                       Army starterArmy {StartingGenerals[startingGeneralChosenIndex]};
+                       Settlements[0].StationArmy(starterArmy);
+                       AddElementToFTXUIContainer(gameFlowContainer, paragraph("You should check out your settlements now!") | color(importantGameInformationColor));
+                       gameContextualButtonsContainer->Add(checkSettlementsButton);
+                   }
+                   focus_y = upperLimit;
+               }
+               return true; //Catch the enter and do something else
+           }
+            return false; //Don't mess with any other event
+        });
+
+        //Add the input to the gameContainer
+        gameInputContainer->Add(starterGeneralInput);
 
         //Display what we render AND ALL THE CHANGES
         screen.Loop(renderer);

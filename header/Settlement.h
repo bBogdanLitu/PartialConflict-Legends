@@ -57,7 +57,11 @@ public:
         stationedArmy = std::nullopt;
     }*/
 
+    [[nodiscard]] ftxui::Table CreateSettlementsTable(unsigned long indexInTheSettlementVector) const;
+
     void DisplaySettlement(unsigned long indexInTheSettlementVector) const;
+
+    [[nodiscard]] ftxui::Element FTXUIDisplaySettlement(unsigned long indexInTheSettlementVector) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;

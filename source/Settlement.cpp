@@ -87,7 +87,7 @@ void Settlement::Besieged(const Army &attackingArmy) const {
     }
 }
 
-void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) const {
+ftxui::Table Settlement::CreateSettlementsTable(unsigned long indexInTheSettlementVector) const {
     std::vector<std::vector<std::string> > tableContent;
     std::vector<std::string> tableRow;
     std::string neighboursConverted;
@@ -116,10 +116,10 @@ void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) con
     tableRow.push_back(neighboursConverted);
 
     //Push the row to display it
+    using namespace ftxui;
+
     tableContent.push_back(tableRow);
 
-    //Display stuff
-    using namespace ftxui;
     auto table = Table({tableContent});
 
     table.SelectAll().Border(LIGHT);
@@ -135,10 +135,29 @@ void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) con
     //Make the content a different color
     table.SelectRow(1).DecorateCells(color(Color::GreenYellow));
 
+    return table;
+}
+
+void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) const {
+    //Legacy display stuff
+    using namespace ftxui;
+
+    Table table = CreateSettlementsTable(indexInTheSettlementVector);
+
     auto document = table.Render();
     auto screen =
             Screen::Create(Dimension::Fit(document, /*extend_beyond_screen=*/true));
     Render(screen, document);
     screen.Print();
     std::cout << std::endl;
+}
+
+ftxui::Element Settlement::FTXUIDisplaySettlement(unsigned long indexInTheSettlementVector) const {
+    using namespace ftxui;
+
+    Table table = CreateSettlementsTable(indexInTheSettlementVector);
+
+    auto document = table.Render();
+
+    return document;
 }

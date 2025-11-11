@@ -24,7 +24,11 @@ private:
 
     void CheckGenerals() const;
 
+    [[nodiscard]] ftxui::Table CreateStartingGeneralsTable() const;
+
     void DisplayStartingGenerals() const;
+
+    [[nodiscard]] ftxui::Element FTXUIDisplayStaringGenerals() const;
 
     void ResetArmiesActionPoints() const;
 

@@ -4,6 +4,8 @@
 #include <ftxui/dom/elements.hpp>
 #include <iostream>
 
+#include <ftxui/component/component_base.hpp>
+
 //Combat formulas
 inline bool ArmourToRangedNullification(const int rangedPower, const int armourPower) {
     bool result = false;
