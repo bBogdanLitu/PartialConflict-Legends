@@ -531,6 +531,10 @@ int Game::Start() {
             Settlements[i].DisplaySettlement(i);
         }
 
+        //op<< checks for unit
+        std::cout<<*PlayerGenerals[12];
+        std::cout<<*Captains[2];
+
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
         std::cout << "\nThe game will end when you press enter.\n";

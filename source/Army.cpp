@@ -177,3 +177,25 @@ void Army::DisplayArmy() const {
     screen.Print();
     std::cout << std::endl;
 }
+
+Army::Army(const Army &other) : defaultActionPoints(other.defaultActionPoints),
+                                currentActionPoints(other.currentActionPoints),
+                                totalOverallPower(other.totalOverallPower),
+                                isStationed(other.isStationed) {
+    for (const auto &unit: other.assignedUnits) {
+        assignedUnits.push_back(unit);
+    }
+}
+
+Army &Army::operator=(Army other) {
+    swap(*this, other);
+    return *this;
+}
+
+void swap(Army &first, Army &second) {
+    using std::swap;
+    swap(first.assignedUnits, second.assignedUnits);
+    swap(first.currentActionPoints, second.currentActionPoints);
+    swap(first.totalOverallPower, second.totalOverallPower);
+    swap(first.isStationed, second.isStationed);
+}

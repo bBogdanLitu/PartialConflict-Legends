@@ -42,6 +42,14 @@ public:
 
     void DisplayArmy() const;
 
+    //cc
+    Army(const Army &other);
+
+    //op= cu swap
+    Army &operator=(Army other);
+
+    friend void swap(Army &first, Army &second);
+
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
         os << "Composition:\n";

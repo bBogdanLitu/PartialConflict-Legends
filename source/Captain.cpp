@@ -59,6 +59,10 @@ int Captain::InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> self
     return result; //no instant result!
 }
 
+void Captain::display(std::ostream &os) const {
+    os <<"Handicap: " << captainHandicap << "\n";
+}
+
 Captain::Captain(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
                  int ranged_, int armour_, int str_, int acc_, int dex_,
                  float captainHandicap_) : Unit(firstName_, lastName_, type_, rarity_, melee_, ranged_, armour_, str_,

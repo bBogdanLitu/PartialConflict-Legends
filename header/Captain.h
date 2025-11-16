@@ -11,13 +11,15 @@ private:
 
     void NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int> &selfPowers) const override;
 
-    int InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> selfPowers) const override;
+    [[nodiscard]] int InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> selfPowers) const override;
+
+    void display(std::ostream &os) const override;
 
 public:
     Captain(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_,
             int melee_, int ranged_, int armour_, int str_, int acc_, int dex_, float captainHandicap_);
 
-    std::shared_ptr<Unit> clone() const override { return std::make_shared<Captain>(*this); }
+    [[nodiscard]] std::shared_ptr<Unit> clone() const override { return std::make_shared<Captain>(*this); }
 };
 
 

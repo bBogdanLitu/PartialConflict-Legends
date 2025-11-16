@@ -38,10 +38,12 @@ private:
 
     [[nodiscard]] virtual int InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> selfPowers) const = 0;
 
+    virtual void display(std::ostream &) const;
+
 public:
     virtual ~Unit() = default;
 
-    virtual std::shared_ptr<Unit> clone() const = 0;
+    [[nodiscard]] virtual std::shared_ptr<Unit> clone() const = 0;
 
     Unit(Unit &&other) = default;
 
@@ -72,6 +74,8 @@ public:
                 "\nMelee, ranged and armour stats: " << unit.melee << " " << unit.ranged << " " << unit.armour <<
                 "\nStrength, accuracy and dexterity: " << unit.str << " " << unit.acc << " " << unit.dex <<
                 "\nOverall power: " << unit.overallPower << "\n";
+        unit.display(os); //to display (eventually) the attributes that each derived class adds
+        os << "\n";
         return os;
     }
 
