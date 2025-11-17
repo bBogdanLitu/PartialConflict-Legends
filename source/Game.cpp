@@ -225,6 +225,12 @@ int Game::Start() {
         return -1;
     }
 
+    //Create the initial enemy armies
+    Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
+    warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
+    warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
+    warlord1Army.useActionPoint(); //temporary to get the Github Actions CHECKS
+
     //TEMPORARILY UNDER CONSTRUCTION
 
     //NEW STUFF FOR PLAYING THE GAME
@@ -293,9 +299,6 @@ int Game::Start() {
         //container for the contextual buttons that can be used
         auto gameContextualButtonsContainer = Container::Horizontal({});
 
-        //container for all the inputs that will appear in the game
-        auto gameInputContainer = Container::Horizontal({});
-
         //STYLES
         auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                     Color::Default, Color::White);
@@ -305,6 +308,9 @@ int Game::Start() {
 
         auto testStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                 Color::Default, Color::White);
+
+        auto checkSettlementsStyle = ButtonOption::Animated(Color::Default, beautifulBlue,
+                                                            Color::Default, beautifulGreen);
 
         //for inputs
         InputOption inputOption = InputOption::Spacious();
@@ -355,9 +361,18 @@ int Game::Start() {
                                            paragraph(starterPreTutorial) | color(gameAnnouncementsColor));
                 AddElementToFTXUIContainer(gameFlowContainer,
                                            paragraph(tutorialFirstDefenceText) | color(storyRelatedTextColor));
+                Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
+                Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]); //a good captain
+
+                //the first attack doesn't require the attacking army to be actually stationed somewhere,
+                //it is scripted and just a one-time occurrence.
                 AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph(
-                                               "This is where this process temporarily stops. I have to figure out what I want to do with this more potent display..."));
+                                           paragraph(incomingAttackText) | color(enemyRelatedTextColor));
+                AddElementToFTXUIContainer(gameFlowContainer, warlord1Army.FTXUIDisplayArmy());
+
+
+                //Settlements[0].Besieged(warlord1Army);
+                Settlements[0].FTXUIBesieged(warlord1Army, gameFlowContainer);
             }
             checkSettlementClicked = true;
         };
@@ -376,7 +391,6 @@ int Game::Start() {
         gameContainer->Add(gameFlowContainer);
         gameContainer->Add(gameStateButtonsContainer);
         gameContainer->Add(gameContextualButtonsContainer);
-        gameContainer->Add(gameInputContainer);
 
         //Render the general layout of the game window
         auto renderer = Renderer(gameContainer, [&] {
@@ -397,9 +411,6 @@ int Game::Start() {
                        | frame //allows for a component to overflow with content (which is later made scrollable)
                        | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 85),
                        separator(),
-                       gameInputContainer->Render()
-                       | frame
-                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
                        gameStateButtonsContainer->Render()
                        | frame
                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
@@ -435,7 +446,7 @@ int Game::Start() {
 
         //Add contextual buttons
         auto testButton = Button("Press me!", onTestButtonClick, testStyle);
-        auto checkSettlementsButton = Button("Check settlements", onCheckSettlementsButtonClick, testStyle);
+        auto checkSettlementsButton = Button("Check my settlements", onCheckSettlementsButtonClick, checkSettlementsStyle);
         gameContextualButtonsContainer->Add(testButton);
 
         //Game intro
@@ -465,7 +476,6 @@ int Game::Start() {
                    }
                    else {
                        //in range, can proceed
-                       gameInputContainer->DetachAllChildren(); //remove input from the gameContainer
                        gameFlowContainer->DetachAllChildren(); //remove text that becomes useless
 
                        Army starterArmy {StartingGenerals[startingGeneralChosenIndex]};
@@ -481,7 +491,7 @@ int Game::Start() {
         });
 
         //Add the input to the gameContainer
-        gameInputContainer->Add(starterGeneralInput);
+        gameFlowContainer->Add(starterGeneralInput);
 
         //Display what we render AND ALL THE CHANGES
         screen.Loop(renderer);
@@ -513,11 +523,7 @@ int Game::Start() {
 
         Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
         Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]);
-        //Captain to test if every unit can fight with every unit
-        Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
-        warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
-        warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
-        warlord1Army.useActionPoint(); //temporary to get the Github Actions CHECKS
+
         OutputFTXUIText(tutorialFirstDefenceText, storyRelatedTextColor);
         //the first attack doesn't require the attacking army to be actually stationed somewhere,
         //it is scripted and just a one-time occurrence.
@@ -532,8 +538,8 @@ int Game::Start() {
         }
 
         //op<< checks for unit
-        std::cout<<*PlayerGenerals[12];
-        std::cout<<*Captains[2];
+        std::cout << *PlayerGenerals[12];
+        std::cout << *Captains[2];
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
@@ -565,4 +571,8 @@ void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, co
     gameFlowWindow->Add(ftxui::Renderer([thingToAdd] {
         return thingToAdd;
     }));
+}
+
+void Game::AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Component &thingToAdd) {
+    gameFlowWindow->Add(thingToAdd);
 }

@@ -3,9 +3,10 @@
 #include <optional>
 #include <nlohmann/detail/string_utils.hpp>
 #include <ftxui/dom/table.hpp>
-
+#include <ftxui/component/component.hpp>
 #include "ControlPoint.h"
 #include "Garrison.h"
+
 
 //The objective of the game, conquering them leads to victory. Has an Army and/or a (weak) Garrison stationed.
 //There are Control Points assigned to a Settlement
@@ -35,6 +36,8 @@ public:
     void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
 
     void Besieged(const Army &attackingArmy) const;
+
+    void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
     [[nodiscard]] int getOwner() const;
 

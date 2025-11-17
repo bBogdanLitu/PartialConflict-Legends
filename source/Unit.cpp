@@ -112,7 +112,8 @@ void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEf
     std::cout << std::endl;
 }
 
-void Unit::display(std::ostream &) const {}
+void Unit::display(std::ostream &) const {
+}
 
 int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const {
     ///STAGE 1 - FETCH STATS

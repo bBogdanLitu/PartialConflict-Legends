@@ -59,11 +59,12 @@ int General::InstantWinCheck(std::vector<int> enemyPowers, std::vector<int> self
 }
 
 //No special attributes to display yet
-void General::display(std::ostream &) const {}
+void General::display(std::ostream &) const {
+}
 
 General::General(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
                  int ranged_, int armour_, int str_, int acc_, int dex_) : Unit(firstName_, lastName_, type_, rarity_,
-                                                                                melee_, ranged_, armour_, str_, acc_, dex_) {
+    melee_, ranged_, armour_, str_, acc_, dex_) {
 }
 
 
