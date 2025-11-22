@@ -21,6 +21,10 @@ private:
                                      std::vector<int> &remainingAllies,
                                      int indexOfAttacker, int indexOfDefender);
 
+    static void FTXUIEvaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
+                                     std::vector<int> &remainingAllies,
+                                     int indexOfAttacker, int indexOfDefender, const ftxui::Component& whereToDisplay);
+
 public:
     //explicit Army(const General &general);
 

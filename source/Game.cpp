@@ -347,35 +347,34 @@ int Game::Start() {
         };
 
         auto onCheckSettlementsButtonClick = [&] {
+            AddNewLineToFTXUIContainer(gameFlowContainer);
             AddElementToFTXUIContainer(gameFlowContainer, paragraph("These are your settlements: \n"));
             //Get all player owned settlements and display their information
             for (unsigned long i = 0; i < Settlements.size(); i++) {
                 if (Settlements[i].getOwner() == 0) {
                     AddElementToFTXUIContainer(gameFlowContainer, Settlements[i].FTXUIDisplaySettlement(i));
+                    if (Settlements[i].getStationedArmy().has_value()) {
+                        AddNewLineToFTXUIContainer(gameFlowContainer);
+                        AddElementToFTXUIContainer(gameFlowContainer, paragraph("This is the stationed army:"));
+                        AddElementToFTXUIContainer(gameFlowContainer, Settlements[i].getStationedArmy()->FTXUIDisplayArmy());
+                    }
+
                     focus_y = upperLimit; //auto-scroll to see the bottom of the output
                 }
             }
             if (checkSettlementClicked == false) {
                 //after it being clicked the first time, we can continue the tutorial
                 AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph(starterPreTutorial) | color(gameAnnouncementsColor));
+                                           paragraph(" "));
                 AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph(tutorialFirstDefenceText) | color(storyRelatedTextColor));
-                Settlements[0].AddUnitToArmy(PlayerGenerals[5]); //Good general
-                Settlements[0].AddUnitToArmy(Captains[Captains.size() - 2]); //a good captain
-
-                //the first attack doesn't require the attacking army to be actually stationed somewhere,
-                //it is scripted and just a one-time occurrence.
-                AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph(incomingAttackText) | color(enemyRelatedTextColor));
-                AddElementToFTXUIContainer(gameFlowContainer, warlord1Army.FTXUIDisplayArmy());
-
-
-                //Settlements[0].Besieged(warlord1Army);
-                Settlements[0].FTXUIBesieged(warlord1Army, gameFlowContainer);
+                                           paragraph("Now take a look at your enemy's intents!") | color(beautifulOrange));
             }
             checkSettlementClicked = true;
         };
+
+        /*auto onCheckEnemyIntentButtonClick = [&] {
+
+        };*/
 
         //GAME STATE CONTROL BUTTONS
 
@@ -575,4 +574,10 @@ void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, co
 
 void Game::AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Component &thingToAdd) {
     gameFlowWindow->Add(thingToAdd);
+}
+
+void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
+    gameFlowWindow->Add(ftxui::Renderer([&] {
+        return ftxui::paragraph(" ");
+    }));
 }

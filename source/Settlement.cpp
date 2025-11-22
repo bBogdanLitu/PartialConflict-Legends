@@ -1,4 +1,7 @@
 #include "../header/Settlement.h"
+
+#include <set>
+
 #include "../header/Game.h"
 #include "ftxui/component/event.hpp"
 
@@ -93,7 +96,7 @@ void Settlement::Besieged(const Army &attackingArmy) const {
 //If not, then the player will only get the notification of the outcome.
 void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const {
     int result;
-    std::vector<std::string> boInputStrings(3, "");
+    std::array<std::string, 3> boInputStrings;
     std::vector<unsigned long> battleOrder, availableAllyIndexes;
     using namespace ftxui; //it's a pain otherwise
     //STYLE
@@ -118,7 +121,9 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
     //FUNCTIONS
     //for buttons
     auto onConfirmBOButtonClick = [&] {
-        for (auto i: boInputStrings) {
+        battleOrder.clear();
+
+       /* for (auto i: boInputStrings) {
             if (i.empty()) {
                 i = "0";
                 //if the user didn't write anything in an input, I will assign 0 to it and let the following code do its magic and assign it
@@ -138,13 +143,16 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
                     k++;
                 }
             }
-            battleOrder.push_back(value);
-        }
-        //and I can finally get the result of the fight (after fixing the display stuff in Army)
-        result = stationedArmy.value().FTXUIAttacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder,
-                                                     whereToDisplay);
-    };
+            if (battleOrder.size() < 3) {
+                battleOrder.push_back(value);
+            }
+        } */
 
+        Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(std::to_string(boInputStrings.size())));
+
+        //and I can finally get the result of the fight (after fixing the display stuff in Army)
+        result = 1;
+    };
 
     if (stationedArmy.has_value()) {
         Game::AddElementToFTXUIContainer(whereToDisplay,
@@ -162,6 +170,7 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
         for (unsigned long i = 0;
              i < stationedArmy.value().getUnitCount() && i < attackingArmy.getUnitCount();
              i++) {
+            Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(std::to_string(boInputStrings.size())));
             //to get the battle order I will use an input
             Component boInput = Input(boInputStrings[i],
                                       "Enemy with index " + std::to_string(i) + " to fight with your: ", inputOption);
@@ -183,11 +192,11 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
         auto confirmBOButton = Button("Confirm order", onConfirmBOButtonClick, confirmBOButtonStyle);
         Game::AddComponentToFTXUIContainer(whereToDisplay, confirmBOButton);
     } else {
-        //std::cout << settlementNoStationedArmyText;
         Game::AddElementToFTXUIContainer(whereToDisplay,
                                          paragraph(settlementNoStationedArmyText) | color(allyRelatedTextColor));
         result = stationedGarrison.DirectlyAttacked(attackingArmy);
     }
+
     switch (result) {
         case 1: {
             Game::AddElementToFTXUIContainer(whereToDisplay,

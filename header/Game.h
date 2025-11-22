@@ -47,6 +47,8 @@ public:
     //useful to add buttons, inputs and other interactive components
     static void AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow,
                                              const ftxui::Component &thingToAdd);
+
+    static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 };
 
 #endif //Game_H

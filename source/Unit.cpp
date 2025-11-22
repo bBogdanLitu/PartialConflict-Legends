@@ -1,4 +1,5 @@
 #include "../header/Unit.h"
+#include "../header/Game.h"
 
 
 Unit::Unit(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
@@ -55,17 +56,17 @@ void Unit::UpdatePowers() {
     Powers.push_back(aPower);
 }
 
-void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEffPowers,
-                        const std::vector<int> &enemyEffPowers) const {
+ftxui::Element Unit::CreateDisplayFightTable(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
+                        const std::vector<int> &enemyEffPowers) const{
     std::vector<std::vector<std::string> > table1Content, table2Content;
 
     table1Content.push_back(generalFightTableHeaders); //defender
     table2Content.push_back(generalFightTableHeaders); //attacker
 
     table1Content.push_back(this->getEffectiveCombatStats(selfEffPowers));
-    table2Content.push_back(enemyGeneral.getEffectiveCombatStats(enemyEffPowers));
+    table2Content.push_back(enemyUnit.getEffectiveCombatStats(enemyEffPowers));
 
-    //Display stuff
+    //Create the tables
     using namespace ftxui;
     auto table1 = Table({table1Content});
 
@@ -97,7 +98,7 @@ void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEf
     //Make the content a different color
     table2.SelectRows(1, -1).DecorateCells(color(generalFightAttackerInfoColor));
 
-
+    //Create the document to render
     auto document =
             hbox({
                 table1.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
@@ -105,11 +106,31 @@ void Unit::DisplayFight(const Unit &enemyGeneral, const std::vector<int> &selfEf
                     WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 10),
                 table2.Render() | center | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100 * 45),
             });
+
+    return document;
+}
+
+void Unit::DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
+                        const std::vector<int> &enemyEffPowers) const {
+    //Legacy display
+    using namespace ftxui;
+
+    auto document = CreateDisplayFightTable(enemyUnit, selfEffPowers, enemyEffPowers);
     auto screen =
             Screen::Create(Dimension::Full(), Dimension::Fit(document, true));
     Render(screen, document);
     screen.Print();
     std::cout << std::endl;
+}
+
+ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
+                                const std::vector<int> &enemyEffPowers) const {
+
+    using namespace ftxui;
+
+    auto document = CreateDisplayFightTable(enemyUnit, selfEffPowers, enemyEffPowers);
+
+    return document;
 }
 
 void Unit::display(std::ostream &) const {
@@ -133,6 +154,72 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const
 
     DisplayFight(enemyUnit, selfPowers, enemyPowers); //to display the effective stats
 
+
+    //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!
+    ///STAGE 4: INSTANT WINS
+
+    int instantWin = InstantWinCheck(enemyPowers, selfPowers);
+    //if the defender wins instantly
+    if (instantWin == 1) {
+        result = 1; //won't be 1 forever (after implementing more consequences to win / lose scenarios)
+        return result;
+    }
+    //if the attacker wins instantly
+    if (instantWin == -1) {
+        result = 0;
+        return result;
+    }
+
+    ///STAGE 5: NORMAL WINS (STANDARD FOR EVERY UNIT)
+
+    if (selfPowers[0] > enemyPowers[0]) {
+        result = 1;
+        return result;
+    }
+    if (selfPowers[0] < enemyPowers[0]) {
+        result = 0;
+        return result;
+    }
+    //Equal melee
+    if (selfPowers[1] > enemyPowers[1]) {
+        result = 1;
+        return result;
+    }
+    if (selfPowers[1] < enemyPowers[1]) {
+        result = 0;
+        return result;
+    }
+    //Equal melee and ranged
+    if (selfPowers[2] > enemyPowers[2]) {
+        result = 1;
+        return result;
+    }
+    if (selfPowers[2] < enemyPowers[2]) {
+        result = 0;
+        return result;
+    }
+    //All equal stats -> whoever gets called (the defender) wins
+    return result;
+}
+
+int Unit::FTXUIFightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const {
+    ///STAGE 1 - FETCH STATS
+
+    int result = 1;
+    std::vector<int> enemyPowers = enemyUnit.getPowers(); //can't be const because it's modifiable
+    //Copy so that temporary modifications don't have a permanent effect
+    std::vector<int> selfPowers = this->getPowers();
+
+    ///STAGE 2 - APPLY MODIFICATIONS
+
+    ApplyStatModifiers(garrisonOverallBoost, selfPowers);
+
+    ///STAGE 3 - NULLIFY/BOOST
+
+    NullifyOrBoost(enemyPowers, selfPowers);
+
+    auto whatToDisplay = FTXUIDisplayFight(enemyUnit, selfPowers, enemyPowers); //to display the effective stats
+    Game::AddElementToFTXUIContainer(whereToDisplay, whatToDisplay);
 
     //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!
     ///STAGE 4: INSTANT WINS

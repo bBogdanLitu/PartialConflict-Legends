@@ -27,7 +27,13 @@ private:
 
     void UpdatePowers();
 
+    ftxui::Element CreateDisplayFightTable(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
+                        const std::vector<int> &enemyEffPowers) const;
+
     void DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
+                      const std::vector<int> &enemyEffPowers) const;
+
+    ftxui::Element FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                       const std::vector<int> &enemyEffPowers) const;
 
 
@@ -57,6 +63,8 @@ public:
     //Non-virtual interface for combat -> every type of unit can implement its own particularities, but
     //they all follow a common structure
     [[nodiscard]] int FightWith(const Unit &enemyUnit, int garrisonOverallBoost) const;
+
+    [[nodiscard]] int FTXUIFightWith(const Unit &enemyUnit, int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const;
 
     [[nodiscard]] int getType() const;
 

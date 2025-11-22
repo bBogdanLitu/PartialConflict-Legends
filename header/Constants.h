@@ -16,6 +16,7 @@
 #define generalFightAttackerWinColor ftxui::Color::OrangeRed1
 #define beautifulBlue ftxui::Color::SkyBlue3
 #define beautifulGreen ftxui::Color::SpringGreen3Bis
+#define beautifulOrange ftxui::Color::DarkOrange
 
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;
