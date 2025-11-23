@@ -1,16 +1,15 @@
 #include "../header/Settlement.h"
 
-#include <set>
-
+#include <ftxui/component/event.hpp>
 #include "../header/Game.h"
-#include "ftxui/component/event.hpp"
+
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
                        int index_, long int income_) : stationedGarrison(garrison_),
-                                           name(std::move(name_)),
-                                           owner(owner_),
-                                           index(index_),
-                                           income(income_) {
+                                                       name(std::move(name_)),
+                                                       owner(owner_),
+                                                       index(index_),
+                                                       income(income_) {
 }
 
 void Settlement::StationArmy(const Army &army) {
@@ -95,7 +94,7 @@ void Settlement::Besieged(const Army &attackingArmy) const {
 
 //If there is a stationedArmy, there will be a combat prompt to the player.
 //If not, then the player will only get the notification of the outcome.
-void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const {
+/*void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const {
     int result;
     std::array<std::string, 3> boInputStrings;
     std::vector<unsigned long> battleOrder, availableAllyIndexes;
@@ -124,7 +123,7 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
     auto onConfirmBOButtonClick = [&] {
         battleOrder.clear();
 
-        /* for (auto i: boInputStrings) {
+        for (auto i: boInputStrings) {
              if (i.empty()) {
                  i = "0";
                  //if the user didn't write anything in an input, I will assign 0 to it and let the following code do its magic and assign it
@@ -147,9 +146,7 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
              if (battleOrder.size() < 3) {
                  battleOrder.push_back(value);
              }
-         } */
-
-        Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(std::to_string(boInputStrings.size())));
+         }
 
         //and I can finally get the result of the fight (after fixing the display stuff in Army)
         result = 1;
@@ -215,7 +212,7 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
             std::cerr << "Undefined behaviour detected!" << "\n";
         }
     }
-}
+}*/
 
 ftxui::Table Settlement::CreateSettlementsTable() const {
     std::vector<std::vector<std::string> > tableContent;

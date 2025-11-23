@@ -1,10 +1,10 @@
 #include "../header/Enemy.h"
 
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
-    const int index_, std::string name_): defaultTurnsToAct(defaultTurnsToAct_),
-                                        currentTurnsToAct(currentTurnsToAct_),
-                                        index(index_),
-                                        name(std::move(name_)) {}
+                               std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
+                                                    currentTurnsToAct(currentTurnsToAct_),
+                                                    name(std::move(name_)) {
+}
 
 void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement) {
     for (unsigned long i = 0; i < ownedSettlements.size(); ++i) {
@@ -26,6 +26,10 @@ void Enemy::AdvanceTurn() {
     }
 }
 
+void Enemy::Discovered() {
+    discovered = true;
+}
+
 std::vector<Settlement> Enemy::getOwnedSettlements() const {
     std::vector<Settlement> settlements;
     for (unsigned long i = 0; i < ownedSettlements.size(); ++i) {
@@ -34,11 +38,15 @@ std::vector<Settlement> Enemy::getOwnedSettlements() const {
     return settlements;
 }
 
+bool Enemy::getDiscovered() const {
+    return discovered;
+}
+
 int Enemy::getCurrentTurnsToAct() const {
     return currentTurnsToAct;
 }
 
-std::string Enemy::getName() const {
+const std::string& Enemy::getName() const {
     return name;
 }
 

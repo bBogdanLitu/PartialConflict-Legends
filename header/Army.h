@@ -36,8 +36,10 @@ public:
     [[nodiscard]] int Attacked(const Army &attackingArmy, int overallBoost, const std::vector<unsigned long> &
                                battleOrder) const;
 
+    /*
     [[nodiscard]] int FTXUIAttacked(const Army &attackingArmy, int overallBoost,
                                     const std::vector<unsigned long> &battleOrder, const ftxui::Component &whereToDisplay) const;
+    */
 
     [[nodiscard]] int getTotalOverallPower() const;
 

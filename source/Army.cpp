@@ -144,7 +144,7 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
 }
-
+/*
 int Army::FTXUIAttacked(const Army &attackingArmy, int overallBoost,
                         const std::vector<unsigned long> &battleOrder, const ftxui::Component &whereToDisplay) const {
     //OutputFTXUIText("\nThe battle will now begin.\n", gameAnnouncementsColor);
@@ -161,8 +161,8 @@ int Army::FTXUIAttacked(const Army &attackingArmy, int overallBoost,
     for (const unsigned long currentAlly: battleOrder) {
         //We mark the chosen defender as non-surplus
         surplusDefenders[currentAlly] = -1;
-        /*int fightResult = this->getAssignedGenerals()[currentAlly].
-                FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);*/
+        int fightResult = this->getAssignedGenerals()[currentAlly].
+                FightWith(attackingArmy.getAssignedGenerals()[currentEnemy], overallBoost);
         int fightResult = this->getAssignedUnits()[currentAlly]->
                 FTXUIFightWith(*attackingArmy.getAssignedUnits()[currentEnemy], overallBoost, whereToDisplay);
         //defender combat is boosted by the garrison
@@ -234,6 +234,7 @@ int Army::FTXUIAttacked(const Army &attackingArmy, int overallBoost,
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
 }
+*/
 
 int Army::getTotalOverallPower() const { return totalOverallPower; }
 

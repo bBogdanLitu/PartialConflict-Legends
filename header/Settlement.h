@@ -38,7 +38,7 @@ public:
 
     void Besieged(const Army &attackingArmy) const;
 
-    void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
+    //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
     [[nodiscard]] int getOwner() const;
 

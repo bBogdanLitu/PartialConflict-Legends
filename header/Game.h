@@ -10,8 +10,8 @@ class Game {
 private:
     std::vector<std::shared_ptr<Unit> > StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals,
             EmperorGenerals, Captains;
-    std::vector<std::shared_ptr<Settlement>> Settlements;
-    std::vector<std::shared_ptr<Enemy>> Enemies;
+    std::vector<std::shared_ptr<Settlement> > Settlements;
+    std::vector<std::shared_ptr<Enemy> > Enemies;
     std::vector<int> discoveredEnemies;
     unsigned int ans1 = 0, ans2 = 0;
     unsigned long currentTurn = 0;
@@ -35,7 +35,7 @@ private:
 
     [[nodiscard]] ftxui::Element FTXUIDisplayStaringGenerals() const;
 
-    static void FTXUIDisplaySettlementAndArmy(const ftxui::Component& whereToDisplay, const Settlement& settlement);
+    static void FTXUIDisplaySettlementAndArmy(const ftxui::Component &whereToDisplay, const Settlement &settlement);
 
     void ResetArmiesActionPoints() const;
 
