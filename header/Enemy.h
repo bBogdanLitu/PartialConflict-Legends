@@ -29,7 +29,7 @@ public:
 
     int getCurrentTurnsToAct() const;
 
-    const std::string& getName() const;
+    const std::string &getName() const;
 };
 
 

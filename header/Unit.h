@@ -64,7 +64,7 @@ public:
     //they all follow a common structure
     [[nodiscard]] int FightWith(const Unit &enemyUnit, int garrisonOverallBoost) const;
 
-    [[nodiscard]] int FTXUIFightWith(const Unit &enemyUnit, int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const;
+    //[[nodiscard]] int FTXUIFightWith(const Unit &enemyUnit, int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const;
 
     [[nodiscard]] int getType() const;
 

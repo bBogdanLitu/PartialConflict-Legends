@@ -201,6 +201,7 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const
     return result;
 }
 
+/*
 int Unit::FTXUIFightWith(const Unit &enemyUnit, const int garrisonOverallBoost,
                          const ftxui::Component &whereToDisplay) const {
     ///STAGE 1 - FETCH STATS
@@ -267,6 +268,7 @@ int Unit::FTXUIFightWith(const Unit &enemyUnit, const int garrisonOverallBoost,
     //All equal stats -> whoever gets called (the defender) wins
     return result;
 }
+*/
 
 int Unit::getType() const { return type; }
 

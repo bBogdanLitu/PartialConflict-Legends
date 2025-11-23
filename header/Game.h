@@ -51,9 +51,12 @@ public:
     //useful to add text, tables and other non-interactive elements
     static void AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd);
 
+    /*
     //useful to add buttons, inputs and other interactive components
     static void AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow,
                                              const ftxui::Component &thingToAdd);
+
+    */
 
     static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 };

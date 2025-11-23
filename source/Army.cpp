@@ -26,7 +26,7 @@ void Army::evaluateFightOutcome(int fightResult, std::vector<int> &remainingFigh
         }
     }
 }
-
+/*
 void Army::FTXUIEvaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
                                      std::vector<int> &remainingAllies, int indexOfAttacker, int indexOfDefender,
                                      const ftxui::Component &whereToDisplay) {
@@ -54,6 +54,7 @@ void Army::FTXUIEvaluateFightOutcome(int fightResult, std::vector<int> &remainin
         }
     }
 }
+*/
 
 Army::Army(const std::shared_ptr<Unit> &unit) {
     if (assignedUnits.size() < 3) {

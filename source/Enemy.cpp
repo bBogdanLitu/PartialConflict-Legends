@@ -1,9 +1,9 @@
 #include "../header/Enemy.h"
 
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
-                               std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
-                                                    currentTurnsToAct(currentTurnsToAct_),
-                                                    name(std::move(name_)) {
+             std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
+                                  currentTurnsToAct(currentTurnsToAct_),
+                                  name(std::move(name_)) {
 }
 
 void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement) {

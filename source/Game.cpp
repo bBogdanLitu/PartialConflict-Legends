@@ -425,12 +425,12 @@ int Game::Start() {
                                                    turnsToAct) + " turn(s)."));
                 if (Enemies[discoveredEnemy]->getDiscovered() == true && turnsToAct == 1) {
                     AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph("You will likely be attacked!"));
+                                               paragraph("You will likely be attacked!"));
                 }
                 AddNewLineToFTXUIContainer(gameFlowContainer);
                 AddElementToFTXUIContainer(gameFlowContainer,
                                            paragraph("Owned settlements:"));
-                for (const auto& settlement: enemySettlements) {
+                for (const auto &settlement: enemySettlements) {
                     FTXUIDisplaySettlementAndArmy(gameFlowContainer, settlement);
                 }
             }
@@ -626,9 +626,11 @@ void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, co
     }));
 }
 
+/*
 void Game::AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Component &thingToAdd) {
     gameFlowWindow->Add(thingToAdd);
 }
+*/
 
 void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
     gameFlowWindow->Add(ftxui::Renderer([&] {
