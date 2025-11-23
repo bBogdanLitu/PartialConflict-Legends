@@ -32,10 +32,10 @@ private:
 
     void DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                       const std::vector<int> &enemyEffPowers) const;
-
+    /*
     ftxui::Element FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                                      const std::vector<int> &enemyEffPowers) const;
-
+    */
 
     //Virtual functions used in the NVI (FightWith)
     virtual void ApplyStatModifiers(int garrisonOverallBoost, std::vector<int> &selfPowers) const = 0;
