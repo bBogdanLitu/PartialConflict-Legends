@@ -123,6 +123,7 @@ void Unit::DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPo
     std::cout << std::endl;
 }
 
+/*
 ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                                        const std::vector<int> &enemyEffPowers) const {
     using namespace ftxui;
@@ -131,7 +132,7 @@ ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<
 
     return document;
 }
-
+*/
 void Unit::display(std::ostream &) const {
 }
 

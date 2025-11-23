@@ -32,6 +32,7 @@ private:
 
     void DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                       const std::vector<int> &enemyEffPowers) const;
+
     /*
     ftxui::Element FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
                                      const std::vector<int> &enemyEffPowers) const;
