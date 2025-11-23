@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Bosih",
+    "defaultTurns": 5,
+    "currentTurns": 1
+  },
+  {
+    "name": "Oculta Mondiala",
+    "defaultTurns": 5,
+    "currentTurns": 5
+  },
+  {
+    "name": "BigB",
+    "defaultTurns": 5,
+    "currentTurns": 5
+  },
+  {
+    "name": "PIBBLE",
+    "defaultTurns": 5,
+    "currentTurns": 5
+  },
+  {
+    "name": "VV",
+    "defaultTurns": 5,
+    "currentTurns": 5
+  }
+]

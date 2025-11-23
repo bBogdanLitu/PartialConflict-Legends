@@ -28,19 +28,23 @@ void Army::evaluateFightOutcome(int fightResult, std::vector<int> &remainingFigh
 }
 
 void Army::FTXUIEvaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
-                        std::vector<int> &remainingAllies, int indexOfAttacker, int indexOfDefender,
-                        const ftxui::Component& whereToDisplay) {
+                                     std::vector<int> &remainingAllies, int indexOfAttacker, int indexOfDefender,
+                                     const ftxui::Component &whereToDisplay) {
     switch (fightResult) {
         case 0: {
             //OutputFTXUIText("\nFight won by the attacker.\n\n", generalFightAttackerWinColor);
-            Game::AddElementToFTXUIContainer(whereToDisplay, ftxui::paragraph("Fight won by the attacker.") | color(generalFightAttackerWinColor));
+            Game::AddElementToFTXUIContainer(whereToDisplay,
+                                             ftxui::paragraph("Fight won by the attacker.") | color(
+                                                 generalFightAttackerWinColor));
             //Save the index of the undefeated attacker
             remainingFights.push_back(indexOfAttacker);
             break;
         }
         case 1: {
             //OutputFTXUIText("\nFight won by the defender.\n\n", generalFightDefenderWinColor);
-            Game::AddElementToFTXUIContainer(whereToDisplay, ftxui::paragraph("Fight won by the defender.") | color(generalFightDefenderWinColor));
+            Game::AddElementToFTXUIContainer(whereToDisplay,
+                                             ftxui::paragraph("Fight won by the defender.") | color(
+                                                 generalFightDefenderWinColor));
             //Save the index of the undefeated defender
             remainingAllies.push_back(static_cast<int>(indexOfDefender));
             break;
@@ -219,7 +223,9 @@ int Army::FTXUIAttacked(const Army &attackingArmy, int overallBoost,
     //If there are enemies left to fight, but we have no allies
     if (!remainingAttackers.empty() && remainingDefenders.empty()) {
         //OutputFTXUIText(settlementFightNoRemainingDefendersText, generalFightAttackerWinColor);
-        Game::AddElementToFTXUIContainer(whereToDisplay, ftxui::paragraph(settlementFightNoRemainingDefendersText) | color(generalFightAttackerWinColor));
+        Game::AddElementToFTXUIContainer(whereToDisplay,
+                                         ftxui::paragraph(settlementFightNoRemainingDefendersText) | color(
+                                             generalFightAttackerWinColor));
         //Battle is lost
         return -1;
     }
@@ -314,7 +320,7 @@ Army::Army(const Army &other) : defaultActionPoints(other.defaultActionPoints),
                                 totalOverallPower(other.totalOverallPower),
                                 isStationed(other.isStationed) {
     for (const auto &unit: other.assignedUnits) {
-        assignedUnits.push_back(unit);
+        assignedUnits.push_back(unit->clone());
     }
 }
 

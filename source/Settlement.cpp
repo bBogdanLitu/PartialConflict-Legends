@@ -6,9 +6,10 @@
 #include "ftxui/component/event.hpp"
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
-                       long int income_) : stationedGarrison(garrison_),
+                       int index_, long int income_) : stationedGarrison(garrison_),
                                            name(std::move(name_)),
                                            owner(owner_),
+                                           index(index_),
                                            income(income_) {
 }
 
@@ -123,30 +124,30 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
     auto onConfirmBOButtonClick = [&] {
         battleOrder.clear();
 
-       /* for (auto i: boInputStrings) {
-            if (i.empty()) {
-                i = "0";
-                //if the user didn't write anything in an input, I will assign 0 to it and let the following code do its magic and assign it
-            }
-            unsigned long value = std::stoul(i);
-            if (value >= stationedArmy.value().getUnitCount()) {
-                value = stationedArmy.value().getUnitCount() - 1; //capping to the last possible one
-            }
-            //To prevent assigning one general to fight multiple enemies (at once)
-            //If k was equal once, it will be equal the second time (like, for real),
-            //so it is wrong to restart it from 0 every time it loops.
-            unsigned long k = 0;
-            for (const unsigned long j: battleOrder) {
-                //We search for the first unassigned general and make it assigned instead.
-                while (j == value && k <= armyGeneralsMaximumIndex) {
-                    value = k;
-                    k++;
-                }
-            }
-            if (battleOrder.size() < 3) {
-                battleOrder.push_back(value);
-            }
-        } */
+        /* for (auto i: boInputStrings) {
+             if (i.empty()) {
+                 i = "0";
+                 //if the user didn't write anything in an input, I will assign 0 to it and let the following code do its magic and assign it
+             }
+             unsigned long value = std::stoul(i);
+             if (value >= stationedArmy.value().getUnitCount()) {
+                 value = stationedArmy.value().getUnitCount() - 1; //capping to the last possible one
+             }
+             //To prevent assigning one general to fight multiple enemies (at once)
+             //If k was equal once, it will be equal the second time (like, for real),
+             //so it is wrong to restart it from 0 every time it loops.
+             unsigned long k = 0;
+             for (const unsigned long j: battleOrder) {
+                 //We search for the first unassigned general and make it assigned instead.
+                 while (j == value && k <= armyGeneralsMaximumIndex) {
+                     value = k;
+                     k++;
+                 }
+             }
+             if (battleOrder.size() < 3) {
+                 battleOrder.push_back(value);
+             }
+         } */
 
         Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(std::to_string(boInputStrings.size())));
 
@@ -216,7 +217,7 @@ void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component
     }
 }
 
-ftxui::Table Settlement::CreateSettlementsTable(unsigned long indexInTheSettlementVector) const {
+ftxui::Table Settlement::CreateSettlementsTable() const {
     std::vector<std::vector<std::string> > tableContent;
     std::vector<std::string> tableRow;
     std::string neighboursConverted;
@@ -224,7 +225,7 @@ ftxui::Table Settlement::CreateSettlementsTable(unsigned long indexInTheSettleme
     tableContent.push_back(settlementTableHeaders);
 
     //Populating the (only) row
-    std::string indexConverted = std::to_string(indexInTheSettlementVector);
+    std::string indexConverted = std::to_string(index);
     tableRow.push_back(indexConverted);
     tableRow.push_back(name);
     if (owner == 0) {
@@ -267,11 +268,11 @@ ftxui::Table Settlement::CreateSettlementsTable(unsigned long indexInTheSettleme
     return table;
 }
 
-void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) const {
+void Settlement::DisplaySettlement() const {
     //Legacy display stuff
     using namespace ftxui;
 
-    Table table = CreateSettlementsTable(indexInTheSettlementVector);
+    Table table = CreateSettlementsTable();
 
     auto document = table.Render();
     auto screen =
@@ -281,10 +282,10 @@ void Settlement::DisplaySettlement(unsigned long indexInTheSettlementVector) con
     std::cout << std::endl;
 }
 
-ftxui::Element Settlement::FTXUIDisplaySettlement(unsigned long indexInTheSettlementVector) const {
+ftxui::Element Settlement::FTXUIDisplaySettlement() const {
     using namespace ftxui;
 
-    Table table = CreateSettlementsTable(indexInTheSettlementVector);
+    Table table = CreateSettlementsTable();
 
     auto document = table.Render();
 

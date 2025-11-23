@@ -17,11 +17,12 @@ private:
     std::vector<ControlPoint> ControlPoints;
     std::string name;
     int owner; //0 = player, others are enemies or contenders
+    int index; //index in the vector from Game
     long int income;
     std::vector<int> neighbours; //the index of neighbouring settlements (in the vector)
 
 public:
-    Settlement(const Garrison &garrison_, std::string name_, int owner_, long int income_);
+    Settlement(const Garrison &garrison_, std::string name_, int owner_, int index_, long int income_);
 
     void StationArmy(const Army &army);
 
@@ -60,11 +61,11 @@ public:
         stationedArmy = std::nullopt;
     }*/
 
-    [[nodiscard]] ftxui::Table CreateSettlementsTable(unsigned long indexInTheSettlementVector) const;
+    [[nodiscard]] ftxui::Table CreateSettlementsTable() const;
 
-    void DisplaySettlement(unsigned long indexInTheSettlementVector) const;
+    void DisplaySettlement() const;
 
-    [[nodiscard]] ftxui::Element FTXUIDisplaySettlement(unsigned long indexInTheSettlementVector) const;
+    [[nodiscard]] ftxui::Element FTXUIDisplaySettlement() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;

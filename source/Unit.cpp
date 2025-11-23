@@ -57,7 +57,7 @@ void Unit::UpdatePowers() {
 }
 
 ftxui::Element Unit::CreateDisplayFightTable(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
-                        const std::vector<int> &enemyEffPowers) const{
+                                             const std::vector<int> &enemyEffPowers) const {
     std::vector<std::vector<std::string> > table1Content, table2Content;
 
     table1Content.push_back(generalFightTableHeaders); //defender
@@ -124,8 +124,7 @@ void Unit::DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPo
 }
 
 ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
-                                const std::vector<int> &enemyEffPowers) const {
-
+                                       const std::vector<int> &enemyEffPowers) const {
     using namespace ftxui;
 
     auto document = CreateDisplayFightTable(enemyUnit, selfEffPowers, enemyEffPowers);
@@ -202,7 +201,8 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const
     return result;
 }
 
-int Unit::FTXUIFightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const {
+int Unit::FTXUIFightWith(const Unit &enemyUnit, const int garrisonOverallBoost,
+                         const ftxui::Component &whereToDisplay) const {
     ///STAGE 1 - FETCH STATS
 
     int result = 1;

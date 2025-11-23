@@ -2,17 +2,22 @@
 #define Game_H
 #include <iostream>
 #include <vector>
-#include "Settlement.h"
 #include <ftxui/component/loop.hpp>
+#include "Settlement.h"
+#include "Enemy.h"
 
 class Game {
 private:
     std::vector<std::shared_ptr<Unit> > StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals,
             EmperorGenerals, Captains;
-    std::vector<Settlement> Settlements;
+    std::vector<std::shared_ptr<Settlement>> Settlements;
+    std::vector<std::shared_ptr<Enemy>> Enemies;
+    std::vector<int> discoveredEnemies;
     unsigned int ans1 = 0, ans2 = 0;
     unsigned long currentTurn = 0;
     long int sarmale = 0; //this is the 'gold' of my game
+
+    void PopulateEnemies(std::ifstream enemiesJson);
 
     void PopulateGenerals(std::ifstream generalsJson);
 
@@ -29,6 +34,8 @@ private:
     void DisplayStartingGenerals() const;
 
     [[nodiscard]] ftxui::Element FTXUIDisplayStaringGenerals() const;
+
+    static void FTXUIDisplaySettlementAndArmy(const ftxui::Component& whereToDisplay, const Settlement& settlement);
 
     void ResetArmiesActionPoints() const;
 
