@@ -1,5 +1,7 @@
 #ifndef Functions_H
 #define Functions_H
+#include <fstream>
+
 #include "Constants.h"
 #include <ftxui/dom/elements.hpp>
 #include <iostream>

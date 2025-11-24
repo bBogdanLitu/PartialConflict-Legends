@@ -12,25 +12,37 @@
 //There are Control Points assigned to a Settlement
 class Settlement {
 private:
-    std::optional<Army> stationedArmy;
+    std::optional<std::shared_ptr<Army> > stationedArmy;
+    std::optional<std::shared_ptr<Army> > temporaryArmy;
     Garrison stationedGarrison;
     std::vector<ControlPoint> ControlPoints;
     std::string name;
     int owner; //0 = player, others are enemies or contenders
     int index; //index in the vector from Game
     long int income;
-    std::vector<int> neighbours; //the index of neighbouring settlements (in the vector)
+    std::vector<std::shared_ptr<Settlement> > Neighbours; //the neighbouring settlements
+
 
 public:
     Settlement(const Garrison &garrison_, std::string name_, int owner_, int index_, long int income_);
 
-    void StationArmy(const Army &army);
+    void StationArmy(const std::shared_ptr<Army> &army);
+
+    void StationTemporaryArmy(const std::shared_ptr<Army> &army);
+
+    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>);
+
+    void DetachArmy();
+
+    void DetachTemporaryArmy();
+
+    [[nodiscard]] int CheckNeighboursOwner(int) const;
 
     //Because the settlements are added before the control points by the new logic.
     void AddControlPoint(const ControlPoint &controlPoint);
 
     //This allows me to know how everything is connected to what
-    void AddNeighbour(int neighbourIndex);
+    void AddNeighbour(const std::shared_ptr<Settlement> &neighbour);
 
 
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
@@ -44,7 +56,9 @@ public:
 
     [[nodiscard]] long int getIncome() const;
 
-    [[nodiscard]] std::optional<Army> getStationedArmy() const {
+    [[nodiscard]] int getIndex() const;
+
+    [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const {
         if (stationedArmy.has_value()) {
             return stationedArmy.value();
         }

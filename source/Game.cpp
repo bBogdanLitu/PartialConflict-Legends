@@ -16,11 +16,11 @@
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
-    //int count = 0;
+    int count = 0;
     for (const auto &i: data) {
-        Enemy enemy{i["defaultTurns"], i["currentTurns"], i["name"]};
+        Enemy enemy{i["defaultTurns"], i["currentTurns"], count, i["name"]};
         Enemies.push_back(std::make_shared<Enemy>(enemy));
-        //count++;
+        count++;
     }
 }
 
@@ -82,13 +82,15 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) {
     nlohmann::json data = nlohmann::json::parse(controlPointsJson);
     for (const auto &i: data) {
         Scout scout{i["scoutViewRange"]};
-        ControlPoint controlPoint{scout, i["name"], i["ownedBy"]};
+        ControlPoint controlPoint{scout, i["name"], i["cost"], i["ownedBy"], i["connectedTo"]};
 
         Settlements[i["ownedBy"]]->AddControlPoint(controlPoint);
+        //I should also let the connected settlement know it has access to that controlPoint
+        Settlements[i["connectedTo"]]->AddControlPoint(controlPoint);
 
         //Add the connection to both the Settlements' neighbour list
-        Settlements[i["ownedBy"]]->AddNeighbour(i["connectedTo"]);
-        Settlements[i["connectedTo"]]->AddNeighbour(i["ownedBy"]);
+        Settlements[i["ownedBy"]]->AddNeighbour(Settlements[i["connectedTo"]]);
+        Settlements[i["connectedTo"]]->AddNeighbour(Settlements[i["ownedBy"]]);
     }
     controlPointsJson.close();
 }
@@ -191,7 +193,7 @@ void Game::FTXUIDisplaySettlementAndArmy(const ftxui::Component &whereToDisplay,
     if (settlement.getStationedArmy().has_value()) {
         AddElementToFTXUIContainer(whereToDisplay, paragraph("With the stationed army:"));
         AddElementToFTXUIContainer(whereToDisplay,
-                                   settlement.getStationedArmy()->FTXUIDisplayArmy());
+                                   (*settlement.getStationedArmy())->FTXUIDisplayArmy());
     } else {
         AddElementToFTXUIContainer(whereToDisplay, paragraph("With no stationed army."));
     }
@@ -204,7 +206,7 @@ void Game::ResetArmiesActionPoints() const {
         //If the settlement is owned by the player and it has an army
         if (i->getOwner() == 0 && i->getStationedArmy() != std::nullopt) {
             //We reset that army's action points to the default value
-            i->getStationedArmy()->resetActionPoints();
+            (*i->getStationedArmy())->resetActionPoints();
         }
     }
 }
@@ -261,12 +263,10 @@ int Game::Start() {
     Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
     warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
     warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
-    warlord1Army.useActionPoint(); //temporary to get the GitHub Actions CHECKS
 
-    Settlements[1]->StationArmy(warlord1Army);
+    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army));
 
-    //Add the first enemy to the discovered vector
-    discoveredEnemies.emplace_back(0);
+    //Make the first enemy discovered
     Enemies[0]->Discovered();
 
     //TEMPORARILY UNDER CONSTRUCTION
@@ -315,7 +315,7 @@ int Game::Start() {
 
         //variables that will be used
         unsigned long startingGeneralChosenIndex = 0;
-        bool checkSettlementClicked = false;
+        bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false;
 
         //button variables so I can use them in functions
         Component testButton, checkSettlementsButton, checkEnemyIntentsButton;
@@ -375,10 +375,18 @@ int Game::Start() {
         //FUNCTIONS FOR BUTTONS
 
         auto onNextTurnButtonClick = [&] {
-            NextTurn();
-            gameFlowContainer->DetachAllChildren(); //clear last turn output
-            AddElementToFTXUIContainer(gameFlowContainer, paragraph("next turn started") | color(beautifulBlue));
-            focus_y = upperLimit; //So we see the last thing added
+            if (checkEnemyIntentsClickedCurrentTurn == true) {
+                NextTurn();
+                gameFlowContainer->DetachAllChildren(); //clear last turn output
+                AddElementToFTXUIContainer(gameFlowContainer, paragraph("next turn started") | color(beautifulBlue));
+                focus_y = upperLimit; //So we see the last thing added
+
+                //reset all checks
+                checkEnemyIntentsClickedCurrentTurn = false;
+            } else {
+                AddElementToFTXUIContainer(gameFlowContainer,
+                                           paragraph("There still are things you should do!") | color(beautifulBlue));
+            }
         };
 
         auto onExitButtonClick = [&] {
@@ -401,7 +409,7 @@ int Game::Start() {
                     focus_y = upperLimit; //auto-scroll to see the bottom of the output
                 }
             }
-            if (checkSettlementClicked == false) {
+            if (checkSettlementClickedFirstTime == false) {
                 //after it being clicked the first time, we can continue the tutorial
                 AddElementToFTXUIContainer(gameFlowContainer,
                                            paragraph(" "));
@@ -409,29 +417,35 @@ int Game::Start() {
                                            paragraph("Now take a look at your enemy's intents!") | color(beautifulOrange));
                 gameContextualButtonsContainer->Add(checkEnemyIntentsButton);
             }
-            checkSettlementClicked = true;
+            checkSettlementClickedFirstTime = true;
         };
 
         auto onCheckEnemyIntentButtonClick = [&] {
-            for (auto discoveredEnemy: discoveredEnemies) {
-                std::vector<Settlement> enemySettlements = Enemies[discoveredEnemy]->getOwnedSettlements();
-                int turnsToAct = Enemies[discoveredEnemy]->getCurrentTurnsToAct();
-                std::string name = Enemies[discoveredEnemy]->getName();
+            checkEnemyIntentsClickedCurrentTurn = true;
+            //We can only get information about the enemies we have (had) contact with.
+            for (const auto &Enemy: Enemies) {
+                if (Enemy->getDiscovered() == true) {
+                    std::vector<Settlement> enemySettlements = Enemy->getOwnedSettlements();
+                    int turnsToAct = Enemy->getCurrentTurnsToAct();
+                    std::string name = Enemy->getName();
 
-                AddNewLineToFTXUIContainer(gameFlowContainer);
-                AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph(
-                                               name + " intends to act in " + std::to_string(
-                                                   turnsToAct) + " turn(s)."));
-                if (Enemies[discoveredEnemy]->getDiscovered() == true && turnsToAct == 1) {
+                    AddNewLineToFTXUIContainer(gameFlowContainer);
                     AddElementToFTXUIContainer(gameFlowContainer,
-                                               paragraph("You will likely be attacked!"));
-                }
-                AddNewLineToFTXUIContainer(gameFlowContainer);
-                AddElementToFTXUIContainer(gameFlowContainer,
-                                           paragraph("Owned settlements:"));
-                for (const auto &settlement: enemySettlements) {
-                    FTXUIDisplaySettlementAndArmy(gameFlowContainer, settlement);
+                                               paragraph(
+                                                   name + " intends to act in " + std::to_string(
+                                                       turnsToAct) + " turn(s)."));
+                    //If the discovered enemy is about to act, the player might get attacked.
+                    //A player should check what settlements they have in contact with an enemy to know where to expect it.
+                    if (turnsToAct == 1) {
+                        AddElementToFTXUIContainer(gameFlowContainer,
+                                                   paragraph("You will likely be attacked!"));
+                    }
+                    AddNewLineToFTXUIContainer(gameFlowContainer);
+                    AddElementToFTXUIContainer(gameFlowContainer,
+                                               paragraph("Owned settlements:"));
+                    for (const auto &settlement: enemySettlements) {
+                        FTXUIDisplaySettlementAndArmy(gameFlowContainer, settlement);
+                    }
                 }
             }
         };
@@ -532,7 +546,7 @@ int Game::Start() {
                        gameFlowContainer->DetachAllChildren(); //remove text that becomes useless
 
                        Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
-                       Settlements[0]->StationArmy(starterArmy);
+                       Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
                        AddElementToFTXUIContainer(gameFlowContainer, paragraph("You should check out your settlements now!") | color(importantGameInformationColor));
                        gameContextualButtonsContainer->Add(checkSettlementsButton);
                    }
@@ -563,7 +577,7 @@ int Game::Start() {
         Army starterArmy{StartingGenerals[ans2]};
         StartingGenerals.erase(StartingGenerals.begin() + ans2); //Once chosen, gone forever!
 
-        Settlements[0]->StationArmy(starterArmy);
+        Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
 
         OutputFTXUIText(starterPostChoiceText, importantGameInformationColor);
         Settlements[0]->DisplaySettlement();
@@ -593,6 +607,9 @@ int Game::Start() {
         //op<< checks for unit
         std::cout << *PlayerGenerals[12];
         std::cout << *Captains[2];
+
+        //try to
+        Enemies[0]->AdvanceTurn();
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);

@@ -145,6 +145,8 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
     //Otherwise, the battle is won (no enemies left to fight)
     return 1;
 }
+
+
 /*
 int Army::FTXUIAttacked(const Army &attackingArmy, int overallBoost,
                         const std::vector<unsigned long> &battleOrder, const ftxui::Component &whereToDisplay) const {
@@ -243,12 +245,16 @@ int Army::getTotalOverallPower() const { return totalOverallPower; }
 
 unsigned long Army::getUnitCount() const { return assignedUnits.size(); }
 
-int Army::useActionPoint() {
-    if (currentActionPoints > 0) {
-        currentActionPoints--;
-        return 1; //Action point depleted successfully
+int Army::getCurrentActionPoints() const {
+    return currentActionPoints;
+}
+
+int Army::useActionPoints(const int howMany) {
+    if (currentActionPoints - howMany >= 0) {
+        currentActionPoints -= howMany;
+        return 1; //Action points depleted successfully
     }
-    return -1; //Action points already depleted
+    return -1; //Action points already depleted - shouldn't really happen
 }
 
 void Army::resetActionPoints() {

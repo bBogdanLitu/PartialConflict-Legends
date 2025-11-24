@@ -12,20 +12,90 @@ Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
                                                        income(income_) {
 }
 
-void Settlement::StationArmy(const Army &army) {
+void Settlement::StationArmy(const std::shared_ptr<Army> &army) {
     stationedArmy = army;
+}
+
+void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
+    temporaryArmy = army;
+}
+
+//An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
+//As such, it is moved from settlement to settlement, while keeping in mind what route to take.
+//(doesn't station in a control point, it only checks if it has enough action points to pass)
+void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes) {
+    //We are certain that this current settlement neighbours the target.
+    int targetIndex = targetIndexes[targetIndexes.size() - 1];
+    int cost = 9999; //so it doesn't cry
+
+
+    //We temporarily store this army in this settlement
+    StationTemporaryArmy(travellingArmy);
+
+    for (const auto &controlPoint: ControlPoints) {
+        if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
+            targetIndex) {
+            cost = controlPoint.getTravelCost();
+            break; //found it
+        }
+    }
+    if (targetIndexes.size() == 1) {
+        //If we reached the last settlement before the target, we will try to attack the settlement
+        // after checking the actionPoints;
+        if (cost <= travellingArmy->getCurrentActionPoints()) {
+            DetachTemporaryArmy();
+            //attack
+            std::cout << "\nI shall attack the enemy!\n";
+        }
+    } else {
+        targetIndexes.pop_back(); //remove the one we will send it to right now
+        //send it forward to the next Settlement
+        for (const auto &neighbour: Neighbours) {
+            if (neighbour->getIndex() == targetIndex) {
+                if (cost <= travellingArmy->getCurrentActionPoints()) {
+                    DetachTemporaryArmy(); //we no longer need to store it here, it will pass to the next settlement.
+                    neighbour->SendArmy(travellingArmy, targetIndexes);
+                    break; //found
+                } else {
+                    //The army cannot pass further. Should try again next turn... NIGHTMARE TO IMPLEMENT
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+void Settlement::DetachArmy() {
+    stationedArmy.reset();
+}
+
+void Settlement::DetachTemporaryArmy() {
+    temporaryArmy.reset();
+}
+
+//will check if this settlement neighbours a settlement with a specific owner and will return -1 if not,
+// or the searched index if it does.
+int Settlement::CheckNeighboursOwner(int wantedOwnerIndex) const {
+    for (const auto &neighbour: Neighbours) {
+        if (neighbour->getOwner() == wantedOwnerIndex) {
+            return neighbour->getIndex();
+        }
+    }
+    return -1;
 }
 
 void Settlement::AddControlPoint(const ControlPoint &controlPoint) {
     ControlPoints.push_back(controlPoint);
 }
 
-void Settlement::AddNeighbour(int neighbourIndex) {
-    neighbours.push_back(neighbourIndex);
+void Settlement::AddNeighbour(const std::shared_ptr<Settlement> &neighbour) {
+    Neighbours.push_back(neighbour);
 }
 
+
 void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) {
-    stationedArmy.value().AddUnit(unit);
+    stationedArmy.value()->AddUnit(unit);
 }
 
 int Settlement::getOwner() const {
@@ -36,27 +106,31 @@ long int Settlement::getIncome() const {
     return income;
 }
 
+int Settlement::getIndex() const {
+    return index;
+}
+
 void Settlement::Besieged(const Army &attackingArmy) const {
     //If there is a stationedArmy, there will be a combat prompt to the player.
     //If not, then the player will only get the notification of the outcome.
     int result;
     if (stationedArmy.has_value()) {
         OutputFTXUIText(settlementStationedArmyText, allyRelatedTextColor);
-        stationedArmy.value().DisplayArmy();
+        stationedArmy.value()->DisplayArmy();
         OutputFTXUIText(chooseBattleOrderText, importantGameInformationColor);
 
         std::vector<unsigned long> battleOrder;
         //Choosing the order until it is useless to do so.
         for (unsigned long i = 0;
-             i < stationedArmy.value().getUnitCount() && i < attackingArmy.getUnitCount();
+             i < stationedArmy.value()->getUnitCount() && i < attackingArmy.getUnitCount();
              i++) {
             unsigned long a;
             OutputFTXUIText("Enemy " + std::to_string(i) + " to fight with your: ", userInputExpectedColor);
             std::cin >> a;
             //Sanitizing user input
             sanitizeInputMore(a);
-            if (a >= stationedArmy.value().getUnitCount()) {
-                a = stationedArmy.value().getUnitCount() - 1; //capping to the last possible one
+            if (a >= stationedArmy.value()->getUnitCount()) {
+                a = stationedArmy.value()->getUnitCount() - 1; //capping to the last possible one
             }
             //To prevent assigning one general to fight multiple enemies (at once)
             //If k was equal once, it will be equal the second time (like, for real),
@@ -72,7 +146,7 @@ void Settlement::Besieged(const Army &attackingArmy) const {
             battleOrder.push_back(a);
         }
 
-        result = stationedArmy.value().Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder);
+        result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder);
     } else {
         std::cout << settlementNoStationedArmyText;
         result = stationedGarrison.DirectlyAttacked(attackingArmy);
@@ -237,8 +311,8 @@ ftxui::Table Settlement::CreateSettlementsTable() const {
         tableRow.push_back("No");
     }
     tableRow.push_back(std::to_string(ControlPoints.size()));
-    for (unsigned long i = 0; i < neighbours.size(); i++) {
-        neighboursConverted += std::to_string(neighbours[i]) + " ";
+    for (unsigned long i = 0; i < Neighbours.size(); i++) {
+        neighboursConverted += std::to_string(Neighbours[i]->getIndex()) + " ";
     }
     tableRow.push_back(neighboursConverted);
 

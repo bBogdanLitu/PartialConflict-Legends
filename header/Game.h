@@ -12,7 +12,6 @@ private:
             EmperorGenerals, Captains;
     std::vector<std::shared_ptr<Settlement> > Settlements;
     std::vector<std::shared_ptr<Enemy> > Enemies;
-    std::vector<int> discoveredEnemies;
     unsigned int ans1 = 0, ans2 = 0;
     unsigned long currentTurn = 0;
     long int sarmale = 0; //this is the 'gold' of my game
