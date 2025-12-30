@@ -58,6 +58,8 @@ public:
     */
 
     static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
+
+    ~Game();
 };
 
 #endif //Game_H

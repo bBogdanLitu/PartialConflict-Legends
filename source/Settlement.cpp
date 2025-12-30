@@ -44,21 +44,24 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
         // after checking the actionPoints;
         if (cost <= travellingArmy->getCurrentActionPoints()) {
             DetachTemporaryArmy();
+            travellingArmy->useActionPoints(cost);
             //attack
             std::cout << "\nI shall attack the enemy!\n";
         }
     } else {
         targetIndexes.pop_back(); //remove the one we will send it to right now
         //send it forward to the next Settlement
-        for (const auto &neighbour: Neighbours) {
-            if (neighbour->getIndex() == targetIndex) {
-                if (cost <= travellingArmy->getCurrentActionPoints()) {
-                    DetachTemporaryArmy(); //we no longer need to store it here, it will pass to the next settlement.
-                    neighbour->SendArmy(travellingArmy, targetIndexes);
-                    break; //found
-                } else {
-                    //The army cannot pass further. Should try again next turn... NIGHTMARE TO IMPLEMENT
-                    break;
+        for (const auto &neighbourWeak: Neighbours) {
+            if (auto neighbour = neighbourWeak.lock()) {
+                if (neighbour->getIndex() == targetIndex) {
+                    if (cost <= travellingArmy->getCurrentActionPoints()) {
+                        DetachTemporaryArmy(); //we no longer need to store it here, it will pass to the next settlement.
+                        neighbour->SendArmy(travellingArmy, targetIndexes);
+                        break; //found
+                    } else {
+                        //The army cannot pass further. Should try again next turn... NIGHTMARE TO IMPLEMENT
+                        break;
+                    }
                 }
             }
         }
@@ -77,9 +80,11 @@ void Settlement::DetachTemporaryArmy() {
 //will check if this settlement neighbours a settlement with a specific owner and will return -1 if not,
 // or the searched index if it does.
 int Settlement::CheckNeighboursOwner(int wantedOwnerIndex) const {
-    for (const auto &neighbour: Neighbours) {
-        if (neighbour->getOwner() == wantedOwnerIndex) {
-            return neighbour->getIndex();
+    for (const auto &neighbourWeak: Neighbours) {
+        if (auto neighbour = neighbourWeak.lock()) {
+            if (neighbour->getOwner() == wantedOwnerIndex) {
+                return neighbour->getIndex();
+            }
         }
     }
     return -1;
@@ -312,7 +317,7 @@ ftxui::Table Settlement::CreateSettlementsTable() const {
     }
     tableRow.push_back(std::to_string(ControlPoints.size()));
     for (unsigned long i = 0; i < Neighbours.size(); i++) {
-        neighboursConverted += std::to_string(Neighbours[i]->getIndex()) + " ";
+        neighboursConverted += std::to_string(Neighbours[i].lock()->getIndex()) + " ";
     }
     tableRow.push_back(neighboursConverted);
 
@@ -361,4 +366,35 @@ ftxui::Element Settlement::FTXUIDisplaySettlement() const {
     auto document = table.Render();
 
     return document;
+}
+
+Settlement::Settlement(const Settlement &other): stationedGarrison(other.stationedGarrison),
+                                                 ControlPoints(other.ControlPoints),
+                                                 name(other.name),
+                                                 owner(other.owner),
+                                                 index(other.index),
+                                                 income(other.income) {
+    stationedArmy = other.stationedArmy;
+    temporaryArmy = other.temporaryArmy;
+    for (const auto& neighbour : other.Neighbours) {
+        Neighbours.push_back(neighbour);
+    }
+}
+
+Settlement & Settlement::operator=(Settlement other) {
+    swap(*this, other);
+    return *this;
+}
+
+
+void swap(Settlement &first, Settlement &second) {
+    std::swap(first.stationedGarrison, second.stationedGarrison);
+    std::swap(first.ControlPoints, second.ControlPoints);
+    std::swap(first.name, second.name);
+    std::swap(first.owner, second.owner);
+    std::swap(first.index, second.index);
+    std::swap(first.income, second.income);
+    std::swap(first.Neighbours, second.Neighbours);
+    std::swap(first.temporaryArmy, second.temporaryArmy);
+    std::swap(first.stationedArmy, second.stationedArmy);
 }

@@ -43,11 +43,18 @@ void Enemy::TryToAttack() const {
 }
 
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
+                    std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
+                                                    currentTurnsToAct(currentTurnsToAct_),
+                                                    name(std::move(name_)) {}
+
+/*
+Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
              const int index_, std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
                                                     currentTurnsToAct(currentTurnsToAct_),
                                                     index(index_),
                                                     name(std::move(name_)) {
 }
+*/
 
 void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement) {
     for (unsigned long i = 0; i < ownedSettlements.size(); ++i) {

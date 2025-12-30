@@ -20,7 +20,7 @@ private:
     int owner; //0 = player, others are enemies or contenders
     int index; //index in the vector from Game
     long int income;
-    std::vector<std::shared_ptr<Settlement> > Neighbours; //the neighbouring settlements
+    std::vector<std::weak_ptr<Settlement> > Neighbours; //the neighbouring settlements
 
 
 public:
@@ -80,6 +80,20 @@ public:
     void DisplaySettlement() const;
 
     [[nodiscard]] ftxui::Element FTXUIDisplaySettlement() const;
+
+    Settlement(const Settlement &other);
+
+    Settlement & operator=(Settlement other);
+
+    friend void swap(Settlement &first, Settlement &second);
+
+    ~Settlement() {
+        Neighbours.clear();
+        ControlPoints.clear();
+
+        stationedArmy.reset();
+        temporaryArmy.reset();
+    };
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;

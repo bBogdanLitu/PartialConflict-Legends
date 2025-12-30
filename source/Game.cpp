@@ -16,11 +16,11 @@
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
-    int count = 0;
+    //int count = 0;
     for (const auto &i: data) {
-        Enemy enemy{i["defaultTurns"], i["currentTurns"], count, i["name"]};
+        Enemy enemy{i["defaultTurns"], i["currentTurns"], i["name"]};
         Enemies.push_back(std::make_shared<Enemy>(enemy));
-        count++;
+        //count++;
     }
 }
 
@@ -653,4 +653,15 @@ void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
     gameFlowWindow->Add(ftxui::Renderer([&] {
         return ftxui::paragraph(" ");
     }));
+}
+
+Game::~Game() {
+    Settlements.clear();
+    StartingGenerals.clear();
+    PlayerGenerals.clear();
+    ContenderGenerals.clear();
+    WarlordGenerals.clear();
+    EmperorGenerals.clear();
+    Captains.clear();
+    Enemies.clear();
 }
