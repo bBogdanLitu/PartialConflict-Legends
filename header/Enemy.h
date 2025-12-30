@@ -9,21 +9,19 @@ class Enemy {
 private:
     bool discovered = false;
     int defaultTurnsToAct, currentTurnsToAct; //how often an enemy will attempt to do something
-    //int index;
+    int index;
     std::string name;
     std::vector<std::shared_ptr<Settlement> > ownedSettlements;
 
-    void TryToAttack() const;
+    void TryToAttack(const ftxui::Component& gameWindow) const;
 
 public:
-    //Enemy(int defaultTurnsToAct_, int currentTurnsToAct_, int index_, std::string name_);
-
-    Enemy(int defaultTurnsToAct_, int currentTurnsToAct_, std::string name_);
+    Enemy(int defaultTurnsToAct_, int currentTurnsToAct_, int index_, std::string name_);
 
     //function that either deletes or adds a settlement to the enemy
     void ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement);
 
-    void AdvanceTurn();
+    void AdvanceTurn(const ftxui::Component& gameWindow);
 
     void Discovered();
 

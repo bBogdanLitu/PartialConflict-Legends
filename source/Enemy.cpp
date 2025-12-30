@@ -6,7 +6,7 @@
 //The army will be sent to the settlement of the player (following a route)
 //In its path, it can be attacked by the player (each turn, it will station somewhere - at least temporarily)
 //Can be detected by scouts (a button on the GUI or maybe automatic warnings)
-void Enemy::TryToAttack() const {
+void Enemy::TryToAttack(const ftxui::Component &gameWindow) const {
     if (!ownedSettlements.empty()) {
         std::vector<int> targetIndexes; //LIFO
         bool foundNeighbour = false, foundNeighbourWithArmy = false;
@@ -20,7 +20,7 @@ void Enemy::TryToAttack() const {
                     foundNeighbourWithArmy = true;
 
                     targetIndexes.push_back(indexOfPlayerSettlement);
-                    settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes);
+                    settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes, index, gameWindow);
 
                     //After getting its information, the army will be detached from the settlement and sent forward.
                     settlement->DetachArmy();
@@ -41,21 +41,13 @@ void Enemy::TryToAttack() const {
         }
     }
 }
-
-Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
-             std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
-                                  currentTurnsToAct(currentTurnsToAct_),
-                                  name(std::move(name_)) {
-}
-
-/*
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
              const int index_, std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
                                                     currentTurnsToAct(currentTurnsToAct_),
                                                     index(index_),
                                                     name(std::move(name_)) {
 }
-*/
+
 
 void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement) {
     for (unsigned long i = 0; i < ownedSettlements.size(); ++i) {
@@ -69,14 +61,14 @@ void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlem
     ownedSettlements.push_back(settlement);
 }
 
-void Enemy::AdvanceTurn() {
+void Enemy::AdvanceTurn(const ftxui::Component &gameWindow) {
     currentTurnsToAct--;
     if (currentTurnsToAct == 0) {
         currentTurnsToAct = defaultTurnsToAct;
         //do stuff
         //only discovered enemies can attack the player
         if (discovered == true) {
-            TryToAttack();
+            TryToAttack(gameWindow);
         }
     }
 }

@@ -16,11 +16,11 @@
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
-    //int count = 0;
+    int count = 1; //0 is the player
     for (const auto &i: data) {
-        Enemy enemy{i["defaultTurns"], i["currentTurns"], i["name"]};
+        Enemy enemy{i["defaultTurns"], i["currentTurns"], count, i["name"]};
         Enemies.push_back(std::make_shared<Enemy>(enemy));
-        //count++;
+        count++;
     }
 }
 
@@ -226,8 +226,8 @@ void Game::NextTurn() {
     ResetArmiesActionPoints();
     CollectIncomeFromSettlements();
     //Enemy related stuff
-    for (auto enemy: Enemies) {
-        enemy->AdvanceTurn();
+    for (const auto& enemy: Enemies) {
+        enemy->AdvanceTurn(gameWindow);
     }
 }
 
@@ -329,7 +329,7 @@ int Game::Start() {
         auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
         //container where all the feedback is - made scrollable using | focusPositionRelative
-        auto gameFlowContainer = Container::Vertical({});
+        gameWindow = Container::Vertical({});
 
         //container with the game control buttons I want to use
         auto gameStateButtonsContainer = Container::Horizontal({});
@@ -376,15 +376,14 @@ int Game::Start() {
 
         auto onNextTurnButtonClick = [&] {
             if (checkEnemyIntentsClickedCurrentTurn == true) {
+                gameWindow->DetachAllChildren(); //clear last turn output
                 NextTurn();
-                gameFlowContainer->DetachAllChildren(); //clear last turn output
-                AddElementToFTXUIContainer(gameFlowContainer, paragraph("next turn started") | color(beautifulBlue));
                 focus_y = upperLimit; //So we see the last thing added
 
                 //reset all checks
                 checkEnemyIntentsClickedCurrentTurn = false;
             } else {
-                AddElementToFTXUIContainer(gameFlowContainer,
+                AddElementToFTXUIContainer(gameWindow,
                                            paragraph("There still are things you should do!") | color(beautifulBlue));
             }
         };
@@ -394,26 +393,30 @@ int Game::Start() {
         };
 
         auto onTestButtonClick = [&] {
-            AddElementToFTXUIContainer(gameFlowContainer, paragraph("stuff happening " + std::to_string(currentTurn))
+            AddElementToFTXUIContainer(gameWindow, paragraph("stuff happening " + std::to_string(currentTurn))
                                                           | color(importantGameInformationColor));
         };
 
         auto onCheckSettlementsButtonClick = [&] {
-            AddNewLineToFTXUIContainer(gameFlowContainer);
-            AddElementToFTXUIContainer(gameFlowContainer, paragraph("These are your settlements: \n"));
+            AddNewLineToFTXUIContainer(gameWindow);
+            AddElementToFTXUIContainer(gameWindow, paragraph("These are your settlements: \n"));
             //Get all player owned settlements and display their information
+            int alliedSettlementCount = 0;
             for (unsigned long i = 0; i < Settlements.size(); i++) {
                 if (Settlements[i]->getOwner() == 0) {
-                    FTXUIDisplaySettlementAndArmy(gameFlowContainer, *Settlements[i]);
-
+                    FTXUIDisplaySettlementAndArmy(gameWindow, *Settlements[i]);
+                    alliedSettlementCount++;
                     focus_y = upperLimit; //auto-scroll to see the bottom of the output
                 }
             }
+            if (alliedSettlementCount == 0) {
+                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... there are none! YOU LOST?!"));
+            }
             if (checkSettlementClickedFirstTime == false) {
                 //after it being clicked the first time, we can continue the tutorial
-                AddElementToFTXUIContainer(gameFlowContainer,
+                AddElementToFTXUIContainer(gameWindow,
                                            paragraph(" "));
-                AddElementToFTXUIContainer(gameFlowContainer,
+                AddElementToFTXUIContainer(gameWindow,
                                            paragraph("Now take a look at your enemy's intents!") | color(beautifulOrange));
                 gameContextualButtonsContainer->Add(checkEnemyIntentsButton);
             }
@@ -429,22 +432,22 @@ int Game::Start() {
                     int turnsToAct = Enemy->getCurrentTurnsToAct();
                     std::string name = Enemy->getName();
 
-                    AddNewLineToFTXUIContainer(gameFlowContainer);
-                    AddElementToFTXUIContainer(gameFlowContainer,
+                    AddNewLineToFTXUIContainer(gameWindow);
+                    AddElementToFTXUIContainer(gameWindow,
                                                paragraph(
                                                    name + " intends to act in " + std::to_string(
                                                        turnsToAct) + " turn(s)."));
                     //If the discovered enemy is about to act, the player might get attacked.
                     //A player should check what settlements they have in contact with an enemy to know where to expect it.
                     if (turnsToAct == 1) {
-                        AddElementToFTXUIContainer(gameFlowContainer,
+                        AddElementToFTXUIContainer(gameWindow,
                                                    paragraph("You will likely be attacked!"));
                     }
-                    AddNewLineToFTXUIContainer(gameFlowContainer);
-                    AddElementToFTXUIContainer(gameFlowContainer,
+                    AddNewLineToFTXUIContainer(gameWindow);
+                    AddElementToFTXUIContainer(gameWindow,
                                                paragraph("Owned settlements:"));
                     for (const auto &settlement: enemySettlements) {
-                        FTXUIDisplaySettlementAndArmy(gameFlowContainer, settlement);
+                        FTXUIDisplaySettlementAndArmy(gameWindow, settlement);
                     }
                 }
             }
@@ -461,7 +464,7 @@ int Game::Start() {
 
         //Adding all containers to the main one
 
-        gameContainer->Add(gameFlowContainer);
+        gameContainer->Add(gameWindow);
         gameContainer->Add(gameStateButtonsContainer);
         gameContainer->Add(gameContextualButtonsContainer);
 
@@ -478,7 +481,7 @@ int Game::Start() {
                        | frame
                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
                        separator(),
-                       gameFlowContainer->Render()
+                       gameWindow->Render()
                        | focusPositionRelative(0.f, focus_y) //make it scrollable only on the y-axis
                        | vscroll_indicator //to indicate where we are
                        | frame //allows for a component to overflow with content (which is later made scrollable)
@@ -517,8 +520,8 @@ int Game::Start() {
         gameContextualButtonsContainer->Add(testButton);
 
         //Game intro
-        AddElementToFTXUIContainer(gameFlowContainer, paragraph(beginningGeneralText) | color(gameAnnouncementsColor));
-        AddElementToFTXUIContainer(gameFlowContainer, FTXUIDisplayStaringGenerals());
+        AddElementToFTXUIContainer(gameWindow, paragraph(beginningGeneralText) | color(gameAnnouncementsColor));
+        AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
 
         //Every time I want to listen to input from the user, I will have to add an input such as this one
         Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption);
@@ -538,16 +541,16 @@ int Game::Start() {
                    startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
                    if (startingGeneralChosenIndex >= StartingGenerals.size()) {
                        //too high, reset and try again
-                       AddElementToFTXUIContainer(gameFlowContainer, paragraph("try again! min: 0, max: " + std::to_string(StartingGenerals.size()-1)));
+                       AddElementToFTXUIContainer(gameWindow, paragraph("try again! min: 0, max: " + std::to_string(StartingGenerals.size()-1)));
                        tempInput = "";
                    }
                    else {
                        //in range, can proceed
-                       gameFlowContainer->DetachAllChildren(); //remove text that becomes useless
+                       gameWindow->DetachAllChildren(); //remove text that becomes useless
 
                        Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
                        Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
-                       AddElementToFTXUIContainer(gameFlowContainer, paragraph("You should check out your settlements now!") | color(importantGameInformationColor));
+                       AddElementToFTXUIContainer(gameWindow, paragraph("You should check out your settlements now!") | color(importantGameInformationColor));
                        gameContextualButtonsContainer->Add(checkSettlementsButton);
                    }
                    focus_y = upperLimit;
@@ -558,7 +561,7 @@ int Game::Start() {
         });
 
         //Add the input to the gameContainer
-        gameFlowContainer->Add(starterGeneralInput);
+        gameWindow->Add(starterGeneralInput);
 
         //Display what we render AND ALL THE CHANGES
         screen.Loop(renderer);
@@ -596,7 +599,7 @@ int Game::Start() {
         //it is scripted and just a one-time occurrence.
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
         warlord1Army.DisplayArmy();
-        Settlements[0]->Besieged(warlord1Army);
+        //Settlements[0]->Besieged(warlord1Army);
 
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)
 
@@ -609,7 +612,7 @@ int Game::Start() {
         std::cout << *Captains[2];
 
         //try to
-        Enemies[0]->AdvanceTurn();
+        //Enemies[0]->AdvanceTurn();
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
@@ -643,17 +646,13 @@ void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, co
     }));
 }
 
-/*
-void Game::AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Component &thingToAdd) {
-    gameFlowWindow->Add(thingToAdd);
-}
-*/
 
 void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
     gameFlowWindow->Add(ftxui::Renderer([&] {
         return ftxui::paragraph(" ");
     }));
 }
+
 
 Game::~Game() {
     Settlements.clear();

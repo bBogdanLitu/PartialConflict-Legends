@@ -2,6 +2,7 @@
 
 #include <ftxui/component/event.hpp>
 #include "../header/Game.h"
+#include "ftxui/component/screen_interactive.hpp"
 
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
@@ -23,7 +24,7 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
-void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes) {
+void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, int sender, const ftxui::Component& gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
     int cost = 9999; //so it doesn't cry
@@ -45,8 +46,42 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
         if (cost <= travellingArmy->getCurrentActionPoints()) {
             DetachTemporaryArmy();
             travellingArmy->useActionPoints(cost);
+            int result = 0;
             //attack
-            std::cout << "\nI shall attack the enemy!\n";
+            for (const auto &neighbourWeak: Neighbours) {
+                if (auto neighbour = neighbourWeak.lock()) {
+                    if (neighbour->getIndex() == targetIndex) {
+                        Game::AddElementToFTXUIContainer(
+                            gameWindow,
+                            ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
+                                importantGameInformationColor));
+                        Game::AddNewLineToFTXUIContainer(gameWindow);
+                        result = neighbour->Besieged(*travellingArmy, gameWindow);
+
+                        switch (result) {
+                            case 1: {
+                                travellingArmy->Disband();
+                                Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Won"));
+                                break;
+                            }
+                            case -1: {
+                                neighbour->ChangeOwnership(sender);
+                                Game::AddElementToFTXUIContainer(
+                                    gameWindow,
+                                    ftxui::paragraph("Lost " + neighbour->name) | ftxui::color(
+                                        importantGameInformationColor));
+                                break;
+                            }
+                            default: {
+                                Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("asdsa32113sdasdasda"));
+                            }
+
+                        break;
+                    }
+                }
+            }
+
+            }
         }
     } else {
         targetIndexes.pop_back(); //remove the one we will send it to right now
@@ -57,7 +92,7 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                     if (cost <= travellingArmy->getCurrentActionPoints()) {
                         DetachTemporaryArmy();
                         //we no longer need to store it here, it will pass to the next settlement.
-                        neighbour->SendArmy(travellingArmy, targetIndexes);
+                        neighbour->SendArmy(travellingArmy, targetIndexes, sender, gameWindow);
                         break; //found
                     } else {
                         //The army cannot pass further. Should try again next turn... NIGHTMARE TO IMPLEMENT
@@ -116,7 +151,9 @@ int Settlement::getIndex() const {
     return index;
 }
 
-void Settlement::Besieged(const Army &attackingArmy) const {
+
+/*
+void Settlement::NBesieged(const Army &attackingArmy) const {
     //If there is a stationedArmy, there will be a combat prompt to the player.
     //If not, then the player will only get the notification of the outcome.
     int result;
@@ -171,6 +208,48 @@ void Settlement::Besieged(const Army &attackingArmy) const {
         }
     }
 }
+*/
+
+//attempt to merge the logic of NBesieged and FTXUIBesieged into one singular Besieged
+int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component& gameWindow) const {
+    //1 = victory , -1 = defeat, 0 = nothing happened (?)
+    int result = 0;
+    if (stationedArmy.has_value()) {
+        //fight with army+garrison
+        std::vector<unsigned long> battleOrder;
+        unsigned long neededInputs = stationedArmy.value()->getUnitCount();
+        std::string input1, input2, input3;
+        ftxui::Component inputComp1 = ftxui::Input(&input1, "First to battle with:"),
+        inputComp2 = ftxui::Input(&input2, "Second to battle with:"),
+        inputComp3 = ftxui::Input(&input3, "Third to battle with:");
+
+        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Your army:"));
+        Game::AddElementToFTXUIContainer(gameWindow, stationedArmy.value()->FTXUIDisplayArmy());
+        Game::AddNewLineToFTXUIContainer(gameWindow);
+        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Enemy army:"));
+        Game::AddElementToFTXUIContainer(gameWindow, attackingArmy.FTXUIDisplayArmy());
+        Game::AddNewLineToFTXUIContainer(gameWindow);
+        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Choose order:"));
+        //i will have to create a new temporary screen where I read the inputs and the come back here and use the values.
+
+        //temp
+        for (unsigned long i = 0; i < neededInputs; i++) {
+            battleOrder.emplace_back(i);
+        }
+        result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder, gameWindow);
+    }
+    else {
+        //fight with garrison
+        result = stationedGarrison.DirectlyAttacked(attackingArmy);
+    }
+    return result;
+}
+
+void Settlement::ChangeOwnership(const int newOwner) {
+    stationedArmy.reset();
+    owner = newOwner;
+}
+
 
 //If there is a stationedArmy, there will be a combat prompt to the player.
 //If not, then the player will only get the notification of the outcome.
@@ -376,8 +455,7 @@ Settlement::Settlement(const Settlement &other) : stationedArmy(other.stationedA
                                                   name(other.name),
                                                   owner(other.owner),
                                                   index(other.index),
-                                                  income(other.income)
-                                                  {
+                                                  income(other.income) {
     for (const auto &neighbour: other.Neighbours) {
         Neighbours.push_back(neighbour);
     }
@@ -386,6 +464,14 @@ Settlement::Settlement(const Settlement &other) : stationedArmy(other.stationedA
 Settlement &Settlement::operator=(Settlement other) {
     swap(*this, other);
     return *this;
+}
+
+Settlement::~Settlement() {
+    Neighbours.clear();
+    ControlPoints.clear();
+
+    stationedArmy.reset();
+    temporaryArmy.reset();
 }
 
 

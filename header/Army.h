@@ -17,16 +17,6 @@ private:
     //Will be called whenever a general is added or removed
     int TotalOverallPowerCalculation(const std::shared_ptr<Unit> &modifiedUnit);
 
-    static void evaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
-                                     std::vector<int> &remainingAllies,
-                                     int indexOfAttacker, int indexOfDefender);
-
-    /*
-    static void FTXUIEvaluateFightOutcome(int fightResult, std::vector<int> &remainingFights,
-                                          std::vector<int> &remainingAllies,
-                                          int indexOfAttacker, int indexOfDefender,
-                                          const ftxui::Component &whereToDisplay);
-    */
 
 public:
     //explicit Army(const General &general);
@@ -36,7 +26,7 @@ public:
     void AddUnit(const std::shared_ptr<Unit> &unit);
 
     [[nodiscard]] int Attacked(const Army &attackingArmy, int overallBoost, const std::vector<unsigned long> &
-                               battleOrder) const;
+                               battleOrder, const ftxui::Component &gameWindow) const;
 
     /*
     [[nodiscard]] int FTXUIAttacked(const Army &attackingArmy, int overallBoost,
@@ -60,6 +50,8 @@ public:
     void DisplayArmy() const;
 
     [[nodiscard]] ftxui::Element FTXUIDisplayArmy() const;
+
+    void Disband();
 
     //cc
     Army(const Army &other);

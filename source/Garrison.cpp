@@ -29,7 +29,7 @@ int Garrison::GetOverallPower() const { return overallPower; }
 
 int Garrison::DirectlyAttacked(const Army &attackingArmy) const {
     int actualPower = this->overallPower / garrisonOverallBoostContribution;
-    if (actualPower < attackingArmy.getTotalOverallPower()) {
+    if (actualPower > attackingArmy.getTotalOverallPower()) {
         return 1; //The battle is won by the defending garrison
     }
     return -1; //The battle is won by the attacking army

@@ -15,6 +15,7 @@ private:
     unsigned int ans1 = 0, ans2 = 0;
     unsigned long currentTurn = 0;
     long int sarmale = 0; //this is the 'gold' of my game
+    ftxui::Component gameWindow;
 
     void PopulateEnemies(std::ifstream enemiesJson);
 
@@ -50,12 +51,6 @@ public:
     //useful to add text, tables and other non-interactive elements
     static void AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd);
 
-    /*
-    //useful to add buttons, inputs and other interactive components
-    static void AddComponentToFTXUIContainer(const ftxui::Component &gameFlowWindow,
-                                             const ftxui::Component &thingToAdd);
-
-    */
 
     static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 

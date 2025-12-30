@@ -111,16 +111,12 @@ ftxui::Element Unit::CreateDisplayFightTable(const Unit &enemyUnit, const std::v
 }
 
 void Unit::DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
-                        const std::vector<int> &enemyEffPowers) const {
+                        const std::vector<int> &enemyEffPowers, const ftxui::Component& gameWindow) const {
     //Legacy display
     using namespace ftxui;
 
     auto document = CreateDisplayFightTable(enemyUnit, selfEffPowers, enemyEffPowers);
-    auto screen =
-            Screen::Create(Dimension::Full(), Dimension::Fit(document, true));
-    Render(screen, document);
-    screen.Print();
-    std::cout << std::endl;
+    Game::AddElementToFTXUIContainer(gameWindow, document);
 }
 
 /*
@@ -136,7 +132,7 @@ ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<
 void Unit::display(std::ostream &) const {
 }
 
-int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const {
+int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const ftxui::Component& gameWindow) const {
     ///STAGE 1 - FETCH STATS
 
     int result = 1;
@@ -152,7 +148,7 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost) const
 
     NullifyOrBoost(enemyPowers, selfPowers);
 
-    DisplayFight(enemyUnit, selfPowers, enemyPowers); //to display the effective stats
+    DisplayFight(enemyUnit, selfPowers, enemyPowers, gameWindow); //to display the effective stats
 
 
     //POTENTIAL FIGHT ENDING SCENARIOS DOWN BELOW!

@@ -30,7 +30,7 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>);
+    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, int, const ftxui::Component&);
 
     void DetachArmy();
 
@@ -48,7 +48,9 @@ public:
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
     void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
 
-    void Besieged(const Army &attackingArmy) const;
+    [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component& gameWindow) const;
+
+    void ChangeOwnership(int newOwner);
 
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
@@ -87,13 +89,7 @@ public:
 
     friend void swap(Settlement &first, Settlement &second);
 
-    ~Settlement() {
-        Neighbours.clear();
-        ControlPoints.clear();
-
-        stationedArmy.reset();
-        temporaryArmy.reset();
-    };
+    ~Settlement();
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;
