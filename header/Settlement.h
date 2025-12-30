@@ -30,7 +30,7 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, int, const ftxui::Component&);
+    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, int, const ftxui::Component &);
 
     void DetachArmy();
 
@@ -48,7 +48,7 @@ public:
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
     void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
 
-    [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component& gameWindow) const;
+    [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const;
 
     void ChangeOwnership(int newOwner);
 

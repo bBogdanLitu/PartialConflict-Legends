@@ -226,7 +226,7 @@ void Game::NextTurn() {
     ResetArmiesActionPoints();
     CollectIncomeFromSettlements();
     //Enemy related stuff
-    for (const auto& enemy: Enemies) {
+    for (const auto &enemy: Enemies) {
         enemy->AdvanceTurn(gameWindow);
     }
 }
@@ -394,7 +394,7 @@ int Game::Start() {
 
         auto onTestButtonClick = [&] {
             AddElementToFTXUIContainer(gameWindow, paragraph("stuff happening " + std::to_string(currentTurn))
-                                                          | color(importantGameInformationColor));
+                                                   | color(importantGameInformationColor));
         };
 
         auto onCheckSettlementsButtonClick = [&] {
@@ -541,23 +541,27 @@ int Game::Start() {
                    startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
                    if (startingGeneralChosenIndex >= StartingGenerals.size()) {
                        //too high, reset and try again
-                       AddElementToFTXUIContainer(gameWindow, paragraph("try again! min: 0, max: " + std::to_string(StartingGenerals.size()-1)));
+                       AddElementToFTXUIContainer(
+                           gameWindow, paragraph(
+                               "try again! min: 0, max: " + std::to_string(StartingGenerals.size() - 1)));
                        tempInput = "";
-                   }
-                   else {
+                   } else {
                        //in range, can proceed
                        gameWindow->DetachAllChildren(); //remove text that becomes useless
 
                        Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
                        Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
-                       AddElementToFTXUIContainer(gameWindow, paragraph("You should check out your settlements now!") | color(importantGameInformationColor));
+                       AddElementToFTXUIContainer(
+                           gameWindow,
+                           paragraph("You should check out your settlements now!") | color(
+                               importantGameInformationColor));
                        gameContextualButtonsContainer->Add(checkSettlementsButton);
                    }
                    focus_y = upperLimit;
                }
                return true; //Catch the enter and do something else
            }
-            return false; //Don't mess with any other event
+           return false; //Don't mess with any other event
         });
 
         //Add the input to the gameContainer

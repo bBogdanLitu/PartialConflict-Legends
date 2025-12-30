@@ -111,7 +111,7 @@ ftxui::Element Unit::CreateDisplayFightTable(const Unit &enemyUnit, const std::v
 }
 
 void Unit::DisplayFight(const Unit &enemyUnit, const std::vector<int> &selfEffPowers,
-                        const std::vector<int> &enemyEffPowers, const ftxui::Component& gameWindow) const {
+                        const std::vector<int> &enemyEffPowers, const ftxui::Component &gameWindow) const {
     //Legacy display
     using namespace ftxui;
 
@@ -132,7 +132,7 @@ ftxui::Element Unit::FTXUIDisplayFight(const Unit &enemyUnit, const std::vector<
 void Unit::display(std::ostream &) const {
 }
 
-int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const ftxui::Component& gameWindow) const {
+int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const ftxui::Component &gameWindow) const {
     ///STAGE 1 - FETCH STATS
 
     int result = 1;

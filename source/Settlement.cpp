@@ -2,7 +2,7 @@
 
 #include <ftxui/component/event.hpp>
 #include "../header/Game.h"
-#include "ftxui/component/screen_interactive.hpp"
+#include <ftxui/component/screen_interactive.hpp>
 
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
@@ -24,7 +24,8 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
-void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, int sender, const ftxui::Component& gameWindow) {
+void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, int sender,
+                          const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
     int cost = 9999; //so it doesn't cry
@@ -46,7 +47,6 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
         if (cost <= travellingArmy->getCurrentActionPoints()) {
             DetachTemporaryArmy();
             travellingArmy->useActionPoints(cost);
-            int result = 0;
             //attack
             for (const auto &neighbourWeak: Neighbours) {
                 if (auto neighbour = neighbourWeak.lock()) {
@@ -56,7 +56,7 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                             ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
                                 importantGameInformationColor));
                         Game::AddNewLineToFTXUIContainer(gameWindow);
-                        result = neighbour->Besieged(*travellingArmy, gameWindow);
+                        int result = neighbour->Besieged(*travellingArmy, gameWindow);
 
                         switch (result) {
                             case 1: {
@@ -76,10 +76,10 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                                 Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("asdsa32113sdasdasda"));
                             }
 
-                        break;
+                            break;
+                        }
                     }
                 }
-            }
 
             }
         }
@@ -211,7 +211,7 @@ void Settlement::NBesieged(const Army &attackingArmy) const {
 */
 
 //attempt to merge the logic of NBesieged and FTXUIBesieged into one singular Besieged
-int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component& gameWindow) const {
+int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const {
     //1 = victory , -1 = defeat, 0 = nothing happened (?)
     int result = 0;
     if (stationedArmy.has_value()) {
@@ -220,8 +220,8 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component& game
         unsigned long neededInputs = stationedArmy.value()->getUnitCount();
         std::string input1, input2, input3;
         ftxui::Component inputComp1 = ftxui::Input(&input1, "First to battle with:"),
-        inputComp2 = ftxui::Input(&input2, "Second to battle with:"),
-        inputComp3 = ftxui::Input(&input3, "Third to battle with:");
+                inputComp2 = ftxui::Input(&input2, "Second to battle with:"),
+                inputComp3 = ftxui::Input(&input3, "Third to battle with:");
 
         Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Your army:"));
         Game::AddElementToFTXUIContainer(gameWindow, stationedArmy.value()->FTXUIDisplayArmy());
@@ -236,9 +236,9 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component& game
         for (unsigned long i = 0; i < neededInputs; i++) {
             battleOrder.emplace_back(i);
         }
-        result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder, gameWindow);
-    }
-    else {
+        result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder,
+                                                 gameWindow);
+    } else {
         //fight with garrison
         result = stationedGarrison.DirectlyAttacked(attackingArmy);
     }
