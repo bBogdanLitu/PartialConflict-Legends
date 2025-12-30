@@ -43,9 +43,10 @@ void Enemy::TryToAttack() const {
 }
 
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
-                    std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
-                                                    currentTurnsToAct(currentTurnsToAct_),
-                                                    name(std::move(name_)) {}
+             std::string name_) : defaultTurnsToAct(defaultTurnsToAct_),
+                                  currentTurnsToAct(currentTurnsToAct_),
+                                  name(std::move(name_)) {
+}
 
 /*
 Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,

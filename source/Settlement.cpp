@@ -55,7 +55,8 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
             if (auto neighbour = neighbourWeak.lock()) {
                 if (neighbour->getIndex() == targetIndex) {
                     if (cost <= travellingArmy->getCurrentActionPoints()) {
-                        DetachTemporaryArmy(); //we no longer need to store it here, it will pass to the next settlement.
+                        DetachTemporaryArmy();
+                        //we no longer need to store it here, it will pass to the next settlement.
                         neighbour->SendArmy(travellingArmy, targetIndexes);
                         break; //found
                     } else {
@@ -368,20 +369,21 @@ ftxui::Element Settlement::FTXUIDisplaySettlement() const {
     return document;
 }
 
-Settlement::Settlement(const Settlement &other): stationedGarrison(other.stationedGarrison),
-                                                 ControlPoints(other.ControlPoints),
-                                                 name(other.name),
-                                                 owner(other.owner),
-                                                 index(other.index),
-                                                 income(other.income) {
-    stationedArmy = other.stationedArmy;
-    temporaryArmy = other.temporaryArmy;
-    for (const auto& neighbour : other.Neighbours) {
+Settlement::Settlement(const Settlement &other) : stationedArmy(other.stationedArmy),
+                                                  temporaryArmy(other.temporaryArmy),
+                                                  stationedGarrison(other.stationedGarrison),
+                                                  ControlPoints(other.ControlPoints),
+                                                  name(other.name),
+                                                  owner(other.owner),
+                                                  index(other.index),
+                                                  income(other.income)
+                                                  {
+    for (const auto &neighbour: other.Neighbours) {
         Neighbours.push_back(neighbour);
     }
 }
 
-Settlement & Settlement::operator=(Settlement other) {
+Settlement &Settlement::operator=(Settlement other) {
     swap(*this, other);
     return *this;
 }

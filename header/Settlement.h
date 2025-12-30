@@ -83,7 +83,7 @@ public:
 
     Settlement(const Settlement &other);
 
-    Settlement & operator=(Settlement other);
+    Settlement &operator=(Settlement other);
 
     friend void swap(Settlement &first, Settlement &second);
 
