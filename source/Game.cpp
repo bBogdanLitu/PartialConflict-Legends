@@ -396,7 +396,7 @@ int Game::Start() {
         };
 
         auto onTestButtonClick = [&] {
-            for (const auto& settlementPtr : Settlements) {
+            for (const auto &settlementPtr: Settlements) {
                 AddElementToFTXUIContainer(gameWindow, settlementPtr->FTXUIDisplaySettlement());
             }
         };

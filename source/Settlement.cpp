@@ -24,7 +24,7 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
-void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy* sender,
+void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *sender,
                           const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
@@ -152,15 +152,11 @@ int Settlement::getIndex() const {
     return index;
 }
 
-std::optional<std::shared_ptr<Army>> Settlement::getStationedArmy() const {
+std::optional<std::shared_ptr<Army> > Settlement::getStationedArmy() const {
     if (stationedArmy.has_value()) {
         return stationedArmy.value();
     }
     return std::nullopt;
-}
-
-std::weak_ptr<Settlement> Settlement::getWeakSelfPtr() const {
-    return weakSelfPtr;
 }
 
 //attempt to merge the logic of NBesieged and FTXUIBesieged into one singular Besieged
@@ -197,7 +193,6 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
                 battleOrder.emplace(battleOrder.begin(), std::stoul(input1));
                 screen.Exit();
             }
-
         };
         Component battleInputContainer = Container::Vertical({});
         Component inputReaderContainer = Container::Vertical({});
@@ -217,7 +212,8 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         Game::AddNewLineToFTXUIContainer(gameWindow);
 
         battleInformationContainer->Add(Renderer([&] {
-            return paragraph("Your settlement " + name + " is being attacked! You must choose the battle order.") | color(importantGameInformationColor);
+            return paragraph("Your settlement " + name + " is being attacked! You must choose the battle order.") |
+                   color(importantGameInformationColor);
         }));
         battleInformationContainer->Add(Renderer([&] {
             return paragraph("Your army:");
@@ -235,7 +231,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             return paragraph("Choose order:");
         }));
 
-        inputComp1 |= CatchEvent([&](const Event& event) {
+        inputComp1 |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
                 return true; //it's not a digit, catch it and prevent it from modifying tempInput
             }
@@ -245,7 +241,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             }
             return false; //it's a digit that we want
         });
-        inputComp2 |= CatchEvent([&](const Event& event) {
+        inputComp2 |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
                 return true; //it's not a digit, catch it and prevent it from modifying tempInput
             }
@@ -255,7 +251,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             }
             return false; //it's a digit that we want
         });
-        inputComp3 |= CatchEvent([&](const Event& event) {
+        inputComp3 |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
                 return true; //it's not a digit, catch it and prevent it from modifying tempInput
             }
@@ -267,16 +263,16 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         });
 
 
-        inputReaderContainer -> Add(inputComp1);
+        inputReaderContainer->Add(inputComp1);
         if (neededInputs > 1) {
-            inputReaderContainer -> Add(inputComp2);
+            inputReaderContainer->Add(inputComp2);
         }
         if (neededInputs > 2) {
-            inputReaderContainer -> Add(inputComp3);
+            inputReaderContainer->Add(inputComp3);
         }
-        inputReaderContainer -> Add(doneButton);
-        battleInputContainer -> Add(battleInformationContainer);
-        battleInputContainer -> Add(inputReaderContainer);
+        inputReaderContainer->Add(doneButton);
+        battleInputContainer->Add(battleInformationContainer);
+        battleInputContainer->Add(inputReaderContainer);
 
         auto renderer = Renderer(battleInputContainer, [&] {
             return vbox({
@@ -299,12 +295,12 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         }
         for (unsigned long i = 0; i < battleOrder.size(); i++) {
             if (battleOrder[i] >= neededInputs) {
-                battleOrder[i] = neededInputs- 1; //capping to the last possible one
+                battleOrder[i] = neededInputs - 1; //capping to the last possible one
             }
         }
         //We search for the first unassigned general and make it assigned instead.
         for (unsigned long i = 1; i < battleOrder.size(); i++) {
-            for (unsigned long j = 0 ; j < i; j++) {
+            for (unsigned long j = 0; j < i; j++) {
                 while (battleOrder[i] == battleOrder[j] && k < neededInputs) {
                     battleOrder[i] = k;
                     k++;
@@ -329,7 +325,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
     return result;
 }
 
-void Settlement::ChangeOwnership(Enemy* newOwner) {
+void Settlement::ChangeOwnership(Enemy *newOwner) {
     stationedArmy.reset();
     owner = newOwner->getIndex();
     if (auto selfPtr = weakSelfPtr.lock()) {

@@ -24,7 +24,6 @@ private:
     std::vector<std::weak_ptr<Settlement> > Neighbours; //the neighbouring settlements
     std::weak_ptr<Settlement> weakSelfPtr;
 
-
 public:
     Settlement(const Garrison &garrison_, std::string name_, int owner_, int index_, long int income_);
 
@@ -32,7 +31,7 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy*, const ftxui::Component &);
+    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy *, const ftxui::Component &);
 
     void DetachArmy();
 
@@ -52,7 +51,7 @@ public:
 
     [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const;
 
-    void ChangeOwnership(Enemy* newOwner);
+    void ChangeOwnership(Enemy *newOwner);
 
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
@@ -65,8 +64,6 @@ public:
     [[nodiscard]] int getIndex() const;
 
     [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const;
-
-    [[nodiscard]] std::weak_ptr<Settlement> getWeakSelfPtr() const;
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
         controlPoints[index].StationArmy(army);
