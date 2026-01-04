@@ -21,6 +21,18 @@ public:
         os << "This garrison has an overall of: "<< garrison.overallPower <<"\n";
         return os;
     }
+
+    friend bool operator==(const Garrison &lhs, const Garrison &rhs) {
+        return lhs.powerLevel == rhs.powerLevel
+               && lhs.mPower == rhs.mPower
+               && lhs.rPower == rhs.rPower
+               && lhs.aPower == rhs.aPower
+               && lhs.overallPower == rhs.overallPower;
+    }
+
+    friend bool operator!=(const Garrison &lhs, const Garrison &rhs) {
+        return !(lhs == rhs);
+    }
 };
 
 

@@ -8,6 +8,7 @@
 #include "Garrison.h"
 
 
+class Enemy;
 //The objective of the game, conquering them leads to victory. Has an Army and/or a (weak) Garrison stationed.
 //There are Control Points assigned to a Settlement
 class Settlement {
@@ -21,6 +22,7 @@ private:
     int index; //index in the vector from Game
     long int income;
     std::vector<std::weak_ptr<Settlement> > Neighbours; //the neighbouring settlements
+    std::weak_ptr<Settlement> weakSelfPtr;
 
 
 public:
@@ -30,7 +32,7 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, int, const ftxui::Component &);
+    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy*, const ftxui::Component &);
 
     void DetachArmy();
 
@@ -50,9 +52,11 @@ public:
 
     [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const;
 
-    void ChangeOwnership(int newOwner);
+    void ChangeOwnership(Enemy* newOwner);
 
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
+
+    void setSelfPtr(const std::shared_ptr<Settlement> &settlement);
 
     [[nodiscard]] int getOwner() const;
 
@@ -60,12 +64,9 @@ public:
 
     [[nodiscard]] int getIndex() const;
 
-    [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const {
-        if (stationedArmy.has_value()) {
-            return stationedArmy.value();
-        }
-        return std::nullopt;
-    }
+    [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const;
+
+    [[nodiscard]] std::weak_ptr<Settlement> getWeakSelfPtr() const;
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
         controlPoints[index].StationArmy(army);
@@ -90,6 +91,16 @@ public:
     friend void swap(Settlement &first, Settlement &second);
 
     ~Settlement();
+
+    friend bool operator==(const Settlement &lhs, const Settlement &rhs) {
+        return lhs.name == rhs.name
+               && lhs.owner == rhs.owner
+               && lhs.index == rhs.index;
+    }
+
+    friend bool operator!=(const Settlement &lhs, const Settlement &rhs) {
+        return !(lhs == rhs);
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Settlement& settlement) {
         int k = 0;

@@ -24,7 +24,7 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
-void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, int sender,
+void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy* sender,
                           const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
@@ -61,11 +61,13 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                         switch (result) {
                             case 1: {
                                 travellingArmy->Disband();
+
                                 Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Won"));
                                 break;
                             }
                             case -1: {
                                 neighbour->ChangeOwnership(sender);
+                                neighbour->StationArmy(travellingArmy);
                                 Game::AddElementToFTXUIContainer(
                                     gameWindow,
                                     ftxui::paragraph("Lost " + neighbour->name) | ftxui::color(
@@ -80,7 +82,6 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                         }
                     }
                 }
-
             }
         }
     } else {
@@ -151,91 +152,174 @@ int Settlement::getIndex() const {
     return index;
 }
 
-
-/*
-void Settlement::NBesieged(const Army &attackingArmy) const {
-    //If there is a stationedArmy, there will be a combat prompt to the player.
-    //If not, then the player will only get the notification of the outcome.
-    int result;
+std::optional<std::shared_ptr<Army>> Settlement::getStationedArmy() const {
     if (stationedArmy.has_value()) {
-        OutputFTXUIText(settlementStationedArmyText, allyRelatedTextColor);
-        stationedArmy.value()->DisplayArmy();
-        OutputFTXUIText(chooseBattleOrderText, importantGameInformationColor);
-
-        std::vector<unsigned long> battleOrder;
-        //Choosing the order until it is useless to do so.
-        for (unsigned long i = 0;
-             i < stationedArmy.value()->getUnitCount() && i < attackingArmy.getUnitCount();
-             i++) {
-            unsigned long a;
-            OutputFTXUIText("Enemy " + std::to_string(i) + " to fight with your: ", userInputExpectedColor);
-            std::cin >> a;
-            //Sanitizing user input
-            sanitizeInputMore(a);
-            if (a >= stationedArmy.value()->getUnitCount()) {
-                a = stationedArmy.value()->getUnitCount() - 1; //capping to the last possible one
-            }
-            //To prevent assigning one general to fight multiple enemies (at once)
-            //If k was equal once, it will be equal the second time (like, for real),
-            //so it is wrong to restart it from 0 every time it loops.
-            unsigned long k = 0;
-            for (const unsigned long j: battleOrder) {
-                //We search for the first unassigned general and make it assigned instead.
-                while (j == a && k <= armyGeneralsMaximumIndex) {
-                    a = k;
-                    k++;
-                }
-            }
-            battleOrder.push_back(a);
-        }
-
-        result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder);
-    } else {
-        std::cout << settlementNoStationedArmyText;
-        result = stationedGarrison.DirectlyAttacked(attackingArmy);
+        return stationedArmy.value();
     }
-    switch (result) {
-        case 1: {
-            OutputFTXUIText(this->name + settlementBesiegeFailedText, importantGameInformationColor);
-            break;
-        }
-        case -1: {
-            OutputFTXUIText(this->name + settlementBesiegeSuccessText, importantGameInformationColor);
-            break;
-        }
-        default: {
-            std::cerr << "Undefined behaviour detected!" << "\n";
-        }
-    }
+    return std::nullopt;
 }
-*/
+
+std::weak_ptr<Settlement> Settlement::getWeakSelfPtr() const {
+    return weakSelfPtr;
+}
 
 //attempt to merge the logic of NBesieged and FTXUIBesieged into one singular Besieged
+//If there is a stationedArmy, there will be a combat prompt to the player.
+//If not, then the player will only get the notification of the outcome.
 int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const {
     //1 = victory , -1 = defeat, 0 = nothing happened (?)
     int result = 0;
     if (stationedArmy.has_value()) {
         //fight with army+garrison
-        std::vector<unsigned long> battleOrder;
+        std::vector<unsigned long> battleOrder = {0};
         unsigned long neededInputs = stationedArmy.value()->getUnitCount();
         std::string input1, input2, input3;
-        ftxui::Component inputComp1 = ftxui::Input(&input1, "First to battle with:"),
-                inputComp2 = ftxui::Input(&input2, "Second to battle with:"),
-                inputComp3 = ftxui::Input(&input3, "Third to battle with:");
+        using namespace ftxui;
 
-        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Your army:"));
+        auto screen = ScreenInteractive::FitComponent();
+
+        auto doneStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+                                                Color::Default, Color::White);
+        auto onDoneButtonClick = [&] {
+            //I only check if they are empty. Any other verification (whether they are digits) will be done elsewhere.
+            battleOrder.clear();
+            if (neededInputs > 2) {
+                if (!input3.empty()) {
+                    battleOrder.emplace(battleOrder.begin(), std::stoul(input3));
+                }
+            }
+            if (neededInputs > 1) {
+                if (!input2.empty()) {
+                    battleOrder.emplace(battleOrder.begin(), std::stoul(input2));
+                }
+            }
+            if (!input1.empty()) {
+                battleOrder.emplace(battleOrder.begin(), std::stoul(input1));
+                screen.Exit();
+            }
+
+        };
+        Component battleInputContainer = Container::Vertical({});
+        Component inputReaderContainer = Container::Vertical({});
+        Component battleInformationContainer = Container::Vertical({});
+
+        Component inputComp1 = ftxui::Input(&input1, "First enemy to battle with your:"),
+                inputComp2 = ftxui::Input(&input2, "Second enemy to battle with your:"),
+                inputComp3 = ftxui::Input(&input3, "Third enemy to battle with your:");
+        Component doneButton = Button("Done", onDoneButtonClick, doneStyle);
+
+        //information that will be shown after choosing the battle order.
         Game::AddElementToFTXUIContainer(gameWindow, stationedArmy.value()->FTXUIDisplayArmy());
         Game::AddNewLineToFTXUIContainer(gameWindow);
-        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Enemy army:"));
+        Game::AddElementToFTXUIContainer(gameWindow, paragraph("VERSUS") | color(beautifulOrange));
+        Game::AddNewLineToFTXUIContainer(gameWindow);
         Game::AddElementToFTXUIContainer(gameWindow, attackingArmy.FTXUIDisplayArmy());
         Game::AddNewLineToFTXUIContainer(gameWindow);
-        Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Choose order:"));
-        //i will have to create a new temporary screen where I read the inputs and the come back here and use the values.
 
-        //temp
-        for (unsigned long i = 0; i < neededInputs; i++) {
-            battleOrder.emplace_back(i);
+        battleInformationContainer->Add(Renderer([&] {
+            return paragraph("Your settlement " + name + " is being attacked! You must choose the battle order.") | color(importantGameInformationColor);
+        }));
+        battleInformationContainer->Add(Renderer([&] {
+            return paragraph("Your army:");
+        }));
+        battleInformationContainer->Add(Renderer([&] {
+            return stationedArmy.value()->FTXUIDisplayArmy();
+        }));
+        battleInformationContainer->Add(Renderer([&] {
+            return paragraph("Enemy army:");
+        }));
+        battleInformationContainer->Add(Renderer([&] {
+            return attackingArmy.FTXUIDisplayArmy();
+        }));
+        battleInformationContainer->Add(Renderer([&] {
+            return paragraph("Choose order:");
+        }));
+
+        inputComp1 |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            //check if the digit is any other than 0, 1, 2, and catch it.
+            if (event.is_character() && event.character()[0] > '2') {
+                return true;
+            }
+            return false; //it's a digit that we want
+        });
+        inputComp2 |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            //check if the digit is any other than 0, 1, 2, and catch it.
+            if (event.is_character() && event.character()[0] > '2') {
+                return true;
+            }
+            return false; //it's a digit that we want
+        });
+        inputComp3 |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            //check if the digit is any other than 0, 1, 2, and catch it.
+            if (event.is_character() && event.character()[0] > '2') {
+                return true;
+            }
+            return false; //it's a digit that we want
+        });
+
+
+        inputReaderContainer -> Add(inputComp1);
+        if (neededInputs > 1) {
+            inputReaderContainer -> Add(inputComp2);
         }
+        if (neededInputs > 2) {
+            inputReaderContainer -> Add(inputComp3);
+        }
+        inputReaderContainer -> Add(doneButton);
+        battleInputContainer -> Add(battleInformationContainer);
+        battleInputContainer -> Add(inputReaderContainer);
+
+        auto renderer = Renderer(battleInputContainer, [&] {
+            return vbox({
+                battleInputContainer->Render(),
+            });
+        });
+
+        //only makes sense to let the player choose if he has more than 1 general in his army
+        if (neededInputs > 1) {
+            screen.Loop(renderer);
+        }
+
+
+        //To prevent assigning one general to fight multiple enemies (at once)
+        //If k was equal once, it will be equal the second time (like, for real),
+        //so it is wrong to restart it from 0 every time it loops.
+        unsigned long k = 0;
+        while (battleOrder.size() < neededInputs) {
+            battleOrder.emplace_back(2);
+        }
+        for (unsigned long i = 0; i < battleOrder.size(); i++) {
+            if (battleOrder[i] >= neededInputs) {
+                battleOrder[i] = neededInputs- 1; //capping to the last possible one
+            }
+        }
+        //We search for the first unassigned general and make it assigned instead.
+        for (unsigned long i = 1; i < battleOrder.size(); i++) {
+            for (unsigned long j = 0 ; j < i; j++) {
+                while (battleOrder[i] == battleOrder[j] && k < neededInputs) {
+                    battleOrder[i] = k;
+                    k++;
+                }
+            }
+        }
+
+        /*Will keep this temporarily if the method above ever backfires
+        //temp
+        auto battleOrderP = battleOrder;
+        battleOrderP.clear();
+        for (unsigned long i = 0; i < neededInputs; i++) {
+            battleOrderP.emplace_back(i);
+        }
+        */
         result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder,
                                                  gameWindow);
     } else {
@@ -245,133 +329,17 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
     return result;
 }
 
-void Settlement::ChangeOwnership(const int newOwner) {
+void Settlement::ChangeOwnership(Enemy* newOwner) {
     stationedArmy.reset();
-    owner = newOwner;
+    owner = newOwner->getIndex();
+    if (auto selfPtr = weakSelfPtr.lock()) {
+        newOwner->ModifySettlementOwnership(selfPtr);
+    }
 }
 
-
-//If there is a stationedArmy, there will be a combat prompt to the player.
-//If not, then the player will only get the notification of the outcome.
-/*void Settlement::FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const {
-    int result;
-    std::array<std::string, 3> boInputStrings;
-    std::vector<unsigned long> battleOrder, availableAllyIndexes;
-    using namespace ftxui; //it's a pain otherwise
-    //STYLE
-    //for input
-    InputOption inputOption = InputOption::Spacious();
-    inputOption.transform = [](InputState state) {
-        state.element |= color(userInputExpectedColor);
-        if (state.focused) {
-            state.element |= bgcolor(Color::Default);
-        } else if (state.hovered) {
-            state.element |= bgcolor(Color::Grey15);
-        } else {
-            state.element |= bgcolor(Color::Grey27);
-        }
-        return state.element;
-    };
-
-    //for button
-    auto confirmBOButtonStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
-                                                       Color::Default, Color::White);
-
-    //FUNCTIONS
-    //for buttons
-    auto onConfirmBOButtonClick = [&] {
-        battleOrder.clear();
-
-        for (auto i: boInputStrings) {
-             if (i.empty()) {
-                 i = "0";
-                 //if the user didn't write anything in an input, I will assign 0 to it and let the following code do its magic and assign it
-             }
-             unsigned long value = std::stoul(i);
-             if (value >= stationedArmy.value().getUnitCount()) {
-                 value = stationedArmy.value().getUnitCount() - 1; //capping to the last possible one
-             }
-             //To prevent assigning one general to fight multiple enemies (at once)
-             //If k was equal once, it will be equal the second time (like, for real),
-             //so it is wrong to restart it from 0 every time it loops.
-             unsigned long k = 0;
-             for (const unsigned long j: battleOrder) {
-                 //We search for the first unassigned general and make it assigned instead.
-                 while (j == value && k <= armyGeneralsMaximumIndex) {
-                     value = k;
-                     k++;
-                 }
-             }
-             if (battleOrder.size() < 3) {
-                 battleOrder.push_back(value);
-             }
-         }
-
-        //and I can finally get the result of the fight (after fixing the display stuff in Army)
-        result = 1;
-    };
-
-    if (stationedArmy.has_value()) {
-        Game::AddElementToFTXUIContainer(whereToDisplay,
-                                         paragraph(settlementStationedArmyText) | color(allyRelatedTextColor));
-        Game::AddElementToFTXUIContainer(whereToDisplay, stationedArmy.value().FTXUIDisplayArmy());
-        Game::AddElementToFTXUIContainer(whereToDisplay,
-                                         paragraph(chooseBattleOrderText) | color(allyRelatedTextColor));
-
-
-        for (unsigned long i = 0; i < stationedArmy.value().getUnitCount(); i++) {
-            availableAllyIndexes.push_back(i);
-        }
-
-        //Choosing the order until it is useless to do so.
-        for (unsigned long i = 0;
-             i < stationedArmy.value().getUnitCount() && i < attackingArmy.getUnitCount();
-             i++) {
-            Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(std::to_string(boInputStrings.size())));
-            //to get the battle order I will use an input
-            Component boInput = Input(boInputStrings[i],
-                                      "Enemy with index " + std::to_string(i) + " to fight with your: ", inputOption);
-
-            boInput |= CatchEvent([&](const Event &event) {
-                if (event.is_character() && !std::isdigit(event.character()[0])) {
-                    return true; //it isn't a digit and shouldn't modify the input
-                }
-                if (event == Event::Return) {
-                    return true; //the input doesn't require more than one line
-                }
-                return false;
-            });
-            Game::AddComponentToFTXUIContainer(whereToDisplay, boInput);
-            Game::AddElementToFTXUIContainer(whereToDisplay, paragraph(" ")); //newline
-        }
-
-        //to validate the results, I will add a button that should be pressed when the user has entered everything
-        auto confirmBOButton = Button("Confirm order", onConfirmBOButtonClick, confirmBOButtonStyle);
-        Game::AddComponentToFTXUIContainer(whereToDisplay, confirmBOButton);
-    } else {
-        Game::AddElementToFTXUIContainer(whereToDisplay,
-                                         paragraph(settlementNoStationedArmyText) | color(allyRelatedTextColor));
-        result = stationedGarrison.DirectlyAttacked(attackingArmy);
-    }
-
-    switch (result) {
-        case 1: {
-            Game::AddElementToFTXUIContainer(whereToDisplay,
-                                             paragraph(this->name + settlementBesiegeFailedText) | color(
-                                                 importantGameInformationColor));
-            break;
-        }
-        case -1: {
-            Game::AddElementToFTXUIContainer(whereToDisplay,
-                                             paragraph(this->name + settlementBesiegeSuccessText) | color(
-                                                 importantGameInformationColor));
-            break;
-        }
-        default: {
-            std::cerr << "Undefined behaviour detected!" << "\n";
-        }
-    }
-}*/
+void Settlement::setSelfPtr(const std::shared_ptr<Settlement> &settlement) {
+    weakSelfPtr = settlement;
+}
 
 ftxui::Table Settlement::CreateSettlementsTable() const {
     std::vector<std::vector<std::string> > tableContent;

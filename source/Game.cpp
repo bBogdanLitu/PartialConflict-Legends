@@ -66,9 +66,12 @@ void Game::PopulateSettlements(std::ifstream settlementsJson) {
     int count = 0;
     for (const auto &i: data) {
         Garrison garrison(i["startingGarrisonLevel"]); //Create the garrison according to config
-        Settlement settlement{garrison, i["name"], i["owner"], count, i["income"]};
-        Settlements.push_back(std::make_shared<Settlement>(settlement));
+        auto settlement = std::make_shared<Settlement>(garrison, i["name"], i["owner"], count, i["income"]);
         //Settlement is created and added to this collection
+        Settlements.push_back(settlement);
+        //The settlement receives a ptr to itself (useful for transfers)
+        Settlements.back()->setSelfPtr(Settlements.back());
+
         //The enemy receives a pointer to that settlement (from the vector)
         if (static_cast<int>(i["owner"]) > 0) {
             Enemies[static_cast<int>(i["owner"]) - 1]->ModifySettlementOwnership(Settlements[count]);
@@ -322,7 +325,7 @@ int Game::Start() {
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
-        float step = 0.05f;
+        float step = 0.1f;
         float upperLimit = 1.f;
         float lowerLimit = 0.f;
 
@@ -393,8 +396,9 @@ int Game::Start() {
         };
 
         auto onTestButtonClick = [&] {
-            AddElementToFTXUIContainer(gameWindow, paragraph("stuff happening " + std::to_string(currentTurn))
-                                                   | color(importantGameInformationColor));
+            for (const auto& settlementPtr : Settlements) {
+                AddElementToFTXUIContainer(gameWindow, settlementPtr->FTXUIDisplaySettlement());
+            }
         };
 
         auto onCheckSettlementsButtonClick = [&] {
@@ -514,7 +518,7 @@ int Game::Start() {
         //This is where I can basically add whatever needs to be shown to the player throughout the game.
 
         //Add contextual buttons
-        testButton = Button("Press me!", onTestButtonClick, testStyle);
+        testButton = Button("Show ALL settlements", onTestButtonClick, testStyle);
         checkSettlementsButton = Button("Check my settlements", onCheckSettlementsButtonClick, checkSettlementsStyle);
         checkEnemyIntentsButton = Button("Check enemy intents", onCheckEnemyIntentButtonClick, checkEnemyIntentsStyle);
         gameContextualButtonsContainer->Add(testButton);
@@ -550,6 +554,9 @@ int Game::Start() {
                        gameWindow->DetachAllChildren(); //remove text that becomes useless
 
                        Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
+                       //temp (so that the selection screen is actually usable
+                       starterArmy.AddUnit(PlayerGenerals[10]);
+                       starterArmy.AddUnit(PlayerGenerals[33]);
                        Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
                        AddElementToFTXUIContainer(
                            gameWindow,

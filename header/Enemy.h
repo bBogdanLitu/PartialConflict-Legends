@@ -11,9 +11,9 @@ private:
     int defaultTurnsToAct, currentTurnsToAct; //how often an enemy will attempt to do something
     int index;
     std::string name;
-    std::vector<std::shared_ptr<Settlement> > ownedSettlements;
+    std::vector<std::weak_ptr<Settlement> > ownedSettlements;
 
-    void TryToAttack(const ftxui::Component &gameWindow) const;
+    void TryToAttack(const ftxui::Component &gameWindow);
 
 public:
     Enemy(int defaultTurnsToAct_, int currentTurnsToAct_, int index_, std::string name_);
@@ -33,6 +33,8 @@ public:
     [[nodiscard]] int getCurrentTurnsToAct() const;
 
     [[nodiscard]] const std::string &getName() const;
+
+    [[nodiscard]] int getIndex() const;
 };
 
 
