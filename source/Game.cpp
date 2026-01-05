@@ -137,7 +137,7 @@ ftxui::Table Game::CreateStartingGeneralsTable() const {
     auto Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
     std::vector<std::vector<std::string> > tableContent;
-    tableContent.push_back(startingGeneralTableHeaders);
+    tableContent.push_back(generalTableHeaders);
 
     int count = 0;
     for (const auto &general: Generals) {
@@ -212,6 +212,70 @@ void Game::FTXUIDisplaySettlementAndArmy(const ftxui::Component &whereToDisplay,
         AddElementToFTXUIContainer(whereToDisplay, paragraph("With no stationed army."));
     }
     AddNewLineToFTXUIContainer(whereToDisplay);
+}
+
+void Game::FTXUIDisplayOnlyArmyFromSettlement(const ftxui::Component &whereToDisplay, const Settlement &settlement) {
+    using namespace ftxui;
+    if (settlement.getStationedArmy().has_value()) {
+        AddElementToFTXUIContainer(whereToDisplay,
+                                   (*settlement.getStationedArmy())->FTXUIDisplayArmy());
+        AddNewLineToFTXUIContainer(whereToDisplay);
+    }
+}
+
+ftxui::Table Game::CreatePlayerAdditionalGeneralsTable() const {
+    //I can't use the already existing StartingGenerals table because it is not modifiable after creation
+    //I'll just create a headerless table with the other generals and display it as well
+    using namespace ftxui;
+    std::vector<std::string> statsToPrintForEachGeneral;
+    std::vector<std::vector<std::string> > tableContent;
+    auto AdditionalGenerals = PlayerGenerals;
+    tableContent.push_back(generalTableHeaders);
+
+    unsigned long count = StartingGenerals.size();
+    for (const auto &general: AdditionalGenerals) {
+        std::string countConverted = std::to_string(count);
+
+        statsToPrintForEachGeneral.clear();
+        statsToPrintForEachGeneral = general->getPrintableStats();
+        statsToPrintForEachGeneral.emplace(statsToPrintForEachGeneral.begin(), countConverted);
+        tableContent.push_back(statsToPrintForEachGeneral);
+
+        count++;
+    }
+
+    auto table = Table({tableContent});
+
+    table.SelectAll().Border(LIGHT);
+
+    //Make first row bold with a double border.
+    table.SelectRow(0).Decorate(bold);
+    table.SelectRow(0).Border(DOUBLE);
+
+    //Separators
+    table.SelectAll().SeparatorVertical(LIGHT);
+    table.SelectAll().SeparatorHorizontal(LIGHT);
+
+    // elect row from the second to the last.
+    auto content = table.SelectRows(1, -1);
+    //Alternate in between 3 colors.
+    content.DecorateCellsAlternateRow(color(Color::Blue), 3, 0);
+    content.DecorateCellsAlternateRow(color(Color::Cyan), 3, 1);
+    content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
+
+    return table;
+}
+
+ftxui::Element Game::FTXUIDisplayAdditionalPlayerGenerals() const {
+    using namespace ftxui;
+
+    Table table = CreatePlayerAdditionalGeneralsTable();
+
+    auto document = table.Render();
+
+    //New rendering logic
+    return document;
+
 }
 
 
@@ -301,7 +365,7 @@ int Game::Start() {
         OutputFTXUIText("Would you like to see a list of the player's generals?\n", userInputExpectedColor);
         std::cin >> ans3;
         sanitizeInputMore(ans3);
-        if (ans3 != 1) {
+        if (ans3 > 1) {
             ans3 = 0;
         } else {
             ShowPlayerGenerals();
@@ -333,20 +397,21 @@ int Game::Start() {
         */
         using namespace ftxui;
 
-        //where to store input temporarily
-        std::string tempInput;
+        //where to store input
+        std::string tempInput, modifiedArmyInput;
 
         //variables that will be used
-        unsigned long startingGeneralChosenIndex = 0;
+        unsigned long startingGeneralChosenIndex = 0, whichArmyToModify = 0;
         int timesWithoutSettlements = 0;
         bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false;
+        std::vector<std::shared_ptr<Army>> PlayerArmies;
 
         //button variables so I can use them in functions
-        Component testButton, checkSettlementsButton, checkEnemyIntentsButton;
+        Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton, exitButton;
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
-        float step = 0.1f;
+        float step = 0.05f;
         float upperLimit = 1.f;
         float lowerLimit = 0.f;
 
@@ -364,7 +429,7 @@ int Game::Start() {
         //container for the contextual buttons that can be used
         auto gameContextualButtonsContainer = Container::Horizontal({});
 
-        //STYLES
+        //BUTTON STYLES
         auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                     Color::Default, Color::White);
 
@@ -378,7 +443,10 @@ int Game::Start() {
                                                             Color::Default, beautifulGreen);
 
         auto checkEnemyIntentsStyle = ButtonOption::Animated(Color::Default, beautifulOrange,
-                                                             Color::Default, beautifulGreen);
+                                                             Color::Default, weirdPurple);
+
+        auto modifyPlayerArmyStyle = ButtonOption::Animated(Color::Default, susPink,
+                                                             Color::Default, kaki);
 
         //for inputs
         InputOption inputOption = InputOption::Spacious();
@@ -395,6 +463,177 @@ int Game::Start() {
             }
             return state.element;
         };
+
+        //INPUTS
+
+        //Every time I want to listen to input from the user, I will have to add an input such as this one
+        Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
+                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+        Component modifyArmyCountInput = Input (&modifiedArmyInput, "Count of the army you want to modify:", inputOption)
+                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+        Component modifyArmyWhatInput = Input (&modifiedArmyInput, "0 - ADD UNIT | 1 - REMOVE UNIT | 2 - DELETE ARMY | 3 - CANCEL", inputOption)
+                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+        Component modifyArmyAddInput = Input(&modifiedArmyInput, "Index of the general you'd wish to add:", inputOption)
+                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+
+        //CATCH EVENTS FOR INPUTS
+
+        //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
+        //I can only return true on what I am certain I don't want, then return false for anything else.
+        starterGeneralInput |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+        //I only want to prevent/repurpose enter, anything else can go through (and to other catchers, eventually)
+        starterGeneralInput |= CatchEvent([&](const Event& event) {
+           if (event == Event::Return) {
+               if (!tempInput.empty()) {
+                   startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
+                   if (startingGeneralChosenIndex >= StartingGenerals.size()) {
+                       //too high, reset and try again
+                       AddElementToFTXUIContainer(
+                           gameWindow, paragraph(
+                               "try again! min: 0, max: " + std::to_string(StartingGenerals.size() - 1)));
+                       tempInput = "";
+                   } else {
+                       //in range, can proceed
+                       gameWindow->DetachAllChildren(); //remove text that becomes useless
+
+                       Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
+                       //temp (so that the selection screen is actually usable
+                       starterArmy.AddUnit(PlayerGenerals[10]);
+                       starterArmy.AddUnit(PlayerGenerals[33]);
+                       Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
+                       AddElementToFTXUIContainer(
+                           gameWindow,
+                           paragraph("You should check out your settlements now!") | color(
+                               importantGameInformationColor));
+                       gameContextualButtonsContainer->Add(checkSettlementsButton);
+                   }
+                   focus_y = upperLimit;
+               }
+               return true; //Catch the enter and do something else
+           }
+           return false; //Don't mess with any other event
+        });
+
+        modifyArmyAddInput |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+
+        modifyArmyAddInput |= CatchEvent([&](const Event& event) {
+           if (event == Event::Return) {
+               if (!modifiedArmyInput.empty()) {
+                   unsigned long whichUnitToAdd = std::stoul(modifiedArmyInput); //try to parse as unsigned long
+                   //reset for future use
+                   modifiedArmyInput = "";
+                   if (whichUnitToAdd > StartingGenerals.size() + PlayerGenerals.size() - 1) {
+                       //invalid range
+                       return true;
+                   }
+                   //Add this unit to the Army
+                   if (whichUnitToAdd < StartingGenerals.size()) {
+                       PlayerArmies[whichArmyToModify]->AddUnit(StartingGenerals[whichUnitToAdd]);
+                   }
+                   else {
+                       whichUnitToAdd -= StartingGenerals.size();
+                       PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
+                   }
+
+                   AddElementToFTXUIContainer(gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
+
+                   modifyArmyAddInput->Detach();
+               }
+               return true; //Catch the enter and do something else
+           }
+           return false; //Don't mess with any other event
+        });
+
+        modifyArmyWhatInput |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+
+        modifyArmyWhatInput |= CatchEvent([&](const Event& event) {
+            if (event == Event::Return) {
+               if (!modifiedArmyInput.empty()) {
+                    const int option = std::stoi(modifiedArmyInput); //try to parse as unsigned long
+                    //reset for the next attempt or input
+                      modifiedArmyInput = "";
+                    if (option > 3 || option < 0) {
+                        //invalid options are ignored
+                        return true;
+                    }
+                    switch (option) {
+                       case 0: {
+                           //add
+
+                           //I want to inform the player about what choices he has
+                           AddElementToFTXUIContainer(gameWindow, paragraph("Choose from this list of starters:"));
+                           AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
+                           AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of non-starters:"));
+                           AddElementToFTXUIContainer(gameWindow, FTXUIDisplayAdditionalPlayerGenerals());
+                           gameWindow->Add(modifyArmyAddInput);
+                           break;
+                       }
+                       case 1: {
+                           //remove
+                           break;
+                       }
+                       case 2: {
+                           //delete whole army
+                           break;
+                       }
+                       default: {
+                           //cancel
+                           AddElementToFTXUIContainer(gameWindow, paragraph("Nothing was done"));
+                       }
+                    }
+                    modifyArmyWhatInput->Detach();
+               }
+               return true; //Catch the enter and do something else
+           }
+           return false; //Don't mess with any other event
+        });
+
+        modifyArmyCountInput |= CatchEvent([&](const Event& event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+        //I want to wait for the enter and do things after it's pressed
+        modifyArmyCountInput |= CatchEvent([&](const Event& event) {
+           if (event == Event::Return) {
+               if (!modifiedArmyInput.empty()) {
+                   whichArmyToModify = std::stoul(modifiedArmyInput); //try to parse as unsigned long
+
+                   if (whichArmyToModify > PlayerArmies.size() - 1) {
+                       //too big, doesn't exist
+                       modifiedArmyInput = "";
+                   } else {
+                       //remove and reset the count input
+                       modifiedArmyInput = "";
+                       modifyArmyCountInput->Detach();
+                       //inform the player
+                       AddElementToFTXUIContainer(gameWindow, paragraph("You are modifying this army:"));
+                       AddElementToFTXUIContainer(gameWindow, PlayerArmies[whichArmyToModify]->FTXUIDisplayArmy());
+                       AddElementToFTXUIContainer(gameWindow, separator());
+                       //add input to know what we want to do
+                       gameWindow->Add(modifyArmyWhatInput);
+                   }
+               }
+               return true; //Catch the enter and do something else
+           }
+           return false; //Don't mess with any other event
+        });
 
         //FUNCTIONS FOR BUTTONS
 
@@ -455,9 +694,14 @@ int Game::Start() {
 
                     Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
                     Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
+
+                    gameContextualButtonsContainer->Add(modifyPlayerArmyButton);
                 } else {
-                    //game ends (maybe replace all buttons with the exit one and force the player to quit no matter what)
-                    //or choose to stay in the terminal forever I guess.
+                    //the only available button becomes exit
+                    gameContextualButtonsContainer->DetachAllChildren();
+                    gameContextualButtonsContainer->Add(exitButton);
+                    gameStateButtonsContainer->DetachAllChildren();
+                    gameStateButtonsContainer->Add(exitButton);
                 }
                 timesWithoutSettlements++;
             }
@@ -502,12 +746,39 @@ int Game::Start() {
             }
         };
 
+        auto onModifyPlayerArmyButtonClick = [&] {
+            int count = 0;
+            Component armyDisplayContainer = Container::Horizontal({});
+            //display all player-owned armies
+            AddNewLineToFTXUIContainer(gameWindow);
+            AddElementToFTXUIContainer(gameWindow, paragraph("These are your armies:"));
+            for (const auto & settlement : Settlements) {
+                if (settlement->getOwner() == 0) {
+                    AddElementToFTXUIContainer(armyDisplayContainer,
+                                               paragraph("Count = " + std::to_string(count)) | size(
+                                                   WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 10) | center);
+                    FTXUIDisplayOnlyArmyFromSettlement(armyDisplayContainer, *settlement);
+                    gameWindow->Add(armyDisplayContainer);
+                    focus_y = upperLimit; //auto-scroll to see the bottom of the output
+                    if (settlement->getStationedArmy() != std::nullopt) {
+                        PlayerArmies.emplace_back(settlement->getStationedArmy().value());
+                    }
+                    count++;
+                }
+            }
+
+            //add the input to gameWindow
+            AddElementToFTXUIContainer(gameWindow, separator());
+            gameWindow->Add(modifyArmyCountInput);
+
+        };
+
         //GAME STATE CONTROL BUTTONS
 
-        auto nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
+        nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
         gameStateButtonsContainer->Add(nextTurnButton);
 
-        auto exitButton = Button("Exit", onExitButtonClick, exitStyle);
+        exitButton = Button("Exit", onExitButtonClick, exitStyle);
         gameStateButtonsContainer->Add(exitButton);
 
 
@@ -566,56 +837,12 @@ int Game::Start() {
         testButton = Button("Show ALL settlements", onTestButtonClick, testStyle);
         checkSettlementsButton = Button("Check my settlements", onCheckSettlementsButtonClick, checkSettlementsStyle);
         checkEnemyIntentsButton = Button("Check enemy intents", onCheckEnemyIntentButtonClick, checkEnemyIntentsStyle);
+        modifyPlayerArmyButton = Button("Modify an army", onModifyPlayerArmyButtonClick, modifyPlayerArmyStyle);
         gameContextualButtonsContainer->Add(testButton);
 
         //Game intro
         AddElementToFTXUIContainer(gameWindow, paragraph(beginningGeneralText) | color(gameAnnouncementsColor));
         AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
-
-        //Every time I want to listen to input from the user, I will have to add an input such as this one
-        Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
-                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-
-        //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
-        //I can only return true on what I am certain I don't want, then return false for anything else.
-        starterGeneralInput |= CatchEvent([&](const Event& event) {
-            if (event.is_character() && !std::isdigit(event.character()[0])) {
-                return true; //it's not a digit, catch it and prevent it from modifying tempInput
-            }
-            return false; //it's a digit
-        });
-        //I only want to prevent/repurpose enter, anything else can go through (and to other catchers, eventually)
-        starterGeneralInput |= CatchEvent([&](const Event& event) {
-           if (event == Event::Return) {
-               if (!tempInput.empty()) {
-                   startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
-                   if (startingGeneralChosenIndex >= StartingGenerals.size()) {
-                       //too high, reset and try again
-                       AddElementToFTXUIContainer(
-                           gameWindow, paragraph(
-                               "try again! min: 0, max: " + std::to_string(StartingGenerals.size() - 1)));
-                       tempInput = "";
-                   } else {
-                       //in range, can proceed
-                       gameWindow->DetachAllChildren(); //remove text that becomes useless
-
-                       Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
-                       //temp (so that the selection screen is actually usable
-                       starterArmy.AddUnit(PlayerGenerals[10]);
-                       starterArmy.AddUnit(PlayerGenerals[33]);
-                       Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
-                       AddElementToFTXUIContainer(
-                           gameWindow,
-                           paragraph("You should check out your settlements now!") | color(
-                               importantGameInformationColor));
-                       gameContextualButtonsContainer->Add(checkSettlementsButton);
-                   }
-                   focus_y = upperLimit;
-               }
-               return true; //Catch the enter and do something else
-           }
-           return false; //Don't mess with any other event
-        });
 
         //Add the input to the gameContainer
         gameWindow->Add(starterGeneralInput);
@@ -623,6 +850,7 @@ int Game::Start() {
         //Display what we render AND ALL THE CHANGES
         screen.Loop(renderer);
 
+        PlayerArmies.clear();
     } else {
         //Normal branch
         OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);

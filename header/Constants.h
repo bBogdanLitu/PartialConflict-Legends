@@ -17,6 +17,9 @@
 #define beautifulBlue ftxui::Color::SkyBlue3
 #define beautifulGreen ftxui::Color::SpringGreen3Bis
 #define beautifulOrange ftxui::Color::DarkOrange
+#define susPink ftxui::Color::MistyRose3
+#define kaki ftxui::Color::Khaki3
+#define weirdPurple ftxui::Color::LightSlateBlue
 
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;
@@ -86,7 +89,7 @@ const inline std::string settlementFightNoRemainingAttackersText =
                 "The defenders have defeated the attackers from the first attempt.\n";
 const inline std::string settlementFightNoRemainingDefendersText =
                 "The attackers have defeated the defenders from the first attempt.\n";
-const inline std::vector<std::string> startingGeneralTableHeaders =
+const inline std::vector<std::string> generalTableHeaders =
 {
     "Index", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy", "Dexterity", "Overall"
 };

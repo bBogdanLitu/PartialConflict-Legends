@@ -65,7 +65,7 @@ public:
         int k = 0;
         os << "Composition:\n";
         for (const auto &unit: army.assignedUnits) {
-            os << k << ".\n" << unit;
+            os << k << ".\n" << *unit;
             k++;
         }
         os << "Action points at the start of every turn: " << army.defaultActionPoints << "\n";

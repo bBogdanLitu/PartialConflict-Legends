@@ -14,7 +14,9 @@ Army::Army(const std::shared_ptr<Unit> &unit) {
 }
 
 void Army::AddUnit(const std::shared_ptr<Unit> &unit) {
-    assignedUnits.push_back(unit);
+    if (assignedUnits.size() < 3) {
+        assignedUnits.push_back(unit);
+    }
 }
 
 //no idea how to split this monster into 2 or more
