@@ -234,6 +234,7 @@ void Game::NextTurn() {
     }
 }
 
+//ultimate code sausage / a really long piece of spaghetti
 int Game::Start() {
     std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson, enemiesJson;
 

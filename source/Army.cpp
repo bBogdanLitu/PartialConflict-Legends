@@ -17,6 +17,7 @@ void Army::AddUnit(const std::shared_ptr<Unit> &unit) {
     assignedUnits.push_back(unit);
 }
 
+//no idea how to split this monster into 2 or more
 int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                    const std::vector<unsigned long> &battleOrder, const ftxui::Component &gameWindow) const {
     int currentEnemy = 0;

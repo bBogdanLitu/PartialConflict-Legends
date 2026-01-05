@@ -30,10 +30,10 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
     int cost = 9999; //so it doesn't cry
 
-
     //We temporarily store this army in this settlement
     StationTemporaryArmy(travellingArmy);
 
+    //Searching for the control point that is either owned by or connected to the target settlement
     for (const auto &controlPoint: ControlPoints) {
         if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
             targetIndex) {
@@ -51,35 +51,7 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
             for (const auto &neighbourWeak: Neighbours) {
                 if (auto neighbour = neighbourWeak.lock()) {
                     if (neighbour->getIndex() == targetIndex) {
-                        Game::AddElementToFTXUIContainer(
-                            gameWindow,
-                            ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
-                                importantGameInformationColor));
-                        Game::AddNewLineToFTXUIContainer(gameWindow);
-                        int result = neighbour->Besieged(*travellingArmy, gameWindow);
-
-                        switch (result) {
-                            case 1: {
-                                travellingArmy->Disband();
-
-                                Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Won"));
-                                break;
-                            }
-                            case -1: {
-                                neighbour->ChangeOwnership(sender);
-                                neighbour->StationArmy(travellingArmy);
-                                Game::AddElementToFTXUIContainer(
-                                    gameWindow,
-                                    ftxui::paragraph("Lost " + neighbour->name) | ftxui::color(
-                                        importantGameInformationColor));
-                                break;
-                            }
-                            default: {
-                                Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("asdsa32113sdasdasda"));
-                            }
-
-                            break;
-                        }
+                        AttackAndAnalyzeResult(neighbour, travellingArmy, sender, gameWindow);
                     }
                 }
             }
@@ -102,6 +74,37 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                 }
             }
         }
+    }
+}
+
+void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement>& neighbour, const std::shared_ptr<Army>& travellingArmy, Enemy *sender, const ftxui::Component &gameWindow) {
+    Game::AddElementToFTXUIContainer(
+                            gameWindow,
+                            ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
+                                importantGameInformationColor));
+    Game::AddNewLineToFTXUIContainer(gameWindow);
+    int result = neighbour->Besieged(*travellingArmy, gameWindow);
+
+    switch (result) {
+        case 1: {
+            travellingArmy->Disband();
+            Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("Won"));
+            break;
+        }
+        case -1: {
+            neighbour->ChangeOwnership(sender);
+            neighbour->StationArmy(travellingArmy);
+            Game::AddElementToFTXUIContainer(
+                gameWindow,
+                ftxui::paragraph("Lost " + neighbour->name) | ftxui::color(
+                    importantGameInformationColor));
+            break;
+        }
+        default: {
+            Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("asdsa32113sdasdasda"));
+        }
+
+            break;
     }
 }
 
@@ -159,7 +162,10 @@ std::optional<std::shared_ptr<Army> > Settlement::getStationedArmy() const {
     return std::nullopt;
 }
 
-//attempt to merge the logic of NBesieged and FTXUIBesieged into one singular Besieged
+/*
+ *DISCLAIMER (in ro): Stiu ca este o functie gigantica, dar asta se datoreaza afisarii cu elemente ftxui.
+ *Daca as face-o bucatele cred ca ar deveni si mai greu de inteles :{
+*/
 //If there is a stationedArmy, there will be a combat prompt to the player.
 //If not, then the player will only get the notification of the outcome.
 int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const {
@@ -172,6 +178,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         std::string input1, input2, input3;
         using namespace ftxui;
 
+        //a new temporary screen
         auto screen = ScreenInteractive::FitComponent();
 
         auto doneStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
@@ -194,13 +201,14 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
                 screen.Exit();
             }
         };
+
         Component battleInputContainer = Container::Vertical({});
         Component inputReaderContainer = Container::Vertical({});
         Component battleInformationContainer = Container::Vertical({});
 
-        Component inputComp1 = ftxui::Input(&input1, "First enemy to battle with your:"),
-                inputComp2 = ftxui::Input(&input2, "Second enemy to battle with your:"),
-                inputComp3 = ftxui::Input(&input3, "Third enemy to battle with your:");
+        Component inputComp1 = ftxui::Input(&input1, "First enemy to battle with your (index):"),
+                inputComp2 = ftxui::Input(&input2, "Second enemy to battle with your (index):"),
+                inputComp3 = ftxui::Input(&input3, "Third enemy to battle with your (index):");
         Component doneButton = Button("Done", onDoneButtonClick, doneStyle);
 
         //information that will be shown after choosing the battle order.
@@ -211,25 +219,18 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         Game::AddElementToFTXUIContainer(gameWindow, attackingArmy.FTXUIDisplayArmy());
         Game::AddNewLineToFTXUIContainer(gameWindow);
 
-        battleInformationContainer->Add(Renderer([&] {
-            return paragraph("Your settlement " + name + " is being attacked! You must choose the battle order.") |
-                   color(importantGameInformationColor);
-        }));
-        battleInformationContainer->Add(Renderer([&] {
-            return paragraph("Your army:");
-        }));
-        battleInformationContainer->Add(Renderer([&] {
-            return stationedArmy.value()->FTXUIDisplayArmy();
-        }));
-        battleInformationContainer->Add(Renderer([&] {
-            return paragraph("Enemy army:");
-        }));
-        battleInformationContainer->Add(Renderer([&] {
-            return attackingArmy.FTXUIDisplayArmy();
-        }));
-        battleInformationContainer->Add(Renderer([&] {
-            return paragraph("Choose order:");
-        }));
+        //information to be shown on the temporary screen
+        Game::AddElementToFTXUIContainer(battleInformationContainer,
+                                   paragraph(
+                                       "Your settlement " + name + " is being attacked! You must choose the battle order.")
+                                       | color(importantGameInformationColor));
+        Game::AddElementToFTXUIContainer(battleInformationContainer, paragraph("Your army:"));
+        Game::AddElementToFTXUIContainer(battleInformationContainer, stationedArmy.value()->FTXUIDisplayArmy());
+        Game::AddNewLineToFTXUIContainer(battleInformationContainer);
+        Game::AddElementToFTXUIContainer(battleInformationContainer, paragraph("Enemy army:"));
+        Game::AddElementToFTXUIContainer(battleInformationContainer, attackingArmy.FTXUIDisplayArmy());
+        Game::AddNewLineToFTXUIContainer(battleInformationContainer);
+        Game::AddElementToFTXUIContainer(battleInformationContainer, paragraph("Choose order:"));
 
         inputComp1 |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
@@ -262,7 +263,6 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             return false; //it's a digit that we want
         });
 
-
         inputReaderContainer->Add(inputComp1);
         if (neededInputs > 1) {
             inputReaderContainer->Add(inputComp2);
@@ -284,7 +284,6 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         if (neededInputs > 1) {
             screen.Loop(renderer);
         }
-
 
         //To prevent assigning one general to fight multiple enemies (at once)
         //If k was equal once, it will be equal the second time (like, for real),

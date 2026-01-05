@@ -33,6 +33,8 @@ public:
 
     void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy *, const ftxui::Component &);
 
+    static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement>&, const std::shared_ptr<Army>&, Enemy *, const ftxui::Component &);
+
     void DetachArmy();
 
     void DetachTemporaryArmy();
