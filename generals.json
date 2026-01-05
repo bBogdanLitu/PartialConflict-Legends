@@ -1156,24 +1156,24 @@
 		"lastName": "Gogo",
 		"type": 1,
 		"rarity": 3,
-		"melee": 90,
-		"ranged": 90,
-		"armour": 90,
-		"strength": 90,
-		"accuracy": 90,
-		"dexterity": 90
+      "melee": 99,
+      "ranged": 99,
+      "armour": 99,
+      "strength": 99,
+      "accuracy": 99,
+      "dexterity": 99
 	},
 	{
 		"firstName": "Broaden",
 		"lastName": "Ioachim",
 		"type": 1,
 		"rarity": 3,
-		"melee": 90,
-		"ranged": 90,
-		"armour": 90,
-		"strength": 90,
-		"accuracy": 90,
-		"dexterity": 90
+      "melee": 99,
+      "ranged": 99,
+      "armour": 99,
+      "strength": 99,
+      "accuracy": 99,
+      "dexterity": 99
 	},
 	{
 		"firstName": "Ricky",

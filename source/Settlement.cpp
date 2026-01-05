@@ -77,11 +77,13 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
     }
 }
 
-void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement>& neighbour, const std::shared_ptr<Army>& travellingArmy, Enemy *sender, const ftxui::Component &gameWindow) {
+void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &neighbour,
+                                        const std::shared_ptr<Army> &travellingArmy, Enemy *sender,
+                                        const ftxui::Component &gameWindow) {
     Game::AddElementToFTXUIContainer(
-                            gameWindow,
-                            ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
-                                importantGameInformationColor));
+        gameWindow,
+        ftxui::paragraph("The battle of " + neighbour->name + " will now commence") | ftxui::color(
+            importantGameInformationColor));
     Game::AddNewLineToFTXUIContainer(gameWindow);
     int result = neighbour->Besieged(*travellingArmy, gameWindow);
 
@@ -104,7 +106,7 @@ void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement>& neigh
             Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("asdsa32113sdasdasda"));
         }
 
-            break;
+        break;
     }
 }
 
@@ -181,8 +183,10 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         //a new temporary screen
         auto screen = ScreenInteractive::FitComponent();
 
-        auto doneStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
+        auto doneStyle = ButtonOption::Animated(Color::Default, beautifulBlue,
                                                 Color::Default, Color::White);
+
+        //button functions
         auto onDoneButtonClick = [&] {
             //I only check if they are empty. Any other verification (whether they are digits) will be done elsewhere.
             battleOrder.clear();
@@ -202,13 +206,27 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             }
         };
 
+        //input styles
+        InputOption inputOption = InputOption::Spacious();
+        inputOption.transform = [](InputState state) {
+            state.element |= color(userInputExpectedColor);
+            if (state.focused) {
+                state.element |= bgcolor(Color::Default);
+            } else if (state.hovered) {
+                state.element |= bgcolor(Color::Grey15);
+            } else {
+                state.element |= bgcolor(Color::Grey27);
+            }
+            return state.element;
+        };
+
         Component battleInputContainer = Container::Vertical({});
         Component inputReaderContainer = Container::Vertical({});
         Component battleInformationContainer = Container::Vertical({});
 
-        Component inputComp1 = ftxui::Input(&input1, "First enemy to battle with your (index):"),
-                inputComp2 = ftxui::Input(&input2, "Second enemy to battle with your (index):"),
-                inputComp3 = ftxui::Input(&input3, "Third enemy to battle with your (index):");
+        Component inputComp1 = ftxui::Input(&input1, "First enemy to battle with your (index):", inputOption),
+                inputComp2 = ftxui::Input(&input2, "Second enemy to battle with your (index):", inputOption),
+                inputComp3 = ftxui::Input(&input3, "Third enemy to battle with your (index):", inputOption);
         Component doneButton = Button("Done", onDoneButtonClick, doneStyle);
 
         //information that will be shown after choosing the battle order.
@@ -218,12 +236,15 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         Game::AddNewLineToFTXUIContainer(gameWindow);
         Game::AddElementToFTXUIContainer(gameWindow, attackingArmy.FTXUIDisplayArmy());
         Game::AddNewLineToFTXUIContainer(gameWindow);
+        Game::AddElementToFTXUIContainer(gameWindow, paragraph("How it went: ") | color(gameAnnouncementsColor));
 
         //information to be shown on the temporary screen
         Game::AddElementToFTXUIContainer(battleInformationContainer,
-                                   paragraph(
-                                       "Your settlement " + name + " is being attacked! You must choose the battle order.")
-                                       | color(importantGameInformationColor));
+                                         paragraph(
+                                             "Your settlement " + name +
+                                             " is being attacked! You must choose the battle order.")
+                                         | color(importantGameInformationColor));
+        Game::AddNewLineToFTXUIContainer(battleInformationContainer);
         Game::AddElementToFTXUIContainer(battleInformationContainer, paragraph("Your army:"));
         Game::AddElementToFTXUIContainer(battleInformationContainer, stationedArmy.value()->FTXUIDisplayArmy());
         Game::AddNewLineToFTXUIContainer(battleInformationContainer);
@@ -276,7 +297,14 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
 
         auto renderer = Renderer(battleInputContainer, [&] {
             return vbox({
-                battleInputContainer->Render(),
+                battleInformationContainer->Render(),
+                //now everything in inputReaderContainer
+                inputComp1->Render() | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5)
+                | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 100),
+                inputComp2->Render() | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
+                inputComp3->Render() | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
+                separator(),
+                doneButton->Render() | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
             });
         });
 
@@ -330,6 +358,13 @@ void Settlement::ChangeOwnership(Enemy *newOwner) {
     if (auto selfPtr = weakSelfPtr.lock()) {
         newOwner->ModifySettlementOwnership(selfPtr);
     }
+}
+
+void Settlement::GiveToPlayer(const ftxui::Component &gameWindow) {
+    owner = 0;
+    Game::AddElementToFTXUIContainer(
+        gameWindow,
+        ftxui::paragraph("You have conquered the settlement named " + name) | ftxui::color(gameAnnouncementsColor));
 }
 
 void Settlement::setSelfPtr(const std::shared_ptr<Settlement> &settlement) {

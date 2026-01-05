@@ -33,7 +33,8 @@ public:
 
     void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy *, const ftxui::Component &);
 
-    static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement>&, const std::shared_ptr<Army>&, Enemy *, const ftxui::Component &);
+    static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &, const std::shared_ptr<Army> &, Enemy *,
+                                       const ftxui::Component &);
 
     void DetachArmy();
 
@@ -53,7 +54,11 @@ public:
 
     [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const;
 
+    //gives / removes the ownership of this settlement to / from an enemy
     void ChangeOwnership(Enemy *newOwner);
+
+    //gives the settlement to the player
+    void GiveToPlayer(const ftxui::Component&);
 
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
@@ -91,10 +96,9 @@ public:
 
     ~Settlement();
 
+    //2 settlements are equal if they occupy the same index in the vector from Game
     friend bool operator==(const Settlement &lhs, const Settlement &rhs) {
-        return lhs.name == rhs.name
-               && lhs.owner == rhs.owner
-               && lhs.index == rhs.index;
+        return lhs.index == rhs.index;
     }
 
     friend bool operator!=(const Settlement &lhs, const Settlement &rhs) {

@@ -1,7 +1,5 @@
 #include "../header/Enemy.h"
 
-#include <set>
-
 //The enemy will send one of its armies to attack the player
 //The army will be sent to the settlement of the player (following a route)
 //In its path, it can be attacked by the player (each turn, it will station somewhere - at least temporarily)

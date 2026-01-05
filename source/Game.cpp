@@ -122,6 +122,17 @@ void Game::CheckGenerals() const {
     std::cout << "Emperor general pool: " << EmperorGenerals.size() << std::endl;
 }
 
+void Game::ShowPlayerGenerals() const {
+    for (unsigned long i = 0; i < StartingGenerals.size(); i++) {
+        std::cout << i << std::endl;
+        std::cout << *StartingGenerals[i] << std::endl;
+    }
+    for (unsigned long i = 0; i < PlayerGenerals.size(); i++) {
+        std::cout << i << std::endl;
+        std::cout << *PlayerGenerals[i] << std::endl;
+    }
+}
+
 ftxui::Table Game::CreateStartingGeneralsTable() const {
     auto Generals = StartingGenerals;
     std::vector<std::string> statsToPrintForEachGeneral;
@@ -287,6 +298,14 @@ int Game::Start() {
     } else if (ans1 == 1) {
         std::string temp;
         CheckGenerals();
+        OutputFTXUIText("Would you like to see a list of the player's generals?\n", userInputExpectedColor);
+        std::cin >> ans3;
+        sanitizeInputMore(ans3);
+        if (ans3 != 1) {
+            ans3 = 0;
+        } else if (ans3 == 1) {
+            ShowPlayerGenerals();
+        }
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player has read the list / wants to continue
@@ -319,6 +338,7 @@ int Game::Start() {
 
         //variables that will be used
         unsigned long startingGeneralChosenIndex = 0;
+        int timesWithoutSettlements = 0;
         bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false;
 
         //button variables so I can use them in functions
@@ -415,7 +435,31 @@ int Game::Start() {
                 }
             }
             if (alliedSettlementCount == 0) {
-                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... there are none! YOU LOST?!"));
+                AddElementToFTXUIContainer(gameWindow, paragraph(tutorialFirstDefenceEndText));
+                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... There are none! YOU LOST?!"));
+                //The game won't end. I will give the player 1 more chance (insane lore).
+                if (timesWithoutSettlements == 0) {
+                    AddElementToFTXUIContainer(gameWindow, paragraph("It can't be..."));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("You were supposed to make a difference!"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("..."));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("I won't allow you to escape this easily."));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("Rise again and show everyone why I chose you!"));
+
+                    //Regiving the first settlement to the player and resetting the army
+
+                    // -1 because the player is 0, and the enemies are in a vector from 0
+                    int tempEnemyOwnerID = Settlements[0]->getOwner() - 1;
+                    //remove from the enemy that temporarily occupied it
+                    Enemies[tempEnemyOwnerID]->ModifySettlementOwnership(Settlements[0]);
+                    Settlements[0]->GiveToPlayer(gameWindow);
+
+                    Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
+                    Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
+                } else {
+                    //game ends (maybe replace all buttons with the exit one and force the player to quit no matter what)
+                    //or choose to stay in the terminal forever I guess.
+                }
+                timesWithoutSettlements++;
             }
             if (checkSettlementClickedFirstTime == false) {
                 //after it being clicked the first time, we can continue the tutorial
@@ -529,7 +573,8 @@ int Game::Start() {
         AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
 
         //Every time I want to listen to input from the user, I will have to add an input such as this one
-        Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption);
+        Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
+                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
 
         //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
         //I can only return true on what I am certain I don't want, then return false for anything else.
@@ -625,6 +670,10 @@ int Game::Start() {
 
         //try to
         //Enemies[0]->AdvanceTurn();
+        Enemies[0]->ModifySettlementOwnership(Settlements[0]);
+        Enemies[0]->ModifySettlementOwnership(Settlements[0]);
+        Enemies[0]->ModifySettlementOwnership(Settlements[0]);
+        Enemies[0]->ModifySettlementOwnership(Settlements[0]);
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
