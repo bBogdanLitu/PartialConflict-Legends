@@ -303,7 +303,7 @@ int Game::Start() {
         sanitizeInputMore(ans3);
         if (ans3 != 1) {
             ans3 = 0;
-        } else if (ans3 == 1) {
+        } else {
             ShowPlayerGenerals();
         }
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);

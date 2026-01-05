@@ -58,7 +58,7 @@ public:
     void ChangeOwnership(Enemy *newOwner);
 
     //gives the settlement to the player
-    void GiveToPlayer(const ftxui::Component&);
+    void GiveToPlayer(const ftxui::Component &);
 
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
