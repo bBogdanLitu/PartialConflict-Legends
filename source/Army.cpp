@@ -7,15 +7,22 @@ int Army::TotalOverallPowerCalculation(const std::shared_ptr<Unit> &unit) {
 }
 
 Army::Army(const std::shared_ptr<Unit> &unit) {
-    if (assignedUnits.size() < 3) {
-        assignedUnits.push_back(unit);
+    if (AssignedUnits.size() < 3) {
+        AssignedUnits.push_back(unit);
         TotalOverallPowerCalculation(unit);
     }
 }
 
 void Army::AddUnit(const std::shared_ptr<Unit> &unit) {
-    if (assignedUnits.size() < 3) {
-        assignedUnits.push_back(unit);
+    if (AssignedUnits.size() < 3) {
+        AssignedUnits.push_back(unit);
+    }
+}
+
+void Army::RemoveUnit(const unsigned long &index) {
+    AssignedUnits.erase(AssignedUnits.begin() + index);
+    if (AssignedUnits.size() == 0) {
+        Disband();
     }
 }
 
@@ -129,7 +136,7 @@ int Army::getTotalOverallPower() const { return totalOverallPower; }
 
 //unsigned long Army::getGeneralCount() const { return assignedGenerals.size(); }
 
-unsigned long Army::getUnitCount() const { return assignedUnits.size(); }
+unsigned long Army::getUnitCount() const { return AssignedUnits.size(); }
 
 int Army::getCurrentActionPoints() const {
     return currentActionPoints;
@@ -149,7 +156,7 @@ void Army::resetActionPoints() {
 
 //const std::vector<General> &Army::getAssignedGenerals() const { return assignedGenerals; }
 
-const std::vector<std::shared_ptr<Unit> > &Army::getAssignedUnits() const { return assignedUnits; }
+const std::vector<std::shared_ptr<Unit> > &Army::getAssignedUnits() const { return AssignedUnits; }
 
 ftxui::Table Army::CreateArmyTable() const {
     std::vector<std::vector<std::string> > tableContent;
@@ -157,7 +164,7 @@ ftxui::Table Army::CreateArmyTable() const {
     tableContent.push_back(armyTableHeaders);
 
     int count = 0;
-    for (const auto &unit: assignedUnits) {
+    for (const auto &unit: AssignedUnits) {
         std::vector<std::string> tableRow = unit->getPrintableStats();
         tableRow.emplace(tableRow.begin(), std::to_string(count));
         tableContent.push_back(tableRow);
@@ -210,7 +217,7 @@ ftxui::Element Army::FTXUIDisplayArmy() const {
 }
 
 void Army::Disband() {
-    assignedUnits.clear();
+    AssignedUnits.clear();
     isStationed = false;
 }
 
@@ -218,8 +225,8 @@ Army::Army(const Army &other) : defaultActionPoints(other.defaultActionPoints),
                                 currentActionPoints(other.currentActionPoints),
                                 totalOverallPower(other.totalOverallPower),
                                 isStationed(other.isStationed) {
-    for (const auto &unit: other.assignedUnits) {
-        assignedUnits.push_back(unit->clone());
+    for (const auto &unit: other.AssignedUnits) {
+        AssignedUnits.push_back(unit->clone());
     }
 }
 
@@ -230,7 +237,7 @@ Army &Army::operator=(Army other) {
 
 void swap(Army &first, Army &second) {
     using std::swap;
-    swap(first.assignedUnits, second.assignedUnits);
+    swap(first.AssignedUnits, second.AssignedUnits);
     swap(first.currentActionPoints, second.currentActionPoints);
     swap(first.totalOverallPower, second.totalOverallPower);
     swap(first.isStationed, second.isStationed);

@@ -42,9 +42,14 @@ private:
 
     [[nodiscard]] ftxui::Element FTXUIDisplayAdditionalPlayerGenerals() const;
 
+    [[nodiscard]] ftxui::Table CreateCaptainsTable() const;
+
+    [[nodiscard]] ftxui::Element FTXUIDisplayCaptains() const;
+
     static void FTXUIDisplaySettlementAndArmy(const ftxui::Component &whereToDisplay, const Settlement &settlement);
 
-    static void FTXUIDisplayOnlyArmyFromSettlement(const ftxui::Component &whereToDisplay, const Settlement &settlement);
+    static void FTXUIDisplayOnlyArmyFromSettlement(const ftxui::Component &whereToDisplay,
+                                                   const Settlement &settlement);
 
     void ResetArmiesActionPoints() const;
 

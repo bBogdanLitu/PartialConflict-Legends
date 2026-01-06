@@ -204,7 +204,7 @@ ftxui::Element Game::FTXUIDisplayStaringGenerals() const {
 void Game::FTXUIDisplaySettlementAndArmy(const ftxui::Component &whereToDisplay, const Settlement &settlement) {
     using namespace ftxui;
     AddElementToFTXUIContainer(whereToDisplay, settlement.FTXUIDisplaySettlement());
-    if (settlement.getStationedArmy().has_value()) {
+    if (settlement.getStationedArmy().has_value() && settlement.getStationedArmy().value()->getUnitCount() > 0) {
         AddElementToFTXUIContainer(whereToDisplay, paragraph("With the stationed army:"));
         AddElementToFTXUIContainer(whereToDisplay,
                                    (*settlement.getStationedArmy())->FTXUIDisplayArmy());
@@ -275,7 +275,57 @@ ftxui::Element Game::FTXUIDisplayAdditionalPlayerGenerals() const {
 
     //New rendering logic
     return document;
+}
 
+ftxui::Table Game::CreateCaptainsTable() const {
+    using namespace ftxui;
+    std::vector<std::string> statsToPrintForEachCaptain;
+    std::vector<std::vector<std::string> > tableContent;
+    tableContent.push_back(generalTableHeaders);
+
+    unsigned long count = StartingGenerals.size() + PlayerGenerals.size();
+    for (const auto &captain: Captains) {
+        std::string countConverted = std::to_string(count);
+
+        statsToPrintForEachCaptain.clear();
+        statsToPrintForEachCaptain = captain->getPrintableStats();
+        statsToPrintForEachCaptain.emplace(statsToPrintForEachCaptain.begin(), countConverted);
+        tableContent.push_back(statsToPrintForEachCaptain);
+
+        count++;
+    }
+
+    auto table = Table({tableContent});
+
+    table.SelectAll().Border(LIGHT);
+
+    //Make first row bold with a double border.
+    table.SelectRow(0).Decorate(bold);
+    table.SelectRow(0).Border(DOUBLE);
+
+    //Separators
+    table.SelectAll().SeparatorVertical(LIGHT);
+    table.SelectAll().SeparatorHorizontal(LIGHT);
+
+    // elect row from the second to the last.
+    auto content = table.SelectRows(1, -1);
+    //Alternate in between 3 colors.
+    content.DecorateCellsAlternateRow(color(Color::Blue), 3, 0);
+    content.DecorateCellsAlternateRow(color(Color::Cyan), 3, 1);
+    content.DecorateCellsAlternateRow(color(Color::White), 3, 2);
+
+    return table;
+}
+
+ftxui::Element Game::FTXUIDisplayCaptains() const {
+    using namespace ftxui;
+
+    Table table = CreateCaptainsTable();
+
+    auto document = table.Render();
+
+    //New rendering logic
+    return document;
 }
 
 
@@ -404,10 +454,11 @@ int Game::Start() {
         unsigned long startingGeneralChosenIndex = 0, whichArmyToModify = 0;
         int timesWithoutSettlements = 0;
         bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false;
-        std::vector<std::shared_ptr<Army>> PlayerArmies;
+        std::vector<std::shared_ptr<Army> > PlayerArmies;
 
         //button variables so I can use them in functions
-        Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton, exitButton;
+        Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton,
+                exitButton;
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
@@ -446,7 +497,7 @@ int Game::Start() {
                                                              Color::Default, weirdPurple);
 
         auto modifyPlayerArmyStyle = ButtonOption::Animated(Color::Default, susPink,
-                                                             Color::Default, kaki);
+                                                            Color::Default, kaki);
 
         //for inputs
         InputOption inputOption = InputOption::Spacious();
@@ -469,170 +520,214 @@ int Game::Start() {
         //Every time I want to listen to input from the user, I will have to add an input such as this one
         Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
                                         | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-        Component modifyArmyCountInput = Input (&modifiedArmyInput, "Count of the army you want to modify:", inputOption)
-                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-        Component modifyArmyWhatInput = Input (&modifiedArmyInput, "0 - ADD UNIT | 1 - REMOVE UNIT | 2 - DELETE ARMY | 3 - CANCEL", inputOption)
+        Component modifyArmyCountInput = Input(&modifiedArmyInput, "Count of the army you want to modify:", inputOption)
+                                         | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+        Component modifyArmyWhatInput = Input(&modifiedArmyInput,
+                                              "0 - ADD UNIT | 1 - REMOVE UNIT | 2 - DELETE ARMY | 3 - CANCEL",
+                                              inputOption)
                                         | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         Component modifyArmyAddInput = Input(&modifiedArmyInput, "Index of the general you'd wish to add:", inputOption)
-                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+                                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+        Component modifyArmyRemoveInput = Input(&modifiedArmyInput, "Index of the general you want to remove:", inputOption)
+                                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
 
         //CATCH EVENTS FOR INPUTS
 
         //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
         //I can only return true on what I am certain I don't want, then return false for anything else.
-        starterGeneralInput |= CatchEvent([&](const Event& event) {
+        starterGeneralInput |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
                 return true; //it's not a digit, catch it and prevent it from modifying tempInput
             }
             return false; //it's a digit
         });
         //I only want to prevent/repurpose enter, anything else can go through (and to other catchers, eventually)
-        starterGeneralInput |= CatchEvent([&](const Event& event) {
-           if (event == Event::Return) {
-               if (!tempInput.empty()) {
-                   startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
-                   if (startingGeneralChosenIndex >= StartingGenerals.size()) {
-                       //too high, reset and try again
-                       AddElementToFTXUIContainer(
-                           gameWindow, paragraph(
-                               "try again! min: 0, max: " + std::to_string(StartingGenerals.size() - 1)));
-                       tempInput = "";
-                   } else {
-                       //in range, can proceed
-                       gameWindow->DetachAllChildren(); //remove text that becomes useless
-
-                       Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
-                       //temp (so that the selection screen is actually usable
-                       starterArmy.AddUnit(PlayerGenerals[10]);
-                       starterArmy.AddUnit(PlayerGenerals[33]);
-                       Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
-                       AddElementToFTXUIContainer(
-                           gameWindow,
-                           paragraph("You should check out your settlements now!") | color(
-                               importantGameInformationColor));
-                       gameContextualButtonsContainer->Add(checkSettlementsButton);
-                   }
-                   focus_y = upperLimit;
-               }
-               return true; //Catch the enter and do something else
-           }
-           return false; //Don't mess with any other event
-        });
-
-        modifyArmyAddInput |= CatchEvent([&](const Event& event) {
-            if (event.is_character() && !std::isdigit(event.character()[0])) {
-                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
-            }
-            return false; //it's a digit
-        });
-
-        modifyArmyAddInput |= CatchEvent([&](const Event& event) {
-           if (event == Event::Return) {
-               if (!modifiedArmyInput.empty()) {
-                   unsigned long whichUnitToAdd = std::stoul(modifiedArmyInput); //try to parse as unsigned long
-                   //reset for future use
-                   modifiedArmyInput = "";
-                   if (whichUnitToAdd > StartingGenerals.size() + PlayerGenerals.size() - 1) {
-                       //invalid range
-                       return true;
-                   }
-                   //Add this unit to the Army
-                   if (whichUnitToAdd < StartingGenerals.size()) {
-                       PlayerArmies[whichArmyToModify]->AddUnit(StartingGenerals[whichUnitToAdd]);
-                   }
-                   else {
-                       whichUnitToAdd -= StartingGenerals.size();
-                       PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
-                   }
-
-                   AddElementToFTXUIContainer(gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
-
-                   modifyArmyAddInput->Detach();
-               }
-               return true; //Catch the enter and do something else
-           }
-           return false; //Don't mess with any other event
-        });
-
-        modifyArmyWhatInput |= CatchEvent([&](const Event& event) {
-            if (event.is_character() && !std::isdigit(event.character()[0])) {
-                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
-            }
-            return false; //it's a digit
-        });
-
-        modifyArmyWhatInput |= CatchEvent([&](const Event& event) {
+        starterGeneralInput |= CatchEvent([&](const Event &event) {
             if (event == Event::Return) {
-               if (!modifiedArmyInput.empty()) {
+                if (!tempInput.empty()) {
+                    startingGeneralChosenIndex = std::stoul(tempInput); //try to parse as unsigned long
+                    if (startingGeneralChosenIndex >= StartingGenerals.size()) {
+                        //too high, reset and try again
+                        AddElementToFTXUIContainer(
+                            gameWindow, paragraph(
+                                "try again! min: 0, max: " + std::to_string(StartingGenerals.size() - 1)));
+                        tempInput = "";
+                    } else {
+                        //in range, can proceed
+                        gameWindow->DetachAllChildren(); //remove text that becomes useless
+
+                        Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
+                        //temp (so that the selection screen is actually usable
+                        starterArmy.AddUnit(PlayerGenerals[10]);
+                        starterArmy.AddUnit(PlayerGenerals[33]);
+                        Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
+                        AddElementToFTXUIContainer(
+                            gameWindow,
+                            paragraph("You should check out your settlements now!") | color(
+                                importantGameInformationColor));
+                        gameContextualButtonsContainer->Add(checkSettlementsButton);
+                    }
+                    focus_y = upperLimit;
+                }
+                return true; //Catch the enter and do something else
+            }
+            return false; //Don't mess with any other event
+        });
+
+        modifyArmyRemoveInput |= CatchEvent([&](const Event &event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+
+        modifyArmyRemoveInput |= CatchEvent([&](const Event &event) {
+            if (event == Event::Return) {
+                if (!modifiedArmyInput.empty()) {
+                    unsigned long whichUnitToRemove = std::stoul(modifiedArmyInput);
+
+                    modifiedArmyInput = "";
+                    if (whichUnitToRemove > PlayerArmies[whichArmyToModify]->getUnitCount()) {
+                        //invalid, can't remove something that doesn't exist
+                        return true;
+                    }
+                    PlayerArmies[whichArmyToModify]->RemoveUnit(whichUnitToRemove);
+
+                    AddElementToFTXUIContainer(
+                        gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
+
+                    modifyArmyRemoveInput->Detach();
+                }
+                return true; //Catch the enter and do something else
+            }
+            return false; //Don't mess with any other event
+        });
+
+        modifyArmyAddInput |= CatchEvent([&](const Event &event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+
+        modifyArmyAddInput |= CatchEvent([&](const Event &event) {
+            if (event == Event::Return) {
+                if (!modifiedArmyInput.empty()) {
+                    unsigned long whichUnitToAdd = std::stoul(modifiedArmyInput); //try to parse as unsigned long
+                    //reset for future use
+                    modifiedArmyInput = "";
+                    if (whichUnitToAdd > StartingGenerals.size() + PlayerGenerals.size() + Captains.size() - 1) {
+                        //invalid range
+                        return true;
+                    }
+                    //Add this unit to the Army
+                    if (whichUnitToAdd < StartingGenerals.size()) {
+                        PlayerArmies[whichArmyToModify]->AddUnit(StartingGenerals[whichUnitToAdd]);
+                    } else if (whichUnitToAdd < StartingGenerals.size() + PlayerGenerals.size()) {
+                        //transform from big number to smaller number that fits the actual vector
+                        whichUnitToAdd -= StartingGenerals.size();
+                        PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
+                    } else {
+                        whichUnitToAdd -= StartingGenerals.size();
+                        whichUnitToAdd -= PlayerGenerals.size();
+                        PlayerArmies[whichArmyToModify]->AddUnit(Captains[whichUnitToAdd]);
+                    }
+
+                    AddElementToFTXUIContainer(
+                        gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
+
+                    modifyArmyAddInput->Detach();
+                }
+                return true; //Catch the enter and do something else
+            }
+            return false; //Don't mess with any other event
+        });
+
+        modifyArmyWhatInput |= CatchEvent([&](const Event &event) {
+            if (event.is_character() && !std::isdigit(event.character()[0])) {
+                return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
+            }
+            return false; //it's a digit
+        });
+
+        modifyArmyWhatInput |= CatchEvent([&](const Event &event) {
+            if (event == Event::Return) {
+                if (!modifiedArmyInput.empty()) {
                     const int option = std::stoi(modifiedArmyInput); //try to parse as unsigned long
                     //reset for the next attempt or input
-                      modifiedArmyInput = "";
+                    modifiedArmyInput = "";
                     if (option > 3 || option < 0) {
                         //invalid options are ignored
                         return true;
                     }
                     switch (option) {
-                       case 0: {
-                           //add
+                        case 0: {
+                            //add
 
-                           //I want to inform the player about what choices he has
-                           AddElementToFTXUIContainer(gameWindow, paragraph("Choose from this list of starters:"));
-                           AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
-                           AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of non-starters:"));
-                           AddElementToFTXUIContainer(gameWindow, FTXUIDisplayAdditionalPlayerGenerals());
-                           gameWindow->Add(modifyArmyAddInput);
-                           break;
-                       }
-                       case 1: {
-                           //remove
-                           break;
-                       }
-                       case 2: {
-                           //delete whole army
-                           break;
-                       }
-                       default: {
-                           //cancel
-                           AddElementToFTXUIContainer(gameWindow, paragraph("Nothing was done"));
-                       }
+                            //I want to inform the player about what choices he has
+
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Choose from this list of starters:"));
+                            AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of non-starters:"));
+                            AddElementToFTXUIContainer(gameWindow, FTXUIDisplayAdditionalPlayerGenerals());
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of captains:"));
+                            AddElementToFTXUIContainer(gameWindow, FTXUIDisplayCaptains());
+                            gameWindow->Add(modifyArmyAddInput);
+                            break;
+                        }
+                        case 1: {
+                            //remove
+                            gameWindow->Add(modifyArmyRemoveInput);
+                            break;
+                        }
+                        case 2: {
+                            //delete whole army
+                            PlayerArmies[whichArmyToModify]->Disband();
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Army obliterated."));
+                            break;
+                        }
+                        default: {
+                            //cancel
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Nothing was done"));
+                        }
                     }
                     modifyArmyWhatInput->Detach();
-               }
-               return true; //Catch the enter and do something else
-           }
-           return false; //Don't mess with any other event
+                }
+                return true; //Catch the enter and do something else
+            }
+            return false; //Don't mess with any other event
         });
 
-        modifyArmyCountInput |= CatchEvent([&](const Event& event) {
+        modifyArmyCountInput |= CatchEvent([&](const Event &event) {
             if (event.is_character() && !std::isdigit(event.character()[0])) {
                 return true; //it is a character, it's not a digit, catch it and prevent it from modifying tempInput
             }
             return false; //it's a digit
         });
         //I want to wait for the enter and do things after it's pressed
-        modifyArmyCountInput |= CatchEvent([&](const Event& event) {
-           if (event == Event::Return) {
-               if (!modifiedArmyInput.empty()) {
-                   whichArmyToModify = std::stoul(modifiedArmyInput); //try to parse as unsigned long
+        modifyArmyCountInput |= CatchEvent([&](const Event &event) {
+            if (event == Event::Return) {
+                if (!modifiedArmyInput.empty()) {
+                    whichArmyToModify = std::stoul(modifiedArmyInput); //try to parse as unsigned long
 
-                   if (whichArmyToModify > PlayerArmies.size() - 1) {
-                       //too big, doesn't exist
-                       modifiedArmyInput = "";
-                   } else {
-                       //remove and reset the count input
-                       modifiedArmyInput = "";
-                       modifyArmyCountInput->Detach();
-                       //inform the player
-                       AddElementToFTXUIContainer(gameWindow, paragraph("You are modifying this army:"));
-                       AddElementToFTXUIContainer(gameWindow, PlayerArmies[whichArmyToModify]->FTXUIDisplayArmy());
-                       AddElementToFTXUIContainer(gameWindow, separator());
-                       //add input to know what we want to do
-                       gameWindow->Add(modifyArmyWhatInput);
-                   }
-               }
-               return true; //Catch the enter and do something else
-           }
-           return false; //Don't mess with any other event
+                    if (whichArmyToModify > PlayerArmies.size() - 1) {
+                        //too big, doesn't exist
+                        modifiedArmyInput = "";
+                    } else {
+                        //remove and reset the count input
+                        modifiedArmyInput = "";
+                        modifyArmyCountInput->Detach();
+                        //inform the player
+                        AddElementToFTXUIContainer(gameWindow, paragraph("You are modifying this army:"));
+                        AddElementToFTXUIContainer(gameWindow, PlayerArmies[whichArmyToModify]->FTXUIDisplayArmy());
+                        AddElementToFTXUIContainer(gameWindow, separator());
+                        //add input to know what we want to do
+                        gameWindow->Add(modifyArmyWhatInput);
+                    }
+                }
+                return true; //Catch the enter and do something else
+            }
+            return false; //Don't mess with any other event
         });
 
         //FUNCTIONS FOR BUTTONS
@@ -752,7 +847,7 @@ int Game::Start() {
             //display all player-owned armies
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, paragraph("These are your armies:"));
-            for (const auto & settlement : Settlements) {
+            for (const auto &settlement: Settlements) {
                 if (settlement->getOwner() == 0) {
                     AddElementToFTXUIContainer(armyDisplayContainer,
                                                paragraph("Count = " + std::to_string(count)) | size(
@@ -770,7 +865,6 @@ int Game::Start() {
             //add the input to gameWindow
             AddElementToFTXUIContainer(gameWindow, separator());
             gameWindow->Add(modifyArmyCountInput);
-
         };
 
         //GAME STATE CONTROL BUTTONS

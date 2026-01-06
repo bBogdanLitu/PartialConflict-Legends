@@ -5,10 +5,12 @@
 #include <vector>
 #include "Constants.h"
 
+class Settlement;
+
 //Can hold up to 3 generals, min of 1.
 class Army {
 private:
-    std::vector<std::shared_ptr<Unit> > assignedUnits;
+    std::vector<std::shared_ptr<Unit> > AssignedUnits;
 
     //These attributes shouldn't be modified by the constructor, they are initialized here and updated (eventually) through functions
     int defaultActionPoints = 1, currentActionPoints = defaultActionPoints, totalOverallPower = 0; //Default
@@ -24,6 +26,8 @@ public:
     explicit Army(const std::shared_ptr<Unit> &unit);
 
     void AddUnit(const std::shared_ptr<Unit> &unit);
+
+    void RemoveUnit(const unsigned long& index);
 
     [[nodiscard]] int Attacked(const Army &attackingArmy, int overallBoost, const std::vector<unsigned long> &
                                battleOrder, const ftxui::Component &gameWindow) const;
@@ -64,7 +68,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Army& army) {
         int k = 0;
         os << "Composition:\n";
-        for (const auto &unit: army.assignedUnits) {
+        for (const auto &unit: army.AssignedUnits) {
             os << k << ".\n" << *unit;
             k++;
         }

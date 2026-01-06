@@ -314,9 +314,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         }
 
         //To prevent assigning one general to fight multiple enemies (at once)
-        //If k was equal once, it will be equal the second time (like, for real),
-        //so it is wrong to restart it from 0 every time it loops.
-        unsigned long k = 0;
+
         while (battleOrder.size() < neededInputs) {
             battleOrder.emplace_back(2);
         }
@@ -326,11 +324,25 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             }
         }
         //We search for the first unassigned general and make it assigned instead.
+        bool increase = true;
         for (unsigned long i = 1; i < battleOrder.size(); i++) {
             for (unsigned long j = 0; j < i; j++) {
+                /*
                 while (battleOrder[i] == battleOrder[j] && k < neededInputs) {
                     battleOrder[i] = k;
                     k++;
+                }
+                */
+                if (battleOrder[i] == battleOrder[j]) {
+                    if (battleOrder[j] == neededInputs - 1) {
+                        battleOrder[i] -= 1;
+                        increase = false;
+                    }
+                    else if (increase == true) {
+                        battleOrder[i] += 1;
+                    } else {
+                        battleOrder[i] -= 1;
+                    }
                 }
             }
         }
