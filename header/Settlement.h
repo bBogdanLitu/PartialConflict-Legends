@@ -31,7 +31,8 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &, std::vector<int>, Enemy *, const ftxui::Component &);
+    void SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
+                          const ftxui::Component &gameWindow);
 
     static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &, const std::shared_ptr<Army> &, Enemy *,
                                        const ftxui::Component &);
@@ -60,6 +61,9 @@ public:
     //gives the settlement to the player
     void GiveToPlayer(const ftxui::Component &);
 
+    //gives it without any other announcement
+    void GiveToPlayer();
+
     //void FTXUIBesieged(const Army &attackingArmy, const ftxui::Component &whereToDisplay) const;
 
     void setSelfPtr(const std::shared_ptr<Settlement> &settlement);
@@ -70,7 +74,7 @@ public:
 
     [[nodiscard]] int getIndex() const;
 
-    [[nodiscard]] const std::string& getName() const;
+    [[nodiscard]] const std::string &getName() const;
 
     [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const;
 

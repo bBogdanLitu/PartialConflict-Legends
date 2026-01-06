@@ -29,18 +29,18 @@ void Army::RemoveUnit(const unsigned long &index) {
 //no idea how to split this monster into 2 or more
 int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                    const std::vector<unsigned long> &battleOrder, const ftxui::Component &gameWindow) const {
-    int currentEnemy = 0;
+    int currentAttacker = 0;
     std::vector<int> remainingAttackers, remainingDefenders, surplusDefenders;
     //We assume that every defender and attacker can be surplus (apriori)
     for (int i = 0; i < static_cast<int>(this->getUnitCount()); i++) {
         surplusDefenders.push_back(i);
     }
 
-    for (const unsigned long currentAlly: battleOrder) {
+    for (const unsigned long currentDefender: battleOrder) {
         //We mark the chosen defender as non-surplus
-        surplusDefenders[currentAlly] = -1;
-        int fightResult = this->getAssignedUnits()[currentAlly]->
-                FightWith(*attackingArmy.getAssignedUnits()[currentEnemy], overallBoost, gameWindow);
+        surplusDefenders[currentDefender] = -1;
+        int fightResult = this->getAssignedUnits()[currentDefender]->
+                FightWith(*attackingArmy.getAssignedUnits()[currentAttacker], overallBoost, gameWindow);
         //defender combat is boosted by the garrison
         switch (fightResult) {
             case 0: {
@@ -49,7 +49,7 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                     ftxui::paragraph("Fight won by the attacker.") | ftxui::color(generalFightAttackerWinColor));
                 Game::AddNewLineToFTXUIContainer(gameWindow);
                 //Save the index of the undefeated attacker
-                remainingAttackers.push_back(currentEnemy);
+                remainingAttackers.push_back(currentAttacker);
                 break;
             }
             case 1: {
@@ -58,14 +58,14 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
                     ftxui::paragraph("Fight won by the defender.") | ftxui::color(generalFightDefenderWinColor));
                 Game::AddNewLineToFTXUIContainer(gameWindow);
                 //Save the index of the undefeated defender
-                remainingDefenders.push_back(static_cast<int>(currentAlly));
+                remainingDefenders.push_back(static_cast<int>(currentDefender));
                 break;
             }
             default: {
                 std::cout << "Unhandled\n";
             }
         }
-        currentEnemy++;
+        currentAttacker++;
     }
 
     //If there are generals that didn't take part because of size difference, we add them to their pools.

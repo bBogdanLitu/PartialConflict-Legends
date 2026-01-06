@@ -223,9 +223,9 @@ void Game::FTXUIDisplayOnlyArmyFromSettlement(const ftxui::Component &whereToDis
     }
 }
 
-void Game::FTXUIDisplayOnlySettlementsWithArmies(const ftxui::Component &whereToDisplay) const {
+void Game::FTXUIDisplayOnlyPlayerSettlementsWithArmies(const ftxui::Component &whereToDisplay) const {
     for (const auto &settlement: Settlements) {
-        if (settlement->getStationedArmy().has_value()) {
+        if (settlement->getOwner() == 0 && settlement->getStationedArmy().has_value()) {
             FTXUIDisplaySettlementAndArmy(whereToDisplay, *settlement);
         }
     }
@@ -397,11 +397,15 @@ int Game::Start() {
     }
 
     //Create the initial enemy armies
-    Army warlord1Army{Captains[0]}; //Captain to test if every unit can fight with every unit
-    warlord1Army.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
-    warlord1Army.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
+    Army warlord1Army1{Captains[0]}; //Captain to test if every unit can fight with every unit
+    warlord1Army1.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
+    warlord1Army1.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
 
-    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army));
+    Army warlord1Army2{Captains[1]};
+    warlord1Army2.AddUnit(WarlordGenerals[2]);
+    warlord1Army2.AddUnit(WarlordGenerals[67]);
+
+    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army1));
 
     //Make the first enemy discovered
     Enemies[0]->Discovered();
@@ -761,8 +765,6 @@ int Game::Start() {
                         //show each neighbour
                         FTXUIDisplaySettlementAndArmy(gameWindow, *neighbour);
 
-                        //TEMPORARY TO CHECK IF THE MOVING TO ALLIED SETTLEMENTS WORKS! - this doesn't remove Vlasca from being owned by the enemy!!!
-                        neighbour->GiveToPlayer(gameWindow);
                     }
                     //moving the army means detaching it from its current settlement and sending it
                     //that will be done in the next input
@@ -830,10 +832,19 @@ int Game::Start() {
                         AddElementToFTXUIContainer(
                             gameWindow, paragraph("Army moved successfully to an allied settlement!"));
                     } else {
+                        //attack
                         AddElementToFTXUIContainer(
                             gameWindow,
                             paragraph("This settlement isn't yours. This action will trigger an attack...")
                             | color(importantGameInformationColor));
+
+                        std::vector<int> targetIndexes = {static_cast<int>(moveArmyToIndex)};
+                        Enemy *neighbourEnemyOwner = Enemies[wantedSettlement->getOwner() - 1].get();
+
+                        originalSettlement->SendArmy(originalSettlement->getStationedArmy().value(), targetIndexes,
+                                                     neighbourEnemyOwner, gameWindow);
+                        //once it is sent, it must also be removed
+                        originalSettlement->DetachArmy();
                     }
                     moveArmyWhereInput->Detach();
                 }
@@ -924,6 +935,9 @@ int Game::Start() {
                     Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
                     Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
 
+                    //Add new army to the first settlement the player will face
+                    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army2));
+
                     //Add the final contextual buttons
                     gameContextualButtonsContainer->Add(modifyPlayerArmyButton);
                     gameContextualButtonsContainer->Add(moveArmyButton);
@@ -1006,7 +1020,7 @@ int Game::Start() {
             //will list the settlements that have armies
             AddElementToFTXUIContainer(gameWindow, paragraph(
                                            "These are your settlements with armies:"));
-            FTXUIDisplayOnlySettlementsWithArmies(gameWindow);
+            FTXUIDisplayOnlyPlayerSettlementsWithArmies(gameWindow);
             AddElementToFTXUIContainer(gameWindow, paragraph(
                                            "Enter the index of the settlement whose army you'd like to move."));
             AddElementToFTXUIContainer(gameWindow, separator());
@@ -1126,7 +1140,7 @@ int Game::Start() {
         //the first attack doesn't require the attacking army to be actually stationed somewhere,
         //it is scripted and just a one-time occurrence.
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-        warlord1Army.DisplayArmy();
+        warlord1Army1.DisplayArmy();
         //Settlements[0]->Besieged(warlord1Army);
 
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)

@@ -1,18 +1,20 @@
 # Partial Conflict: Legends
 
 ### Description
-<p align="justify">Command your All-Star army to victory in a turn-based strategy game heavily inspired by my passion for the 'Total War' series by Creative Assembly. Begin as a Contender, with one starting general from a (stat-wise) slightly underwhelming pool. Fight your neighbouring Warlords, loyal to the Emperor, and take over their Settlements to increase your power and influence, but make sure to setup your defence! Periodic attacks from all Warlords who can directly (?) reach one of your controlled Settlements are meant to test your grasp over the realm. Master their routines and exploit their weaknesses in order to progress towards the Emperor himself! If defeating his underlings wasn't a hard task, you might find taking him on to be a real challenge. Upgrade your generals, hire new ones and make sure your army is ready for any situation. Other bot Contenders will follow their path to glory (decided by me) until prevented from doing so, you don't have unlimited time. Defeat the Emperor and take control of his Settlements to claim victory.
 
-<p align="justify">You don't like my take on the stats and/or names of the generals? Edit them yourself by modifying the configuration file, following the given format (generals.json). Give yourself an easier start by creating the most overpowered unit possible, make every enemy as strong as a dying snail or sabotage the other contenders by giving them absolutely nothing to work with (might fire back (?) ).
+<p align="justify">Command your All-Star army to victory in a turn-based strategy game heavily inspired by my passion for the 'Total War' series by Creative Assembly. Begin as a Contender, with one starting general from a (stat-wise) slightly underwhelming pool. Fight your neighbouring Warlords, loyal to the Emperor, and take over their Settlements to increase your power and influence, but make sure to setup your defence! Periodic attacks from all Warlords who can directly reach one of your controlled Settlements are meant to test your grasp over the realm. Master their routines and exploit their weaknesses in order to progress towards the Emperor himself! If defeating his underlings wasn't a hard task, you might find taking him on to be a real challenge. Strengthen your armies, hire new generals and make sure you're ready for any situation. Other bot Contenders will follow their path to glory (decided by me) until prevented from doing so, you don't have unlimited time. Defeat the Emperor and take control of his Settlements to claim victory.
+
+<p align="justify">You don't like my take on the stats and/or names of the generals? Edit them yourself by modifying the configuration file, following the given format (generals.json). Give yourself an easier start by creating the most overpowered unit possible, make every enemy as strong as a dying snail or sabotage the other contenders by giving them absolutely nothing to work with.
 
 Why the name 'Partial Conflict'? Because it can't be compared to its 'inspiration' - [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms) - [Gameplay (my own)](https://www.youtube.com/watch?v=EjgtD9rqzyU).
 
 Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 
 ### Descriere
-<p align="justify">Condu-ți armata de vedete către victorie în jocul meu de strategie pe ture (sună ciudat) inspirat din seria de jocuri „Total War” a celor de la Creative Assembly. Începe ca un Necunoscut, cu un general dintr-o listă slabă (din punct de vedere al puterii). Luptă-te cu Războinicii, cei loiali Împăratului, și preia controlul Orașelor pentru a-ți crește puterea și influența, dar asigură-te că le și aperi! Atacurile periodice de la toți Războinicii care au rută directă (?) spre unul dintre Orașele tale sunt menite să te pună la încercare. Învață-le obiceiurile și exploatează-le slăbiciunile (au) pentru a progresa către Împărat! Dacă, până acum, nu ți s-a părut mare lucru, s-ar putea ca acesta să reprezinte o încercare mai grea. Îmbunătățește-ți generalii și angajează alții, doar asigură-te că armata ta poate trece peste orice situație. Alți boți Necunoscuți își vor urma drumul spre victorie (codat de mine) până când nu mai pot face pași, așa că timpul nu este nelimitat. Doboară Împăratul și stăpânește-i orașele pentru a obține gloria supremă (e doar un joc, totuși).
 
-<p align="justify">Dacă nu-ți convin stats-urile și numele puse de mine (nu te învinuiesc), poți să le schimbi personal prin editarea fișierului de configurație (generals.json). Fă-ți cel mai puternic general de start posibil, dă-le inamicilor cadavre ambulante pe post de unități și/sau sabotează-i pe ceilalți Necunoscuți prin „oferirea” unor melci umani (ar putea avea consecințe (?) ).
+<p align="justify">Condu-ți armata de vedete către victorie în jocul meu de strategie pe ture (sună ciudat) inspirat din seria de jocuri „Total War” a celor de la Creative Assembly. Începe ca un Necunoscut, cu un general dintr-o listă slabă (din punct de vedere al puterii). Luptă-te cu Războinicii, cei loiali Împăratului, și preia controlul Orașelor pentru a-ți crește puterea și influența, dar asigură-te că le și aperi! Atacurile periodice de la toți Războinicii care au rută directă spre unul dintre Orașele tale sunt menite să te pună la încercare. Învață-le obiceiurile și exploatează-le slăbiciunile (au) pentru a progresa către Împărat! Dacă, până acum, nu ți s-a părut mare lucru, s-ar putea ca acesta să reprezinte o încercare mai grea. Îmbunătățește-ți generalii și angajează alții, doar asigură-te că armata ta poate trece peste orice situație. Alți boți Necunoscuți își vor urma drumul spre victorie (codat de mine) până când nu mai pot face pași, așa că timpul nu este nelimitat. Doboară Împăratul și stăpânește-i orașele pentru a obține gloria supremă (e doar un joc, totuși).
+
+<p align="justify">Dacă nu-ți convin stats-urile și numele puse de mine (nu te învinuiesc), poți să le schimbi personal prin editarea fișierului de configurație (generals.json). Fă-ți cel mai puternic general de start posibil, dă-le inamicilor cadavre ambulante pe post de unități și/sau sabotează-i pe ceilalți Necunoscuți prin „oferirea” unor melci umani.
 
 Numele se „justifică” pentru că nu îmi imaginez că acesta va fi măcar comparabil cu jocul [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms) - [Gameplay (al meu)](https://www.youtube.com/watch?v=EjgtD9rqzyU).
 
@@ -112,10 +114,10 @@ O cerință nu se consideră îndeplinită dacă este realizată doar prin cod g
     - clasele de excepții trebuie să trateze categorii de erori distincte (exemplu de erori echivalente: citire fișiere cu diverse extensii)
   - [ ] utilizare cu sens: de exemplu, `throw` în constructor (sau funcție care întoarce un obiect), `try`/`catch` în `main`
   - această ierarhie va fi complet independentă de ierarhia cu funcții virtuale
-- [ ] funcții și atribute `static`
+- [X] funcții și atribute `static`
 - [X] STL
 - [X] cât mai multe `const`
-- [ ] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
+- [X] funcții *de nivel înalt*, de eliminat cât mai mulți getters/setters/funcții low-level
 - [X] minim 75-80% din codul propriu să fie C++
 - [ ] la sfârșit: commit separat cu adăugarea unei noi clase derivate fără a modifica restul codului, **pe lângă cele 3 derivate deja adăugate** din aceeași ierarhie
   - noua derivată nu poate fi una existentă care a fost ștearsă și adăugată din nou
@@ -221,10 +223,11 @@ Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 ## External Libraries
 
 - [Nlohmann Json](https://github.com/nlohmann/json) for reading user-configurable data. Used without any modifications;
-- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) for terminal beautification.
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) for terminal beautification and endless suffering.
 
 ## Resurse
 
 - [Nlohmann Json](https://github.com/nlohmann/json) pentru citirea unor date ce pot fi schimbate după preferințele fiecăruia. Nu am efectuat nicio modificare proprie;
-- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) pentru oportunitati de infrumusetare a terminalului.
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) pentru oportunitati de infrumusetare a terminalului si dureri de cap
+  cum rar se intalnesc.
 - adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit

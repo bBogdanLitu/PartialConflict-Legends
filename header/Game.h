@@ -51,7 +51,7 @@ private:
     static void FTXUIDisplayOnlyArmyFromSettlement(const ftxui::Component &whereToDisplay,
                                                    const Settlement &settlement);
 
-    void FTXUIDisplayOnlySettlementsWithArmies(const ftxui::Component &whereToDisplay) const;
+    void FTXUIDisplayOnlyPlayerSettlementsWithArmies(const ftxui::Component &whereToDisplay) const;
 
     void ResetArmiesActionPoints() const;
 

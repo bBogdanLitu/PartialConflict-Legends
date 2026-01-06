@@ -52,8 +52,11 @@ Enemy::Enemy(const int defaultTurnsToAct_, const int currentTurnsToAct_,
 void Enemy::ModifySettlementOwnership(const std::shared_ptr<Settlement> &settlement) {
     for (unsigned long i = 0; i < ownedSettlements.size(); ++i) {
         if (ownedSettlements[i].lock() == settlement) {
+            //It means it has been conquered by the player. Nobody else can conquer an enemy's settlement
+            ownedSettlements[i].lock()->GiveToPlayer();
             //If it is found, we should delete it.
             ownedSettlements.erase(ownedSettlements.begin() + i);
+
             return;
         }
     }
