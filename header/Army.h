@@ -27,7 +27,7 @@ public:
 
     void AddUnit(const std::shared_ptr<Unit> &unit);
 
-    void RemoveUnit(const unsigned long& index);
+    void RemoveUnit(const unsigned long &index);
 
     [[nodiscard]] int Attacked(const Army &attackingArmy, int overallBoost, const std::vector<unsigned long> &
                                battleOrder, const ftxui::Component &gameWindow) const;

@@ -157,11 +157,26 @@ int Settlement::getIndex() const {
     return index;
 }
 
+std::string Settlement::getName() const {
+    return name;
+}
+
 std::optional<std::shared_ptr<Army> > Settlement::getStationedArmy() const {
     if (stationedArmy.has_value()) {
         return stationedArmy.value();
     }
     return std::nullopt;
+}
+
+std::vector<std::shared_ptr<Settlement>> Settlement::getNeighbours() const {
+    std::vector<std::shared_ptr<Settlement>> ActualNeighbours;
+
+    for (const auto &neighbourWeakPtr : Neighbours) {
+        if (auto neighbour = neighbourWeakPtr.lock()) {
+            ActualNeighbours.push_back(neighbour);
+        }
+    }
+    return ActualNeighbours;
 }
 
 /*
@@ -337,8 +352,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
                     if (battleOrder[j] == neededInputs - 1) {
                         battleOrder[i] -= 1;
                         increase = false;
-                    }
-                    else if (increase == true) {
+                    } else if (increase == true) {
                         battleOrder[i] += 1;
                     } else {
                         battleOrder[i] -= 1;
@@ -367,7 +381,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
 void Settlement::ChangeOwnership(Enemy *newOwner) {
     stationedArmy.reset();
     owner = newOwner->getIndex();
-    if (auto selfPtr = weakSelfPtr.lock()) {
+    if (const auto selfPtr = weakSelfPtr.lock()) {
         newOwner->ModifySettlementOwnership(selfPtr);
     }
 }

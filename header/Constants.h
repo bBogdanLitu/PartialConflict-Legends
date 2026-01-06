@@ -20,6 +20,8 @@
 #define susPink ftxui::Color::MistyRose3
 #define kaki ftxui::Color::Khaki3
 #define weirdPurple ftxui::Color::LightSlateBlue
+#define olive ftxui::Color::Gold3Bis
+#define grayYellow ftxui::Color::Wheat4
 
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;

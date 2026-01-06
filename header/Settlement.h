@@ -70,7 +70,11 @@ public:
 
     [[nodiscard]] int getIndex() const;
 
+    [[nodiscard]] std::string getName() const;
+
     [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const;
+
+    [[nodiscard]] std::vector<std::shared_ptr<Settlement> > getNeighbours() const;
 
     /*void StationArmyInControlPoint(const Army& army, const int index) {
         controlPoints[index].StationArmy(army);
