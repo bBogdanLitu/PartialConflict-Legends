@@ -25,7 +25,7 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
 //It always requires an enemy because that's how the ownership changes.
-void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
+bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
                           const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
@@ -57,27 +57,64 @@ void Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vect
                     }
                 }
             }
+            //it could be sent
+            return true;
         }
-    } else {
-        targetIndexes.pop_back(); //remove the one we will send it to right now
-        //send it forward to the next Settlement
-        for (const auto &neighbourWeak: Neighbours) {
-            if (auto neighbour = neighbourWeak.lock()) {
-                if (neighbour->getIndex() == targetIndex) {
-                    if (cost <= travellingArmy->getCurrentActionPoints()) {
-                        DetachTemporaryArmy();
-                        //we no longer need to store it here, it will pass to the next settlement.
-                        neighbour->SendArmy(travellingArmy, targetIndexes, enemy, gameWindow);
-                        break; //found
-                    } else {
-                        //The army cannot pass further. Should try again next turn... NIGHTMARE TO IMPLEMENT
-                        break;
-                    }
+        //the army doesn't have sufficient action points right now.
+        return false;
+    }
+    //We still have to travel through more settlements. I do not intend for this to be the case, but will keep this code until I decide.
+    /*
+    targetIndexes.pop_back(); //remove the one we will send it to right now
+    //send it forward to the next Settlement
+    for (const auto &neighbourWeak: Neighbours) {
+        if (auto neighbour = neighbourWeak.lock()) {
+            if (neighbour->getIndex() == targetIndex) {
+                if (cost <= travellingArmy->getCurrentActionPoints()) {
+                    DetachTemporaryArmy();
+                    //we no longer need to store it here, it will pass to the next settlement.
+                    neighbour->SendArmy(travellingArmy, targetIndexes, enemy, gameWindow);
+                    //success
+                    return true;
                 }
+                //couldn't proceed
+                return false;
             }
         }
     }
+    */
+
+    //some shit went down
+    return false;
 }
+
+bool Settlement::MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement> &targetSettlement) {
+    const int targetIndex = targetSettlement->getIndex();
+    int cost = 9999;
+    bool found = false;
+
+    for (const auto &controlPoint: ControlPoints) {
+        if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
+            targetIndex) {
+            cost = controlPoint.getTravelCost();
+            found = true;
+            break; //found it
+            }
+    }
+    if (found && stationedArmy.has_value() && cost <= stationedArmy.value()->getCurrentActionPoints()) {
+        //attach to neighbour
+        targetSettlement->StationArmy(stationedArmy.value());
+        //detach from self
+        DetachArmy();
+        //successfully moved
+        return true;
+    }
+
+    //not enough action points / other error;
+    return false;
+}
+
+
 
 void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &neighbour,
                                         const std::shared_ptr<Army> &travellingArmy, Enemy *enemy,
@@ -144,7 +181,7 @@ void Settlement::AddNeighbour(const std::shared_ptr<Settlement> &neighbour) {
 }
 
 
-void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) {
+void Settlement::AddUnitToArmy(const std::shared_ptr<Unit> &unit) const {
     stationedArmy.value()->AddUnit(unit);
 }
 

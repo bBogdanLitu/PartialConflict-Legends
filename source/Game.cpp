@@ -753,6 +753,11 @@ int Game::Start() {
                         return true;
                     }
 
+                    if (originalSettlement->getStationedArmy().has_value() != true) {
+                        //can't move an army that doesn't exist
+                        return true;
+                    }
+
                     auto Neighbours = originalSettlement->getNeighbours();
                     //inform the player about the possibilities
                     AddNewLineToFTXUIContainer(gameWindow);
@@ -768,6 +773,7 @@ int Game::Start() {
                     }
                     //moving the army means detaching it from its current settlement and sending it
                     //that will be done in the next input
+                    //should use SendArmy or another func from Settlement!!!
                     AddNewLineToFTXUIContainer(gameWindow);
                     AddElementToFTXUIContainer(
                         gameWindow, paragraph("Now choose the index of the neighbour you want to move to."));
@@ -797,7 +803,7 @@ int Game::Start() {
                     moveArmyInputString = "";
 
                     const std::shared_ptr<Settlement> originalSettlement = Settlements[moveArmyFromIndex];
-                    const std::shared_ptr<Settlement> wantedSettlement = Settlements[moveArmyToIndex];
+                    const std::shared_ptr<Settlement> targetSettlement = Settlements[moveArmyToIndex];
 
                     bool found = false;
 
@@ -813,9 +819,9 @@ int Game::Start() {
                         return true;
                     }
                     //else it's valid, and we should move the army to this neighbour, if it's allowed
-                    if (wantedSettlement->getOwner() == 0) {
+                    if (targetSettlement->getOwner() == 0) {
                         //if we are trying to move to an allied settlement, check if it already has an army
-                        if (wantedSettlement->getStationedArmy().has_value()) {
+                        if (targetSettlement->getStationedArmy().has_value()) {
                             //we can't move another army to it, retry
                             AddElementToFTXUIContainer(gameWindow, paragraph(
                                                            "Settlement" + std::to_string(moveArmyToIndex) +
@@ -824,13 +830,16 @@ int Game::Start() {
                             return true;
                         }
                         //else, we can move the army there
-                        std::shared_ptr<Army> armyToMove = originalSettlement->getStationedArmy().value();
-                        //certain that it has a value, else we wouldn't have reached this point
-                        originalSettlement->DetachArmy();
-                        wantedSettlement->StationArmy(armyToMove);
+                        bool sendRes = originalSettlement->MoveOwnArmyToAlliedSettlement(targetSettlement);
 
-                        AddElementToFTXUIContainer(
+                        if (sendRes) {
+                            AddElementToFTXUIContainer(
                             gameWindow, paragraph("Army moved successfully to an allied settlement!"));
+                        } else {
+                            AddElementToFTXUIContainer(
+                            gameWindow, paragraph("Army couldn't be moved!"));
+                        }
+
                     } else {
                         //attack
                         AddElementToFTXUIContainer(
@@ -839,12 +848,16 @@ int Game::Start() {
                             | color(importantGameInformationColor));
 
                         std::vector<int> targetIndexes = {static_cast<int>(moveArmyToIndex)};
-                        Enemy *neighbourEnemyOwner = Enemies[wantedSettlement->getOwner() - 1].get();
+                        Enemy *neighbourEnemyOwner = Enemies[targetSettlement->getOwner() - 1].get();
 
-                        originalSettlement->SendArmy(originalSettlement->getStationedArmy().value(), targetIndexes,
-                                                     neighbourEnemyOwner, gameWindow);
-                        //once it is sent, it must also be removed
-                        originalSettlement->DetachArmy();
+                        const bool sendRes = originalSettlement->SendArmy(originalSettlement->getStationedArmy().value(),
+                                                                    targetIndexes,neighbourEnemyOwner, gameWindow);
+                        if (sendRes == true) {
+                            //once it is sent successfully, it must also be removed
+                            originalSettlement->DetachArmy();
+                        } else {
+                            AddElementToFTXUIContainer(gameWindow, paragraph("Couldn't send army, probably not enough action points!"));
+                        }
                     }
                     moveArmyWhereInput->Detach();
                 }
@@ -915,14 +928,17 @@ int Game::Start() {
                 }
             }
             if (alliedSettlementCount == 0) {
-                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... There are none! YOU LOST?!"));
+                AddNewLineToFTXUIContainer(gameWindow);
+                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... There are none! YOU LOST?!") | color(importantGameInformationColor));
                 //The game won't end. I will give the player 1 more chance (insane lore).
                 if (timesWithoutSettlements == 0) {
-                    AddElementToFTXUIContainer(gameWindow, paragraph("It can't be..."));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("You were supposed to make a difference!"));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("..."));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("I won't allow you to escape this easily."));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Rise again and show everyone why I chose you!"));
+                    AddNewLineToFTXUIContainer(gameWindow);
+                    AddElementToFTXUIContainer(gameWindow, paragraph("It can't be...") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("You were supposed to make a difference!") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("...") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("I won't allow you to escape this easily.") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("Rise again and show everyone why I chose you!") | color(storyRelatedTextColor));
+                    AddNewLineToFTXUIContainer(gameWindow);
 
                     //Regiving the first settlement to the player and resetting the army
 
@@ -1018,6 +1034,12 @@ int Game::Start() {
 
         auto onMoveArmyButtonClick = [&] {
             //will list the settlements that have armies
+            AddNewLineToFTXUIContainer(gameWindow);
+            AddElementToFTXUIContainer(gameWindow, separator());
+            AddElementToFTXUIContainer(gameWindow, paragraph(
+                                           "MOVING ARMY") | center | color(userInputExpectedColor));
+            AddElementToFTXUIContainer(gameWindow, separator());
+            AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, paragraph(
                                            "These are your settlements with armies:"));
             FTXUIDisplayOnlyPlayerSettlementsWithArmies(gameWindow);

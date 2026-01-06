@@ -166,6 +166,10 @@ ftxui::Table Army::CreateArmyTable() const {
     int count = 0;
     for (const auto &unit: AssignedUnits) {
         std::vector<std::string> tableRow = unit->getPrintableStats();
+        //add the action points
+        tableRow.emplace(tableRow.begin(), std::to_string(defaultActionPoints));
+        tableRow.emplace(tableRow.begin(), std::to_string(currentActionPoints));
+        //add the count
         tableRow.emplace(tableRow.begin(), std::to_string(count));
         tableContent.push_back(tableRow);
 

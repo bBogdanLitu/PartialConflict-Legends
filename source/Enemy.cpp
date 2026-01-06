@@ -19,10 +19,14 @@ void Enemy::TryToAttack(const ftxui::Component &gameWindow) {
                         foundNeighbourWithArmy = true;
 
                         targetIndexes.push_back(indexOfPlayerSettlement);
-                        settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes, this, gameWindow);
+
+                        //try to send the army (could fail eventually)
+                        bool res = settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes, this, gameWindow);
 
                         //After getting its information, the army will be detached from the settlement and sent forward.
-                        settlement->DetachArmy();
+                        if (res == true) {
+                            settlement->DetachArmy();
+                        }
                         break;
                     }
                     //If it doesn't, the army should still reach it, but also reach the settlement neighbouring the player

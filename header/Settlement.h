@@ -31,8 +31,10 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    void SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
-                          const ftxui::Component &gameWindow);
+    bool SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
+                  const ftxui::Component &gameWindow);
+
+    bool MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement>& targetSettlement);
 
     static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &, const std::shared_ptr<Army> &, Enemy *,
                                        const ftxui::Component &);
@@ -51,7 +53,7 @@ public:
 
 
     //Because Armies can only be modified when they are in a Settlement! (or directly only for test purposes)
-    void AddUnitToArmy(const std::shared_ptr<Unit> &unit);
+    void AddUnitToArmy(const std::shared_ptr<Unit> &unit) const;
 
     [[nodiscard]] int Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const;
 

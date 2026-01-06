@@ -101,7 +101,8 @@ const inline std::vector<std::string> settlementTableHeaders =
 };
 const inline std::vector<std::string> armyTableHeaders =
 {
-    "Index", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy", "Dexterity", "Overall"
+    "Index", "AP", "Max AP", "Full name", "Type", "Rarity", "Melee", "Ranged", "Armour", "Strength", "Accuracy",
+    "Dexterity", "Overall"
 };
 const inline std::vector<std::string> generalFightTableHeaders =
 {
