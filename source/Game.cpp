@@ -510,21 +510,23 @@ int Game::Start() {
         //Every time I want to listen to input from the user, I will have to add an input such as this one
         Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
                                         | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-        Component modifyArmyCountInput = Input(&modifiedArmyInputString, "Count of the army you want to modify:", inputOption)
+        Component modifyArmyCountInput = Input(&modifiedArmyInputString, "Count of the army you want to modify:",
+                                               inputOption)
                                          | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         Component modifyArmyWhatInput = Input(&modifiedArmyInputString,
                                               "0 - ADD UNIT | 1 - REMOVE UNIT | 2 - DELETE ARMY | 3 - CANCEL",
                                               inputOption)
                                         | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-        Component modifyArmyAddInput = Input(&modifiedArmyInputString, "Index of the general you'd wish to add:", inputOption)
+        Component modifyArmyAddInput = Input(&modifiedArmyInputString, "Index of the general you'd wish to add:",
+                                             inputOption)
                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         Component modifyArmyRemoveInput = Input(&modifiedArmyInputString, "Index of the general you want to remove:",
                                                 inputOption)
                                           | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         Component moveArmyWhichSettlementInput = Input(&moveArmyInputString, "Index of the settlement", inputOption)
-                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+                                                 | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         Component moveArmyWhereInput = Input(&moveArmyInputString, "Index of the neighbour:", inputOption)
-                                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+                                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
         //CATCH EVENTS FOR INPUTS
 
         //because I have to only catch events that are related to input, not mouse hovers, clicks and other stuff,
@@ -737,7 +739,7 @@ int Game::Start() {
 
                     //reset for future use
                     moveArmyInputString = "";
-                    if (moveArmyFromIndex > Settlements.size()) {
+                    if (moveArmyFromIndex >= Settlements.size()) {
                         //invalid input
                         return true;
                     }
@@ -750,9 +752,10 @@ int Game::Start() {
                     auto Neighbours = originalSettlement->getNeighbours();
                     //inform the player about the possibilities
                     AddNewLineToFTXUIContainer(gameWindow);
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Neighbours of settlement " + originalSettlement->getName() + ":"));
+                    AddElementToFTXUIContainer(
+                        gameWindow, paragraph("Neighbours of settlement " + originalSettlement->getName() + ":"));
                     AddNewLineToFTXUIContainer(gameWindow);
-                    for (const auto &neighbour : Neighbours) {
+                    for (const auto &neighbour: Neighbours) {
                         //initialize the vector of valid indexes of neighbours
                         validIndexes.push_back(neighbour->getIndex());
                         //show each neighbour
@@ -764,7 +767,8 @@ int Game::Start() {
                     //moving the army means detaching it from its current settlement and sending it
                     //that will be done in the next input
                     AddNewLineToFTXUIContainer(gameWindow);
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Now choose the index of the neighbour you want to move to."));
+                    AddElementToFTXUIContainer(
+                        gameWindow, paragraph("Now choose the index of the neighbour you want to move to."));
                     AddElementToFTXUIContainer(gameWindow, separator());
                     gameWindow->Add(moveArmyWhereInput);
 
@@ -795,7 +799,7 @@ int Game::Start() {
 
                     bool found = false;
 
-                    for (const auto &index : validIndexes) {
+                    for (const auto &index: validIndexes) {
                         if (moveArmyToIndex == index) {
                             found = true;
                             break;
@@ -811,19 +815,21 @@ int Game::Start() {
                         //if we are trying to move to an allied settlement, check if it already has an army
                         if (wantedSettlement->getStationedArmy().has_value()) {
                             //we can't move another army to it, retry
-                            AddElementToFTXUIContainer(gameWindow, paragraph("Settlement" + std::to_string(moveArmyToIndex) + "already has an army. Retry"));
+                            AddElementToFTXUIContainer(gameWindow, paragraph(
+                                                           "Settlement" + std::to_string(moveArmyToIndex) +
+                                                           "already has an army. Retry"));
                             moveArmyInputString = "";
                             return true;
                         }
                         //else, we can move the army there
-                        std::shared_ptr<Army> armyToMove = originalSettlement->getStationedArmy().value(); //certain that it has a value, else we wouldn't have reached this point
+                        std::shared_ptr<Army> armyToMove = originalSettlement->getStationedArmy().value();
+                        //certain that it has a value, else we wouldn't have reached this point
                         originalSettlement->DetachArmy();
                         wantedSettlement->StationArmy(armyToMove);
 
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Army moved successfully to an allied settlement!"));
-
-                    }
-                    else {
+                        AddElementToFTXUIContainer(
+                            gameWindow, paragraph("Army moved successfully to an allied settlement!"));
+                    } else {
                         AddElementToFTXUIContainer(
                             gameWindow,
                             paragraph("This settlement isn't yours. This action will trigger an attack...")
@@ -857,7 +863,7 @@ int Game::Start() {
                                                             Color::Default, kaki);
 
         auto moveArmyStyle = ButtonOption::Animated(Color::Default, olive,
-                                                            Color::Default, grayYellow);
+                                                    Color::Default, grayYellow);
 
         //FUNCTIONS FOR BUTTONS
 

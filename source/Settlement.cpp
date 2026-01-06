@@ -157,7 +157,7 @@ int Settlement::getIndex() const {
     return index;
 }
 
-std::string Settlement::getName() const {
+const std::string& Settlement::getName() const {
     return name;
 }
 
@@ -168,10 +168,10 @@ std::optional<std::shared_ptr<Army> > Settlement::getStationedArmy() const {
     return std::nullopt;
 }
 
-std::vector<std::shared_ptr<Settlement>> Settlement::getNeighbours() const {
-    std::vector<std::shared_ptr<Settlement>> ActualNeighbours;
+std::vector<std::shared_ptr<Settlement> > Settlement::getNeighbours() const {
+    std::vector<std::shared_ptr<Settlement> > ActualNeighbours;
 
-    for (const auto &neighbourWeakPtr : Neighbours) {
+    for (const auto &neighbourWeakPtr: Neighbours) {
         if (auto neighbour = neighbourWeakPtr.lock()) {
             ActualNeighbours.push_back(neighbour);
         }

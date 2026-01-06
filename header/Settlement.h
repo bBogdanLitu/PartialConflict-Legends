@@ -70,7 +70,7 @@ public:
 
     [[nodiscard]] int getIndex() const;
 
-    [[nodiscard]] std::string getName() const;
+    [[nodiscard]] const std::string& getName() const;
 
     [[nodiscard]] std::optional<std::shared_ptr<Army> > getStationedArmy() const;
 
