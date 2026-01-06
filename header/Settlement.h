@@ -31,10 +31,10 @@ public:
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
 
-    bool SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
+    bool SendArmy(const std::shared_ptr<Army> &travellingArmy, const std::vector<int> &targetIndexes, Enemy *enemy,
                   const ftxui::Component &gameWindow);
 
-    bool MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement>& targetSettlement);
+    bool MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement> &targetSettlement);
 
     static void AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &, const std::shared_ptr<Army> &, Enemy *,
                                        const ftxui::Component &);

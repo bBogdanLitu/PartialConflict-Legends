@@ -21,7 +21,8 @@ void Enemy::TryToAttack(const ftxui::Component &gameWindow) {
                         targetIndexes.push_back(indexOfPlayerSettlement);
 
                         //try to send the army (could fail eventually)
-                        bool res = settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes, this, gameWindow);
+                        bool res = settlement->SendArmy(settlement->getStationedArmy().value(), targetIndexes, this,
+                                                        gameWindow);
 
                         //After getting its information, the army will be detached from the settlement and sent forward.
                         if (res == true) {

@@ -25,7 +25,7 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
 //It always requires an enemy because that's how the ownership changes.
-bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, std::vector<int> targetIndexes, Enemy *enemy,
+bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, const std::vector<int> &targetIndexes, Enemy *enemy,
                           const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
     int targetIndex = targetIndexes[targetIndexes.size() - 1];
@@ -99,7 +99,7 @@ bool Settlement::MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement>
             cost = controlPoint.getTravelCost();
             found = true;
             break; //found it
-            }
+        }
     }
     if (found && stationedArmy.has_value() && cost <= stationedArmy.value()->getCurrentActionPoints()) {
         //attach to neighbour
@@ -113,7 +113,6 @@ bool Settlement::MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement>
     //not enough action points / other error;
     return false;
 }
-
 
 
 void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &neighbour,

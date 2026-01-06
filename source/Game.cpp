@@ -834,12 +834,11 @@ int Game::Start() {
 
                         if (sendRes) {
                             AddElementToFTXUIContainer(
-                            gameWindow, paragraph("Army moved successfully to an allied settlement!"));
+                                gameWindow, paragraph("Army moved successfully to an allied settlement!"));
                         } else {
                             AddElementToFTXUIContainer(
-                            gameWindow, paragraph("Army couldn't be moved!"));
+                                gameWindow, paragraph("Army couldn't be moved!"));
                         }
-
                     } else {
                         //attack
                         AddElementToFTXUIContainer(
@@ -850,13 +849,15 @@ int Game::Start() {
                         std::vector<int> targetIndexes = {static_cast<int>(moveArmyToIndex)};
                         Enemy *neighbourEnemyOwner = Enemies[targetSettlement->getOwner() - 1].get();
 
-                        const bool sendRes = originalSettlement->SendArmy(originalSettlement->getStationedArmy().value(),
-                                                                    targetIndexes,neighbourEnemyOwner, gameWindow);
+                        const bool sendRes = originalSettlement->SendArmy(
+                            originalSettlement->getStationedArmy().value(),
+                            targetIndexes, neighbourEnemyOwner, gameWindow);
                         if (sendRes == true) {
                             //once it is sent successfully, it must also be removed
                             originalSettlement->DetachArmy();
                         } else {
-                            AddElementToFTXUIContainer(gameWindow, paragraph("Couldn't send army, probably not enough action points!"));
+                            AddElementToFTXUIContainer(
+                                gameWindow, paragraph("Couldn't send army, probably not enough action points!"));
                         }
                     }
                     moveArmyWhereInput->Detach();
@@ -929,15 +930,22 @@ int Game::Start() {
             }
             if (alliedSettlementCount == 0) {
                 AddNewLineToFTXUIContainer(gameWindow);
-                AddElementToFTXUIContainer(gameWindow, paragraph("Wait... There are none! YOU LOST?!") | color(importantGameInformationColor));
+                AddElementToFTXUIContainer(
+                    gameWindow, paragraph("Wait... There are none! YOU LOST?!") | color(importantGameInformationColor));
                 //The game won't end. I will give the player 1 more chance (insane lore).
                 if (timesWithoutSettlements == 0) {
                     AddNewLineToFTXUIContainer(gameWindow);
                     AddElementToFTXUIContainer(gameWindow, paragraph("It can't be...") | color(storyRelatedTextColor));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("You were supposed to make a difference!") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(
+                        gameWindow,
+                        paragraph("You were supposed to make a difference!") | color(storyRelatedTextColor));
                     AddElementToFTXUIContainer(gameWindow, paragraph("...") | color(storyRelatedTextColor));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("I won't allow you to escape this easily.") | color(storyRelatedTextColor));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Rise again and show everyone why I chose you!") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(
+                        gameWindow,
+                        paragraph("I won't allow you to escape this easily.") | color(storyRelatedTextColor));
+                    AddElementToFTXUIContainer(
+                        gameWindow,
+                        paragraph("Rise again and show everyone why I chose you!") | color(storyRelatedTextColor));
                     AddNewLineToFTXUIContainer(gameWindow);
 
                     //Regiving the first settlement to the player and resetting the army
@@ -1037,7 +1045,7 @@ int Game::Start() {
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, separator());
             AddElementToFTXUIContainer(gameWindow, paragraph(
-                                           "MOVING ARMY") | center | color(userInputExpectedColor));
+                                                       "MOVING ARMY") | center | color(userInputExpectedColor));
             AddElementToFTXUIContainer(gameWindow, separator());
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, paragraph(
