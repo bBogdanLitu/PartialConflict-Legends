@@ -17,8 +17,9 @@ class LocalLeader : public Unit {
     void display(std::ostream &os) const override;
 
 public:
-    LocalLeader(const std::string& firstName_, const std::string& lastName_, int type_, int rarity_,
-        int melee_, int ranged_, int armour_, int str_, int acc_, int dex_, int incomeMultiplier_, float battleHandicap_);
+    LocalLeader(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_,
+                int melee_, int ranged_, int armour_, int str_, int acc_, int dex_, int incomeMultiplier_,
+                float battleHandicap_);
 
     [[nodiscard]] std::shared_ptr<Unit> clone() const override { return std::make_shared<LocalLeader>(*this); }
 };

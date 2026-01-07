@@ -8,6 +8,7 @@
 #include "Garrison.h"
 
 
+class LocalLeader;
 class Enemy;
 //The objective of the game, conquering them leads to victory. Has an Army and/or a (weak) Garrison stationed.
 //There are Control Points assigned to a Settlement
@@ -15,6 +16,7 @@ class Settlement {
 private:
     std::optional<std::shared_ptr<Army> > stationedArmy;
     std::optional<std::shared_ptr<Army> > temporaryArmy;
+    std::optional<std::shared_ptr<LocalLeader> > localLeader;
     Garrison stationedGarrison;
     std::vector<ControlPoint> ControlPoints;
     std::string name;
@@ -32,6 +34,8 @@ public:
     void StationArmy(const std::shared_ptr<Army> &army);
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
+
+    void AppointLocalLeader(const std::shared_ptr<Unit> &leader);
 
     bool SendArmy(const std::shared_ptr<Army> &travellingArmy, const std::vector<int> &targetIndexes, Enemy *enemy,
                   const ftxui::Component &gameWindow);

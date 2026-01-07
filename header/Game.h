@@ -30,7 +30,7 @@ private:
 
     void PopulateLocalLeaders(std::ifstream localLeadersJson);
 
-    void InitializeWarlordArmies() const;
+    void InitializeArmiesAndSettlements() const;
 
     void CheckGenerals() const;
 

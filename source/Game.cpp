@@ -127,7 +127,7 @@ void Game::PopulateLocalLeaders(std::ifstream localLeadersJson) {
     localLeadersJson.close();
 }
 
-void Game::InitializeWarlordArmies() const {
+void Game::InitializeArmiesAndSettlements() const {
     //Create the initial enemy armies
     //Army that should beat the player
     Army warlord1VlascaArmyInitial{Captains[0]};
@@ -141,7 +141,9 @@ void Game::InitializeWarlordArmies() const {
     warlord1ColonistiArmyInitial.AddUnit(WarlordGenerals[4]);
     warlord1ColonistiArmyInitial.AddUnit(WarlordGenerals[20]);
 
-    Settlements[3]->StationArmy(std::make_shared<Army>(warlord1ColonistiArmyInitial));
+    //Settlements[3]->StationArmy(std::make_shared<Army>(warlord1ColonistiArmyInitial));
+    //TEMPORARY local leader test
+    Settlements[3]->AppointLocalLeader(LocalLeaders[2]);
 
     Army warlord2FetestiArmyInitial{Captains[4]};
     warlord2FetestiArmyInitial.AddUnit(WarlordGenerals[5]);
@@ -446,7 +448,7 @@ int Game::Start() {
         return -1;
     }
 
-    InitializeWarlordArmies();
+    InitializeArmiesAndSettlements();
 
     //TEMPORARILY UNDER CONSTRUCTION
 
@@ -1233,7 +1235,7 @@ int Game::Start() {
         //the first attack doesn't require the attacking army to be actually stationed somewhere,
         //it is scripted and just a one-time occurrence.
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-        InitializeWarlordArmies();
+        InitializeArmiesAndSettlements();
         Settlements[0]->getStationedArmy().value()->DisplayArmy();
         //Settlements[0]->Besieged(warlord1Army);
 

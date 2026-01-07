@@ -26,9 +26,9 @@ void LocalLeader::NullifyOrBoost(std::vector<int> &enemyPowers, std::vector<int>
                    selfPowers[1], enemyPowers[2]) == true) {
         selfPowers[1] = 0;
     } else if (enemyPowers[2] <= armourMaximumForBonusMultiplier) {
-       selfPowers[0] *= meleeBonusMultiplierForLowArmour;
-       selfPowers[1] *= rangedBonusMultiplierForLowArmour;
-   }
+        selfPowers[0] *= meleeBonusMultiplierForLowArmour;
+        selfPowers[1] *= rangedBonusMultiplierForLowArmour;
+    }
 
     //If there is a sizeable difference between one's ranged vs the other's melee, melee gets debuffed
     if (enemyPowers[1] > rangedToMeleeDebuffFixedAddition && RangedToMeleeDebuff(enemyPowers[1], selfPowers[0])) {
@@ -61,7 +61,8 @@ void LocalLeader::display(std::ostream &os) const {
 }
 
 LocalLeader::LocalLeader(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_,
-    int melee_, int ranged_, int armour_, int str_, int acc_, int dex_, int incomeMultiplier_,
-    float battleHandicap_) : Unit(firstName_, lastName_, type_, rarity_, melee_, ranged_, armour_, str_, acc_, dex_),
-    incomeMultiplier(incomeMultiplier_), battleHandicap(battleHandicap_){
+                         int melee_, int ranged_, int armour_, int str_, int acc_, int dex_, int incomeMultiplier_,
+                         float battleHandicap_) : Unit(firstName_, lastName_, type_, rarity_, melee_, ranged_, armour_,
+                                                       str_, acc_, dex_),
+                                                  incomeMultiplier(incomeMultiplier_), battleHandicap(battleHandicap_) {
 }

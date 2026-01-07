@@ -77,8 +77,13 @@ int Army::Attacked(const Army &attackingArmy, const int overallBoost,
         }
     } else if (attackingArmy.getUnitCount() > this->getUnitCount()) {
         //Because the attackers use a simple order (0, 1, 2) we can simply add what's left to the remaining pool.
+        /*
         for (unsigned long i = attackingArmy.getUnitCount() - 1;
              i > armyGeneralsMaximumIndex - (attackingArmy.getUnitCount() - this->getUnitCount()); i--) {
+            remainingAttackers.push_back(static_cast<int>(i));
+        }
+        */
+        for (unsigned long i = this->getUnitCount(); i < attackingArmy.getUnitCount(); i++) {
             remainingAttackers.push_back(static_cast<int>(i));
         }
     }

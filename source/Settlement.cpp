@@ -4,6 +4,8 @@
 #include "../header/Game.h"
 #include <ftxui/component/screen_interactive.hpp>
 
+#include "../header/LocalLeader.h"
+
 
 Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
                        int index_, long int income_) : stationedGarrison(garrison_),
@@ -33,6 +35,12 @@ void Settlement::StationArmy(const std::shared_ptr<Army> &army) {
 
 void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
     temporaryArmy = army;
+}
+
+void Settlement::AppointLocalLeader(const std::shared_ptr<Unit> &leader) {
+    if (localLeader.has_value() == false) {
+        localLeader = std::dynamic_pointer_cast<LocalLeader>(leader);
+    }
 }
 
 //An army is sent towards a final destination. Moving armies is done through the settlements they are stationed in.
@@ -236,9 +244,9 @@ std::vector<std::shared_ptr<Settlement> > Settlement::getNeighbours() const {
 int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &gameWindow) const {
     //1 = victory , -1 = defeat, 0 = nothing happened (?)
     int result = 0;
+    std::vector<unsigned long> battleOrder = {0};
     if (stationedArmy.has_value()) {
         //fight with army+garrison
-        std::vector<unsigned long> battleOrder = {0};
         unsigned long neededInputs = std::min(stationedArmy.value()->getUnitCount(), attackingArmy.getUnitCount());
         std::string input1, input2, input3;
         using namespace ftxui;
@@ -413,9 +421,17 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         result = stationedArmy.value()->Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder,
                                                  gameWindow);
     } else {
-        //fight with garrison
+        //fight with garrison and, eventually, localLeader
         Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("The settlement has no stationed army."));
-        result = stationedGarrison.DirectlyAttacked(attackingArmy);
+        if (localLeader.has_value() == false) {
+            result = stationedGarrison.DirectlyAttacked(attackingArmy);
+        } else {
+            //we have a leader and should fight with him
+            Army localLeaderArmy {localLeader.value()};
+            Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("But there is a brave local leader!"));
+            result = localLeaderArmy.Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder, gameWindow);
+        }
+
     }
     return result;
 }
