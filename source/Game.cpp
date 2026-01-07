@@ -73,6 +73,20 @@ void Game::PopulateGenerals(std::ifstream generalsJson) {
         }
     }
     generalsJson.close();
+
+    //The emperor is hard-coded just because
+    Emperor emp{
+        "PIBBLE", "",
+        777,
+        999,
+        99,
+        99,
+        99,
+        99,
+        99,
+        99
+    };
+    EmperorUnit = std::make_shared<Emperor>(emp);
 }
 
 void Game::PopulateSettlements(std::ifstream settlementsJson) {
@@ -187,11 +201,17 @@ void Game::InitializeArmiesAndSettlements() const {
     //TEMPORARY local leader test
     Settlements[3]->AppointLocalLeader(LocalLeaders[2]);
 
+    /*
     Army warlord2FetestiArmyInitial{Captains[4]};
     warlord2FetestiArmyInitial.AddUnit(WarlordGenerals[5]);
     warlord2FetestiArmyInitial.AddUnit(WarlordGenerals[19]);
 
     Settlements[2]->StationArmy(std::make_shared<Army>(warlord2FetestiArmyInitial));
+    */
+
+    //TEMPORARY emperor test
+    Army emperorArmyInitial{EmperorUnit};
+    Settlements[2]->StationArmy(std::make_shared<Army>(emperorArmyInitial));
 
 
     //Make the first enemy discovered
@@ -1332,8 +1352,6 @@ int Game::Start() {
         } catch (const SizeViolation &err) {
             std::cerr << "Size violation - " << err.what() << std::endl;
         }
-
-
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <ftxui/component/loop.hpp>
+
+#include "Emperor.h"
 #include "Settlement.h"
 #include "Enemy.h"
 
@@ -12,6 +14,7 @@ private:
             EmperorGenerals, Captains, LocalLeaders;
     std::vector<std::shared_ptr<Settlement> > Settlements;
     std::vector<std::shared_ptr<Enemy> > Enemies;
+    std::shared_ptr<Emperor> EmperorUnit;
     //I want(ed) to use these somewhere else and that's why they're class attributes (will change when I decide)
     unsigned int ans1 = 0, ans2 = 0, ans3 = 0;
     unsigned long currentTurn = 0;
