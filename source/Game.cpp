@@ -13,6 +13,8 @@
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 
+#include "../header/LocalLeader.h"
+
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
@@ -109,6 +111,20 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
         Captains.push_back(captain.clone());
     }
     captainsJson.close();
+}
+
+void Game::PopulateLocalLeaders(std::ifstream localLeadersJson) {
+    nlohmann::json data = nlohmann::json::parse(localLeadersJson);
+    for (const auto &i: data) {
+        LocalLeader leader{
+            i["firstName"], i["lastName"], i["type"], i["rarity"],
+            i["melee"], i["ranged"], i["armour"],
+            i["strength"], i["accuracy"], i["dexterity"],
+            i["incomeMultiplier"], i["battleHandicap"]
+        };
+        LocalLeaders.push_back(leader.clone());
+    }
+    localLeadersJson.close();
 }
 
 void Game::InitializeWarlordArmies() const {
@@ -401,15 +417,16 @@ void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const
 
 //ultimate code sausage / a really long piece of spaghetti
 int Game::Start() {
-    std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson, enemiesJson;
+    std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson, enemiesJson, localLeadersJson;
 
     generalsJson.open("generals.json");
     settlementsJson.open("settlements.json");
     controlPointsJson.open("controlPoints.json");
     captainsJson.open("captains.json");
     enemiesJson.open("enemies.json");
+    localLeadersJson.open("localLeaders.json");
 
-    if (!generalsJson || !settlementsJson || !captainsJson || !controlPointsJson || !enemiesJson) {
+    if (!generalsJson || !settlementsJson || !captainsJson || !controlPointsJson || !enemiesJson || !localLeadersJson) {
         std::cerr << "File not found." << std::endl;
         return -1;
     }
@@ -418,6 +435,7 @@ int Game::Start() {
     PopulateSettlements(std::move(settlementsJson));
     PopulateControlPoints(std::move(controlPointsJson));
     PopulateCaptains(std::move(captainsJson));
+    PopulateLocalLeaders(std::move(localLeadersJson));
 
     if (WarlordGenerals.size() < warlordMinimumGenerals) {
         std::cout << warlordCountWarningText;
@@ -1285,4 +1303,5 @@ Game::~Game() {
     EmperorGenerals.clear();
     Captains.clear();
     Enemies.clear();
+    LocalLeaders.clear();
 }

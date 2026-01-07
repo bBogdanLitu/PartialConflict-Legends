@@ -79,6 +79,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Captain.h
         source/Enemy.cpp
         header/Enemy.h
+        source/LocalLeader.cpp
+        header/LocalLeader.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
@@ -110,6 +112,6 @@ if(APPLE)
     install(FILES launcher.command DESTINATION ${DESTINATION_DIR})
 endif()
 
-copy_files(FILES tastatura.txt generals.json settlements.json captains.json controlPoints.json enemies.json COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
+copy_files(FILES tastatura.txt generals.json settlements.json captains.json controlPoints.json enemies.json localLeaders.json COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(FILES tastatura.txt config.json DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})
 # copy_files(DIRECTORY images sounds COPY_TO_DESTINATION TARGET_NAME ${MAIN_EXECUTABLE_NAME})

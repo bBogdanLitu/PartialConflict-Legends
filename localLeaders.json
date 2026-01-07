@@ -1,0 +1,44 @@
+[
+  {
+    "firstName": "Wise",
+    "lastName": "Investor",
+    "type": 6,
+    "rarity": 3,
+    "melee": 50,
+    "ranged": 99,
+    "armour": 50,
+    "strength": 99,
+    "accuracy": 99,
+    "dexterity": 50,
+    "incomeMultiplier": 3,
+    "battleHandicap": 0.7
+  },
+  {
+    "firstName": "Balanced",
+    "lastName": "Leader",
+    "type": 6,
+    "rarity": 3,
+    "melee": 99,
+    "ranged": 50,
+    "armour": 77,
+    "strength": 99,
+    "accuracy": 50,
+    "dexterity": 80,
+    "incomeMultiplier": 2,
+    "battleHandicap": 1
+  },
+  {
+    "firstName": "Violent",
+    "lastName": "Warrior",
+    "type": 6,
+    "rarity": 3,
+    "melee": 77,
+    "ranged": 50,
+    "armour": 99,
+    "strength": 85,
+    "accuracy": 50,
+    "dexterity": 99,
+    "incomeMultiplier": 0,
+    "battleHandicap": 1.3
+  }
+]

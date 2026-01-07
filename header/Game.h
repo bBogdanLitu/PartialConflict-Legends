@@ -9,7 +9,7 @@
 class Game {
 private:
     std::vector<std::shared_ptr<Unit> > StartingGenerals, PlayerGenerals, ContenderGenerals, WarlordGenerals,
-            EmperorGenerals, Captains;
+            EmperorGenerals, Captains, LocalLeaders;
     std::vector<std::shared_ptr<Settlement> > Settlements;
     std::vector<std::shared_ptr<Enemy> > Enemies;
     //I want(ed) to use these somewhere else and that's why they're class attributes (will change when I decide)
@@ -27,6 +27,8 @@ private:
     void PopulateControlPoints(std::ifstream controlPointsJson);
 
     void PopulateCaptains(std::ifstream captainsJson);
+
+    void PopulateLocalLeaders(std::ifstream localLeadersJson);
 
     void InitializeWarlordArmies() const;
 
