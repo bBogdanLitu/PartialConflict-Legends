@@ -1215,7 +1215,8 @@ int Game::Start() {
         //the first attack doesn't require the attacking army to be actually stationed somewhere,
         //it is scripted and just a one-time occurrence.
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-        //warlord1Army1.DisplayArmy();
+        InitializeWarlordArmies();
+        Settlements[0]->getStationedArmy().value()->DisplayArmy();
         //Settlements[0]->Besieged(warlord1Army);
 
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)

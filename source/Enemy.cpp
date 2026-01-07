@@ -110,10 +110,6 @@ std::vector<Settlement> Enemy::getOwnedSettlements() const {
     return settlements;
 }
 
-bool Enemy::getDiscovered() const {
-    return discovered;
-}
-
 int Enemy::getCurrentTurnsToAct() const {
     return currentTurnsToAct;
 }

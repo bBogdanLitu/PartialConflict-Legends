@@ -30,8 +30,6 @@ public:
     //no pointer because I don't want them to be modifiable
     [[nodiscard]] std::vector<Settlement> getOwnedSettlements() const;
 
-    [[nodiscard]] bool getDiscovered() const;
-
     [[nodiscard]] int getCurrentTurnsToAct() const;
 
     [[nodiscard]] const std::string &getName() const;
