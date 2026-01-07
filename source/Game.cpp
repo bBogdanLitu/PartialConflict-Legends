@@ -1368,6 +1368,23 @@ int Game::Start() {
             std::cerr << "Size violation - " << err.what() << std::endl;
         }
 
+        //some tests
+        std::cout<<"\n\nTesting adding units to a settlement\n\n";
+        Army army{Captains[3]};
+        std::shared_ptr<Army> army222 = std::make_shared<Army>(army);
+        Settlements[2]->StationArmy(army222);
+        std::cout<<"Before:\n";
+        Settlements[2]->DisplaySettlement();
+        Settlements[2]->getStationedArmy().value()->DisplayArmy();
+        army222->AddUnit(Captains[1]);
+        std::cout<<"\n\nAfter:\n";
+        Settlements[2]->DisplaySettlement();
+        Settlements[2]->getStationedArmy().value()->DisplayArmy();
+        army222->Disband();
+        std::cout<<"\n\nAfter disband:\n";
+        Settlements[2]->DisplaySettlement();
+        Settlements[2]->getStationedArmy().value()->DisplayArmy();
+
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);
         std::cout << "\nThe game will end when you press enter.\n";
