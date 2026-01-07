@@ -472,6 +472,8 @@ void Game::NextTurn() {
     for (const auto &enemy: Enemies) {
         enemy->AdvanceTurn(gameWindow);
     }
+    //so it doesn't say empty container
+    AddNewLineToFTXUIContainer(gameWindow);
 }
 
 void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
@@ -1094,6 +1096,17 @@ int Game::Start() {
                     Army warlord1VlascaArmy2{Captains[1]};
                     warlord1VlascaArmy2.AddUnit(WarlordGenerals[2]);
                     Settlements[1]->StationArmy(std::make_shared<Army>(warlord1VlascaArmy2));
+
+                    //HINTS:
+                    AddNewLineToFTXUIContainer(gameWindow);
+                    AddElementToFTXUIContainer(gameWindow, paragraph("HINTS:"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("1. AVOID PIBBLE;"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("2. MAKE YOUR ARMY STRONGER;"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("3. HURRY! (if Oculta Mondiala acts you will lose your settlement - maybe your army);"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph("4. DON'T LOSE THIS ARMY! YOU MIGHT AS WELL EXIT IF IT HAPPENS (SORRY!)"));
+                    AddNewLineToFTXUIContainer(gameWindow);
+
+
 
                     //Add the final contextual buttons
                     gameContextualButtonsContainer->Add(modifyPlayerArmyButton);
