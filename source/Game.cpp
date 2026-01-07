@@ -13,6 +13,7 @@
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 
+#include "../header/Except.h"
 #include "../header/LocalLeader.h"
 
 
@@ -20,6 +21,10 @@ void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
     int count = 1; //0 is the player
     for (const auto &i: data) {
+        if (!i.contains("defaultTurns") || !i.contains("currentTurns") || !i.contains("name")) {
+            throw ObjectFail("Enemy");
+        }
+
         Enemy enemy{i["defaultTurns"], i["currentTurns"], count, i["name"]};
         Enemies.push_back(std::make_shared<Enemy>(enemy));
         count++;
@@ -29,11 +34,18 @@ void Game::PopulateEnemies(std::ifstream enemiesJson) {
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
     for (const auto &i: data) {
+        if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
+            contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
+            contains("accuracy") || !i.contains("dexterity")) {
+            throw ObjectFail("General");
+        }
+
         General general{
             i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"]
         };
+
         switch (general.getType()) {
             case 0: {
                 StartingGenerals.push_back(general.clone());
@@ -67,8 +79,18 @@ void Game::PopulateSettlements(std::ifstream settlementsJson) {
     nlohmann::json data = nlohmann::json::parse(settlementsJson);
     int count = 0;
     for (const auto &i: data) {
+        if (!i.contains("startingGarrisonLevel")) {
+            throw ObjectFail("Garrison");
+        }
+
+        if (!i.contains("name") || !i.contains("owner") || !i.contains("income")) {
+            std::cout << i << std::endl;
+            throw ObjectFail("Settlement");
+        }
+
         Garrison garrison(i["startingGarrisonLevel"]); //Create the garrison according to config
         auto settlement = std::make_shared<Settlement>(garrison, i["name"], i["owner"], count, i["income"]);
+
         //Settlement is created and added to this collection
         Settlements.push_back(settlement);
         //The settlement receives a ptr to itself (useful for transfers)
@@ -83,9 +105,16 @@ void Game::PopulateSettlements(std::ifstream settlementsJson) {
     settlementsJson.close();
 }
 
-void Game::PopulateControlPoints(std::ifstream controlPointsJson) {
+void Game::PopulateControlPoints(std::ifstream controlPointsJson) const {
     nlohmann::json data = nlohmann::json::parse(controlPointsJson);
     for (const auto &i: data) {
+        if (!i.contains("scoutViewRange")) {
+            throw ObjectFail("Scout");
+        }
+        if (!i.contains("name") || !i.contains("cost") || !i.contains("ownedBy") || !i.contains("connectedTo")) {
+            throw ObjectFail("ControlPoint");
+        }
+
         Scout scout{i["scoutViewRange"]};
         ControlPoint controlPoint{scout, i["name"], i["cost"], i["ownedBy"], i["connectedTo"]};
 
@@ -103,11 +132,18 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) {
 void Game::PopulateCaptains(std::ifstream captainsJson) {
     nlohmann::json data = nlohmann::json::parse(captainsJson);
     for (const auto &i: data) {
+        if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
+            contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
+            contains("accuracy") || !i.contains("dexterity")) {
+            throw ObjectFail("Captain");
+        }
+
         Captain captain{
             i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"], captainInitialHandicapMultiplier
         };
+
         Captains.push_back(captain.clone());
     }
     captainsJson.close();
@@ -116,6 +152,12 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
 void Game::PopulateLocalLeaders(std::ifstream localLeadersJson) {
     nlohmann::json data = nlohmann::json::parse(localLeadersJson);
     for (const auto &i: data) {
+        if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
+            contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
+            contains("accuracy") || !i.contains("dexterity") || !i.contains("incomeMultiplier") || !i.contains(
+                "battleHandicap")) {
+            throw ObjectFail("General");
+        }
         LocalLeader leader{
             i["firstName"], i["lastName"], i["type"], i["rarity"],
             i["melee"], i["ranged"], i["armour"],
@@ -428,9 +470,23 @@ int Game::Start() {
     enemiesJson.open("enemies.json");
     localLeadersJson.open("localLeaders.json");
 
-    if (!generalsJson || !settlementsJson || !captainsJson || !controlPointsJson || !enemiesJson || !localLeadersJson) {
-        std::cerr << "File not found." << std::endl;
-        return -1;
+    if (!generalsJson) {
+        throw BrokenFile("generals.json");
+    }
+    if (!settlementsJson) {
+        throw BrokenFile("settlements.json");
+    }
+    if (!captainsJson) {
+        throw BrokenFile("captains.json");
+    }
+    if (!controlPointsJson) {
+        throw BrokenFile("controlPoints.json");
+    }
+    if (!enemiesJson) {
+        throw BrokenFile("enemies.json");
+    }
+    if (!localLeadersJson) {
+        throw BrokenFile("localLeaders.json");
     }
     PopulateEnemies(std::move(enemiesJson));
     PopulateGenerals(std::move(generalsJson));
@@ -653,6 +709,8 @@ int Game::Start() {
         modifyArmyAddInput |= CatchEvent([&](const Event &event) {
             if (event == Event::Return) {
                 if (!modifiedArmyInputString.empty()) {
+                    bool addSuccess = true;
+                    std::shared_ptr<Unit> addedUnit;
                     unsigned long whichUnitToAdd = std::stoul(modifiedArmyInputString); //try to parse as unsigned long
                     //reset for future use
                     modifiedArmyInputString = "";
@@ -662,19 +720,28 @@ int Game::Start() {
                     }
                     //Add this unit to the Army
                     if (whichUnitToAdd < StartingGenerals.size()) {
-                        PlayerArmies[whichArmyToModify]->AddUnit(StartingGenerals[whichUnitToAdd]);
+                        addedUnit = StartingGenerals[whichUnitToAdd];
                     } else if (whichUnitToAdd < StartingGenerals.size() + PlayerGenerals.size()) {
                         //transform from big number to smaller number that fits the actual vector
                         whichUnitToAdd -= StartingGenerals.size();
-                        PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
+                        addedUnit = PlayerGenerals[whichUnitToAdd];
                     } else {
                         whichUnitToAdd -= StartingGenerals.size();
                         whichUnitToAdd -= PlayerGenerals.size();
-                        PlayerArmies[whichArmyToModify]->AddUnit(Captains[whichUnitToAdd]);
+                        addedUnit = Captains[whichUnitToAdd];
+                    }
+                    try {
+                        PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
+                    } catch (const SizeViolation &) {
+                        //Because I can't output with std::cout in ftxui, I will define the custom behaviour here
+                        AddElementToFTXUIContainer(gameWindow, paragraph("Army is full already!"));
+                        addSuccess = false;
+                    }
+                    if (addSuccess) {
+                        AddElementToFTXUIContainer(
+                            gameWindow, paragraph("You have successfully modified your army - added " + addedUnit->getFullName()));
                     }
 
-                    AddElementToFTXUIContainer(
-                        gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
 
                     modifyArmyAddInput->Detach();
                 }
@@ -1255,6 +1322,18 @@ int Game::Start() {
         Enemies[0]->ModifySettlementOwnership(Settlements[0]);
         Enemies[0]->ModifySettlementOwnership(Settlements[0]);
         Enemies[0]->ModifySettlementOwnership(Settlements[0]);
+
+        //testing SizeViolation
+        try {
+            starterArmy.AddUnit(Captains[0]);
+            starterArmy.AddUnit(Captains[0]);
+            starterArmy.AddUnit(Captains[0]);
+            starterArmy.AddUnit(Captains[0]);
+        } catch (const SizeViolation &err) {
+            std::cerr << "Size violation - " << err.what() << std::endl;
+        }
+
+
 
         //Temporary ending to the game
         OutputFTXUIText(tutorialFirstDefenceEndText, storyRelatedTextColor);

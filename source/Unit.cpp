@@ -200,6 +200,10 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const
 
 int Unit::getType() const { return type; }
 
+const std::string &Unit::getFullName() {
+    return fullName;
+}
+
 int Unit::getOverallPower() const { return overallPower; }
 
 const std::vector<int> &Unit::getPowers() const { return Powers; }

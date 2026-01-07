@@ -70,6 +70,8 @@ public:
 
     [[nodiscard]] int getType() const;
 
+    [[nodiscard]] const std::string &getFullName();
+
     [[nodiscard]] int getOverallPower() const;
 
     [[nodiscard]] const std::vector<int> &getPowers() const;

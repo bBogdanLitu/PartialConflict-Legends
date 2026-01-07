@@ -24,7 +24,7 @@ private:
 
     void PopulateSettlements(std::ifstream settlementsJson);
 
-    void PopulateControlPoints(std::ifstream controlPointsJson);
+    void PopulateControlPoints(std::ifstream controlPointsJson) const;
 
     void PopulateCaptains(std::ifstream captainsJson);
 

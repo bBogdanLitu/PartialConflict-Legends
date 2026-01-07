@@ -1,4 +1,6 @@
 #include "../header/Army.h"
+
+#include "../header/Except.h"
 #include "../header/Game.h"
 
 int Army::TotalOverallPowerCalculation(const std::shared_ptr<Unit> &unit) {
@@ -16,12 +18,14 @@ Army::Army(const std::shared_ptr<Unit> &unit) {
 void Army::AddUnit(const std::shared_ptr<Unit> &unit) {
     if (AssignedUnits.size() < 3) {
         AssignedUnits.push_back(unit);
+    } else {
+        throw SizeViolation(this);
     }
 }
 
 void Army::RemoveUnit(const unsigned long &index) {
     AssignedUnits.erase(AssignedUnits.begin() + index);
-    if (AssignedUnits.size() == 0) {
+    if (AssignedUnits.empty()) {
         Disband();
     }
 }

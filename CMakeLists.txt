@@ -81,6 +81,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Enemy.h
         source/LocalLeader.cpp
         header/LocalLeader.h
+        source/Except.cpp
+        header/Except.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

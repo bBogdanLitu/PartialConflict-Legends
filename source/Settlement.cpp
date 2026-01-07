@@ -427,11 +427,11 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
             result = stationedGarrison.DirectlyAttacked(attackingArmy);
         } else {
             //we have a leader and should fight with him
-            Army localLeaderArmy {localLeader.value()};
+            Army localLeaderArmy{localLeader.value()};
             Game::AddElementToFTXUIContainer(gameWindow, ftxui::paragraph("But there is a brave local leader!"));
-            result = localLeaderArmy.Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder, gameWindow);
+            result = localLeaderArmy.Attacked(attackingArmy, stationedGarrison.GetOverallPower(), battleOrder,
+                                              gameWindow);
         }
-
     }
     return result;
 }
