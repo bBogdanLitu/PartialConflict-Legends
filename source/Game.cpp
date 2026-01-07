@@ -1002,7 +1002,8 @@ int Game::Start() {
                 //clear the screen and show the player it's over.
                 gameWindow->DetachAllChildren();
                 AddNewLineToFTXUIContainer(gameWindow);
-                AddElementToFTXUIContainer(gameWindow, paragraph("You won! (temporarily)") | color(storyRelatedTextColor));
+                AddElementToFTXUIContainer(
+                    gameWindow, paragraph("You won! (temporarily)") | color(storyRelatedTextColor));
 
                 //only button becomes exit
                 ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
@@ -1025,7 +1026,8 @@ int Game::Start() {
             //for more clarity
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, separator());
-            AddElementToFTXUIContainer(gameWindow, paragraph("CHECKING ENEMY INTENTS ") | center | color(beautifulOrange));
+            AddElementToFTXUIContainer(
+                gameWindow, paragraph("CHECKING ENEMY INTENTS ") | center | color(beautifulOrange));
 
             //We can only get information about the enemies we currently have contact with.
             for (const auto &Enemy: Enemies) {

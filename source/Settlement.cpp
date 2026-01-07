@@ -21,7 +21,7 @@ int Settlement::SearchControlPointConnectedTo(int targetIndex) {
             targetIndex) {
             cost = controlPoint.getTravelCost();
             return cost;
-            }
+        }
     }
 
     return -1;
