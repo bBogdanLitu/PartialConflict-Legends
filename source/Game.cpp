@@ -1102,10 +1102,12 @@ int Game::Start() {
                     AddElementToFTXUIContainer(gameWindow, paragraph("HINTS:"));
                     AddElementToFTXUIContainer(gameWindow, paragraph("1. AVOID PIBBLE;"));
                     AddElementToFTXUIContainer(gameWindow, paragraph("2. MAKE YOUR ARMY STRONGER;"));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("3. HURRY! (if Oculta Mondiala acts you will lose your settlement - maybe your army);"));
-                    AddElementToFTXUIContainer(gameWindow, paragraph("4. DON'T LOSE THIS ARMY! YOU MIGHT AS WELL EXIT IF IT HAPPENS (SORRY!)"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph(
+                                                   "3. HURRY! (if Oculta Mondiala acts you will lose your settlement - maybe your army);"));
+                    AddElementToFTXUIContainer(
+                        gameWindow, paragraph(
+                            "4. DON'T LOSE THIS ARMY! YOU MIGHT AS WELL EXIT IF IT HAPPENS (SORRY!)"));
                     AddNewLineToFTXUIContainer(gameWindow);
-
 
 
                     //Add the final contextual buttons
