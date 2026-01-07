@@ -23,6 +23,8 @@ public:
 
     void AdvanceTurn(const ftxui::Component &gameWindow);
 
+    bool CheckShouldBeDiscovered();
+
     void Discovered();
 
     //no pointer because I don't want them to be modifiable

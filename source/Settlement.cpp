@@ -13,6 +13,20 @@ Settlement::Settlement(const Garrison &garrison_, std::string name_, int owner_,
                                                        income(income_) {
 }
 
+int Settlement::SearchControlPointConnectedTo(int targetIndex) {
+    int cost;
+    //Searching for the control point that is either owned by or connected to the target settlement
+    for (const auto &controlPoint: ControlPoints) {
+        if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
+            targetIndex) {
+            cost = controlPoint.getTravelCost();
+            return cost;
+            }
+    }
+
+    return -1;
+}
+
 void Settlement::StationArmy(const std::shared_ptr<Army> &army) {
     stationedArmy = army;
 }
@@ -25,23 +39,22 @@ void Settlement::StationTemporaryArmy(const std::shared_ptr<Army> &army) {
 //As such, it is moved from settlement to settlement, while keeping in mind what route to take.
 //(doesn't station in a control point, it only checks if it has enough action points to pass)
 //It always requires an enemy because that's how the ownership changes.
-bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, const std::vector<int> &targetIndexes, Enemy *enemy,
+bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, const std::vector<int> &targetIndexes,
+                          Enemy *enemy,
                           const ftxui::Component &gameWindow) {
     //We are certain that this current settlement neighbours the target.
-    int targetIndex = targetIndexes[targetIndexes.size() - 1];
-    int cost = 9999; //so it doesn't cry
+    const int targetIndex = targetIndexes[targetIndexes.size() - 1];
+    const int cost = SearchControlPointConnectedTo(targetIndex);
+
+    if (cost < 0) {
+        //invalid
+        return false;
+    }
 
     //We temporarily store this army in this settlement
     StationTemporaryArmy(travellingArmy);
 
-    //Searching for the control point that is either owned by or connected to the target settlement
-    for (const auto &controlPoint: ControlPoints) {
-        if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
-            targetIndex) {
-            cost = controlPoint.getTravelCost();
-            break; //found it
-        }
-    }
+
     if (targetIndexes.size() == 1) {
         //If we reached the last settlement before the target, we will try to attack the settlement
         // after checking the actionPoints;
@@ -90,18 +103,14 @@ bool Settlement::SendArmy(const std::shared_ptr<Army> &travellingArmy, const std
 
 bool Settlement::MoveOwnArmyToAlliedSettlement(const std::shared_ptr<Settlement> &targetSettlement) {
     const int targetIndex = targetSettlement->getIndex();
-    int cost = 9999;
-    bool found = false;
+    const int cost = SearchControlPointConnectedTo(targetIndex);
 
-    for (const auto &controlPoint: ControlPoints) {
-        if (controlPoint.getIndexOfConnectedSettlement() == targetIndex || controlPoint.getIndexOfOwnerSettlement() ==
-            targetIndex) {
-            cost = controlPoint.getTravelCost();
-            found = true;
-            break; //found it
-        }
+    if (cost < 0) {
+        return false;
     }
-    if (found && stationedArmy.has_value() && cost <= stationedArmy.value()->getCurrentActionPoints()) {
+    //else, the control point was found.
+
+    if (stationedArmy.has_value() && cost <= stationedArmy.value()->getCurrentActionPoints()) {
         //attach to neighbour
         targetSettlement->StationArmy(stationedArmy.value());
         //detach from self

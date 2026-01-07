@@ -81,6 +81,23 @@ void Enemy::AdvanceTurn(const ftxui::Component &gameWindow) {
     }
 }
 
+bool Enemy::CheckShouldBeDiscovered() {
+    //Discovers the enemy if it neighbours the player
+    for (const auto &settlementWeakPtr: ownedSettlements) {
+        if (const auto settlement = settlementWeakPtr.lock()) {
+            int result = settlement->CheckNeighboursOwner(0);
+            if (result != -1) {
+                //this enemy neighbours the player and should be discovered
+                Discovered();
+                return true;
+            }
+        }
+        //error for invalid weakptr??
+    }
+    //it doesn't
+    return false;
+}
+
 void Enemy::Discovered() {
     discovered = true;
 }

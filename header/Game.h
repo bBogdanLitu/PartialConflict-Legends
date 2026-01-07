@@ -28,6 +28,8 @@ private:
 
     void PopulateCaptains(std::ifstream captainsJson);
 
+    void InitializeWarlordArmies() const;
+
     void CheckGenerals() const;
 
     void ShowPlayerGenerals() const;
@@ -60,6 +62,8 @@ private:
     //void TickAttackCountdown();
 
     void NextTurn();
+
+    static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
 
 public:
     int Start();

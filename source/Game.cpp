@@ -111,6 +111,33 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
     captainsJson.close();
 }
 
+void Game::InitializeWarlordArmies() const {
+    //Create the initial enemy armies
+    //Army that should beat the player
+    Army warlord1VlascaArmyInitial{Captains[0]};
+    warlord1VlascaArmyInitial.AddUnit(WarlordGenerals[3]);
+    warlord1VlascaArmyInitial.AddUnit(WarlordGenerals[68]);
+
+    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1VlascaArmyInitial));
+    //The second army of Vlasca is made in the code, after the first one is deleted.
+
+    Army warlord1ColonistiArmyInitial{Captains[2]};
+    warlord1ColonistiArmyInitial.AddUnit(WarlordGenerals[4]);
+    warlord1ColonistiArmyInitial.AddUnit(WarlordGenerals[20]);
+
+    Settlements[3]->StationArmy(std::make_shared<Army>(warlord1ColonistiArmyInitial));
+
+    Army warlord2FetestiArmyInitial{Captains[4]};
+    warlord2FetestiArmyInitial.AddUnit(WarlordGenerals[5]);
+    warlord2FetestiArmyInitial.AddUnit(WarlordGenerals[19]);
+
+    Settlements[2]->StationArmy(std::make_shared<Army>(warlord2FetestiArmyInitial));
+
+
+    //Make the first enemy discovered
+    Enemies[0]->Discovered();
+}
+
 void Game::CheckGenerals() const {
     std::cout << "The generals.json file currently holds " << StartingGenerals.size() + PlayerGenerals.size() +
             ContenderGenerals.size() + WarlordGenerals.size() + EmperorGenerals.size() << " generals." << std::endl;
@@ -338,11 +365,11 @@ ftxui::Element Game::FTXUIDisplayCaptains() const {
 
 
 void Game::ResetArmiesActionPoints() const {
-    for (const auto &i: Settlements) {
-        //If the settlement is owned by the player and it has an army
-        if (i->getOwner() == 0 && i->getStationedArmy() != std::nullopt) {
+    for (const auto &settlement: Settlements) {
+        //If the settlement has an army
+        if (settlement->getStationedArmy() != std::nullopt) {
             //We reset that army's action points to the default value
-            (*i->getStationedArmy())->resetActionPoints();
+            (*settlement->getStationedArmy())->resetActionPoints();
         }
     }
 }
@@ -365,6 +392,11 @@ void Game::NextTurn() {
     for (const auto &enemy: Enemies) {
         enemy->AdvanceTurn(gameWindow);
     }
+}
+
+void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
+    container->DetachAllChildren();
+    container->Add(button);
 }
 
 //ultimate code sausage / a really long piece of spaghetti
@@ -396,19 +428,7 @@ int Game::Start() {
         return -1;
     }
 
-    //Create the initial enemy armies
-    Army warlord1Army1{Captains[0]}; //Captain to test if every unit can fight with every unit
-    warlord1Army1.AddUnit(WarlordGenerals[3]); //Medium general to test some of the functionalities
-    warlord1Army1.AddUnit(WarlordGenerals[68]); //OP general to test if the fight is handled correctly in Army.h
-
-    Army warlord1Army2{Captains[1]};
-    warlord1Army2.AddUnit(WarlordGenerals[2]);
-    warlord1Army2.AddUnit(WarlordGenerals[67]);
-
-    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army1));
-
-    //Make the first enemy discovered
-    Enemies[0]->Discovered();
+    InitializeWarlordArmies();
 
     //TEMPORARILY UNDER CONSTRUCTION
 
@@ -475,7 +495,7 @@ int Game::Start() {
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
-        float step = 0.05f;
+        float step = 0.08f;
         float upperLimit = 1.f;
         float lowerLimit = 0.f;
 
@@ -918,7 +938,10 @@ int Game::Start() {
 
         auto onCheckSettlementsButtonClick = [&] {
             AddNewLineToFTXUIContainer(gameWindow);
-            AddElementToFTXUIContainer(gameWindow, paragraph("These are your settlements: \n"));
+            AddElementToFTXUIContainer(gameWindow, separator());
+            AddElementToFTXUIContainer(gameWindow, paragraph("CHECKING SETTLEMENTS") | center | color(beautifulGreen));
+            AddNewLineToFTXUIContainer(gameWindow);
+            AddElementToFTXUIContainer(gameWindow, paragraph("These are your settlements:"));
             //Get all player owned settlements and display their information
             int alliedSettlementCount = 0;
             for (unsigned long i = 0; i < Settlements.size(); i++) {
@@ -960,19 +983,30 @@ int Game::Start() {
                     Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
 
                     //Add new army to the first settlement the player will face
-                    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1Army2));
+                    //Army that will replace and is actually beatable
+                    Army warlord1VlascaArmy2{Captains[1]};
+                    warlord1VlascaArmy2.AddUnit(WarlordGenerals[2]);
+                    Settlements[1]->StationArmy(std::make_shared<Army>(warlord1VlascaArmy2));
 
                     //Add the final contextual buttons
                     gameContextualButtonsContainer->Add(modifyPlayerArmyButton);
                     gameContextualButtonsContainer->Add(moveArmyButton);
                 } else {
                     //the only available button becomes exit
-                    gameContextualButtonsContainer->DetachAllChildren();
-                    gameContextualButtonsContainer->Add(exitButton);
-                    gameStateButtonsContainer->DetachAllChildren();
-                    gameStateButtonsContainer->Add(exitButton);
+                    ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
+                    ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);
                 }
                 timesWithoutSettlements++;
+            } else if (alliedSettlementCount > 3) {
+                //TEMPORARY WIN
+                //clear the screen and show the player it's over.
+                gameWindow->DetachAllChildren();
+                AddNewLineToFTXUIContainer(gameWindow);
+                AddElementToFTXUIContainer(gameWindow, paragraph("You won! (temporarily)") | color(storyRelatedTextColor));
+
+                //only button becomes exit
+                ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
+                ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);
             }
             if (checkSettlementClickedFirstTime == false) {
                 //after it being clicked the first time, we can continue the tutorial
@@ -987,13 +1021,22 @@ int Game::Start() {
 
         auto onCheckEnemyIntentButtonClick = [&] {
             checkEnemyIntentsClickedCurrentTurn = true;
-            //We can only get information about the enemies we have (had) contact with.
+
+            //for more clarity
+            AddNewLineToFTXUIContainer(gameWindow);
+            AddElementToFTXUIContainer(gameWindow, separator());
+            AddElementToFTXUIContainer(gameWindow, paragraph("CHECKING ENEMY INTENTS ") | center | color(beautifulOrange));
+
+            //We can only get information about the enemies we currently have contact with.
             for (const auto &Enemy: Enemies) {
-                if (Enemy->getDiscovered() == true) {
+                if (Enemy->CheckShouldBeDiscovered() == true) {
                     std::vector<Settlement> enemySettlements = Enemy->getOwnedSettlements();
                     int turnsToAct = Enemy->getCurrentTurnsToAct();
                     std::string name = Enemy->getName();
-
+                    AddNewLineToFTXUIContainer(gameWindow);
+                    AddElementToFTXUIContainer(gameWindow, separator());
+                    AddElementToFTXUIContainer(gameWindow, paragraph(name) | center | color(beautifulOrange));
+                    AddElementToFTXUIContainer(gameWindow, separator());
                     AddNewLineToFTXUIContainer(gameWindow);
                     AddElementToFTXUIContainer(gameWindow,
                                                paragraph(
@@ -1022,7 +1065,7 @@ int Game::Start() {
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(gameWindow, paragraph("These are your armies:"));
             for (const auto &settlement: Settlements) {
-                if (settlement->getOwner() == 0) {
+                if (settlement->getOwner() == 0 && settlement->getStationedArmy().has_value()) {
                     AddElementToFTXUIContainer(armyDisplayContainer,
                                                paragraph("Count = " + std::to_string(count)) | size(
                                                    WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 10) | center);
@@ -1170,7 +1213,7 @@ int Game::Start() {
         //the first attack doesn't require the attacking army to be actually stationed somewhere,
         //it is scripted and just a one-time occurrence.
         OutputFTXUIText(incomingAttackText, enemyRelatedTextColor);
-        warlord1Army1.DisplayArmy();
+        //warlord1Army1.DisplayArmy();
         //Settlements[0]->Besieged(warlord1Army);
 
         //CHECKING IF SETTLEMENT READ IS CORRECT (IT IS)

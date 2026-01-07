@@ -27,6 +27,8 @@ private:
 public:
     Settlement(const Garrison &garrison_, std::string name_, int owner_, int index_, long int income_);
 
+    [[nodiscard]] int SearchControlPointConnectedTo(int targetIndex);
+
     void StationArmy(const std::shared_ptr<Army> &army);
 
     void StationTemporaryArmy(const std::shared_ptr<Army> &army);
