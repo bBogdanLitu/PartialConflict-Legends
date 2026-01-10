@@ -68,7 +68,7 @@ private:
 
     void NextTurn();
 
-    static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
+    void ShowMenu() const;
 
 public:
     int Start();
@@ -76,8 +76,11 @@ public:
     //useful to add text, tables and other non-interactive elements
     static void AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd);
 
-
     static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
+
+    static void AddMoreLinesToFTXUIContainer(const ftxui::Component &gameFlowWindow);
+
+    static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
 
     ~Game();
 };

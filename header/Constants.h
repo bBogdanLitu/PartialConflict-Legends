@@ -22,6 +22,8 @@
 #define weirdPurple ftxui::Color::LightSlateBlue
 #define olive ftxui::Color::Gold3Bis
 #define grayYellow ftxui::Color::Wheat4
+#define honeydew ftxui::Color::Honeydew2
+#define backgroundGrey ftxui::Color::Grey7
 
 constexpr int warlordMinimumGenerals = 66;
 constexpr int emperorMinimumGenerals = 30;

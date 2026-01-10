@@ -16,6 +16,20 @@
 #include "../header/Except.h"
 #include "../header/LocalLeader.h"
 
+using namespace ftxui;
+
+//helper functions for ftxui
+ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Color background, Color backgroundActive) {
+    auto option = ButtonOption::Animated(background, foreground, backgroundActive, foregroundActive);
+    option.transform = [](const EntryState &s) {
+        auto element = text(s.label);
+        if (s.focused) {
+            element |= bold;
+        }
+        return element | center | borderEmpty | flex;
+    };
+    return option;
+}
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
     nlohmann::json data = nlohmann::json::parse(enemiesJson);
@@ -476,6 +490,84 @@ void Game::NextTurn() {
     AddNewLineToFTXUIContainer(gameWindow);
 }
 
+void Game::ShowMenu() const {
+    using namespace ftxui;
+
+    auto screen = ScreenInteractive::FitComponent();
+
+    //button variables so I can use them in functions
+    Component startGameButton, exitButton, loadGameButton;
+
+    //parent container for everything
+    auto menuContainer = Container::Horizontal({});
+
+    auto introContainer = Container::Vertical({});
+    auto buttonsContainer = Container::Vertical({});
+
+
+    //paragraphs
+    auto introductionParagraph = paragraph("PARTIAL CONFLICT: LEGENDS") | center | bold | color(honeydew);
+
+    //button-related
+    //STYLES are done throught the helper function
+
+    //FUNCTIONS
+    auto onStartGameButtonClicked = [&] {
+        screen.Exit();
+    };
+
+    auto onLoadGameButtonClicked = [&] {
+        screen.Exit();
+    };
+
+    auto onExitButtonClicked = [&] {
+        screen.Exit();
+        throw(ApplicationException("Premature exit triggered by player"));
+    };
+
+    //button definition
+    startGameButton = Button("Start a New Game", onStartGameButtonClicked, ButtonStyleCenterText(kaki, susPink, backgroundGrey, backgroundGrey))
+                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
+
+    loadGameButton = Button("Load Progress", onLoadGameButtonClicked, ButtonStyleCenterText(beautifulBlue, beautifulGreen, backgroundGrey, backgroundGrey))
+                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
+
+    exitButton = Button("Exit", onExitButtonClicked, ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey))
+                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
+
+
+
+    //add all components to parents
+    //paragraphs
+    AddElementToFTXUIContainer(introContainer, introductionParagraph);
+
+    //buttons
+    AddMoreLinesToFTXUIContainer(buttonsContainer);
+    buttonsContainer->Add(startGameButton);
+    AddNewLineToFTXUIContainer(buttonsContainer);
+    buttonsContainer->Add(loadGameButton);
+    AddNewLineToFTXUIContainer(buttonsContainer);
+    buttonsContainer->Add(exitButton);
+    AddMoreLinesToFTXUIContainer(buttonsContainer);
+
+    menuContainer->Add(introContainer);
+    menuContainer->Add(buttonsContainer);
+
+    auto renderer = Renderer(menuContainer, [&] {
+        return vbox({
+            introContainer->Render(),
+            separator(),
+
+            buttonsContainer->Render() | center,
+        }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
+    });
+
+    screen.Loop(renderer);
+}
+
 void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
     container->DetachAllChildren();
     container->Add(button);
@@ -576,6 +668,9 @@ int Game::Start() {
         *  then appending a CatchEvent to the renderer that uses the Mouse Wheel to increment or decrement this relative position
         */
         using namespace ftxui;
+
+        //show menu first
+        ShowMenu();
 
         //where to store input
         std::string tempInput, modifiedArmyInputString, moveArmyInputString;
@@ -1421,6 +1516,12 @@ void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, co
 void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
     gameFlowWindow->Add(ftxui::Renderer([&] {
         return ftxui::paragraph(" ");
+    }));
+}
+
+void Game::AddMoreLinesToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
+    gameFlowWindow->Add(ftxui::Renderer([&] {
+        return ftxui::paragraph(" ") | size(HEIGHT, EQUAL, 5);
     }));
 }
 
