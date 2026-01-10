@@ -4,8 +4,8 @@
 
 Unit::Unit(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
            int ranged_, int armour_, int str_, int acc_, int dex_) : firstName(firstName_),
-                                                                     lastName(lastName_), type(type_),
-                                                                     rarity(rarity_),
+                                                                     lastName(lastName_),
+                                                                     type(type_), rarity(rarity_),
                                                                      melee(melee_), ranged(ranged_),
                                                                      armour(armour_), str(str_), acc(acc_),
                                                                      dex(dex_) {
@@ -197,6 +197,12 @@ int Unit::FightWith(const Unit &enemyUnit, const int garrisonOverallBoost, const
     //All equal stats -> whoever gets called (the defender) wins
     return result;
 }
+
+void Unit::setIndex(const int index_) {
+    index = index_;
+}
+
+int Unit::getIndex() const { return index; }
 
 int Unit::getType() const { return type; }
 

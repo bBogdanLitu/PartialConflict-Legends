@@ -10,7 +10,8 @@
 class Unit {
 private:
     std::string firstName, lastName, fullName;
-    int type, rarity, melee, ranged, armour, str, acc, dex, mPower = 0, rPower = 0, aPower = 0, overallPower = 0;
+    int index = 0, type, rarity, melee, ranged, armour, str, acc, dex, mPower = 0, rPower = 0, aPower = 0, overallPower
+                    = 0;
     std::vector<int> Powers;
 
     //Applying the designed cap to the stats so the game makes sense
@@ -67,6 +68,10 @@ public:
                                 const ftxui::Component &gameWindow) const;
 
     //[[nodiscard]] int FTXUIFightWith(const Unit &enemyUnit, int garrisonOverallBoost, const ftxui::Component &whereToDisplay) const;
+
+    void setIndex(int index_);
+
+    [[nodiscard]] int getIndex() const;
 
     [[nodiscard]] int getType() const;
 

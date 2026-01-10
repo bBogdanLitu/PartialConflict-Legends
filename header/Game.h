@@ -70,6 +70,8 @@ private:
 
     void ShowMenu() const;
 
+    bool SaveGame();
+
 public:
     int Start();
 
@@ -79,6 +81,8 @@ public:
     static void AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 
     static void AddMoreLinesToFTXUIContainer(const ftxui::Component &gameFlowWindow);
+
+    static void AddHorizontalSpaceToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 
     static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
 

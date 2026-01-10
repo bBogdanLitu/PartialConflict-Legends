@@ -12,6 +12,7 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/component/screen_interactive.hpp>
+#include <ctime>
 
 #include "../header/Except.h"
 #include "../header/LocalLeader.h"
@@ -47,6 +48,7 @@ void Game::PopulateEnemies(std::ifstream enemiesJson) {
 
 void Game::PopulateGenerals(std::ifstream generalsJson) {
     nlohmann::json data = nlohmann::json::parse(generalsJson);
+    int SGcount = 0, PGcount = 0, CGcount = 0, WGcount = 0, EGcount = 0;
     for (const auto &i: data) {
         if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
             contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
@@ -62,23 +64,33 @@ void Game::PopulateGenerals(std::ifstream generalsJson) {
 
         switch (general.getType()) {
             case 0: {
+                general.setIndex(SGcount);
                 StartingGenerals.push_back(general.clone());
+                SGcount++;
                 break;
             }
             case 1: {
+                general.setIndex(PGcount);
                 PlayerGenerals.push_back(general.clone());
+                PGcount++;
                 break;
             }
             case 2: {
+                general.setIndex(CGcount);
                 ContenderGenerals.push_back(general.clone());
+                CGcount++;
                 break;
             }
             case 3: {
+                general.setIndex(WGcount);
                 WarlordGenerals.push_back(general.clone());
+                WGcount++;
                 break;
             }
             case 4: {
+                general.setIndex(EGcount);
                 EmperorGenerals.push_back(general.clone());
+                EGcount++;
                 break;
             }
             default: {
@@ -517,6 +529,7 @@ void Game::ShowMenu() const {
     };
 
     auto onLoadGameButtonClicked = [&] {
+        //not working temporarily
         screen.Exit();
     };
 
@@ -526,18 +539,20 @@ void Game::ShowMenu() const {
     };
 
     //button definition
-    startGameButton = Button("Start a New Game", onStartGameButtonClicked, ButtonStyleCenterText(kaki, susPink, backgroundGrey, backgroundGrey))
-                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
-                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
+    startGameButton = Button("Start a New Game", onStartGameButtonClicked,
+                             ButtonStyleCenterText(kaki, susPink, backgroundGrey, backgroundGrey))
+                      | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                      | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
-    loadGameButton = Button("Load Progress", onLoadGameButtonClicked, ButtonStyleCenterText(beautifulBlue, beautifulGreen, backgroundGrey, backgroundGrey))
-                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
-                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
+    loadGameButton = Button("Load Progress", onLoadGameButtonClicked,
+                            ButtonStyleCenterText(beautifulBlue, beautifulGreen, backgroundGrey, backgroundGrey))
+                     | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                     | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
-    exitButton = Button("Exit", onExitButtonClicked, ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey))
-                        | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
-                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
-
+    exitButton = Button("Exit", onExitButtonClicked,
+                        ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey))
+                 | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
+                 | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
 
     //add all components to parents
@@ -558,14 +573,57 @@ void Game::ShowMenu() const {
 
     auto renderer = Renderer(menuContainer, [&] {
         return vbox({
-            introContainer->Render(),
-            separator(),
+                   introContainer->Render(),
+                   separator(),
 
-            buttonsContainer->Render() | center,
-        }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
+                   buttonsContainer->Render() | center,
+               }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
     });
 
     screen.Loop(renderer);
+}
+
+bool Game::SaveGame() {
+    time_t timestamp;
+    time(&timestamp);
+    std::ofstream saveFile("Save " + std::string(ctime(&timestamp)));
+    //the output in json formatting
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    if (!saveFile.is_open()) {
+        throw(BrokenFile("Save file"));
+    }
+    //else it's ok
+    //Go through each Settlement and save their owner and index, along with the stationedArmy (if it's the case)
+    for (const auto &settlement: Settlements) {
+        nlohmann::json jsonFormatSaveFile;
+        auto index = settlement->getIndex();
+        auto owner = settlement->getOwner();
+
+        jsonFormatSaveFile = {
+            {"settlementIndex", index},
+            {"owner", owner}
+        };
+
+        auto army = settlement->getStationedArmy();
+        if (army.has_value()) {
+            jsonFormatSaveFile.push_back({"unitsInArmy", army.value()->getUnitCount()});
+            int count = 0;
+            for (const auto &unit: army.value()->getAssignedUnits()) {
+                auto unitIndex = unit->getIndex();
+                auto unitType = unit->getType();
+                jsonFormatSaveFile.push_back({"unitIndex" + std::to_string(count), unitIndex});
+                jsonFormatSaveFile.push_back({"unitType" + std::to_string(count), unitType});
+                count++;
+            }
+        } else {
+            jsonFormatSaveFile.push_back({"unitsInArmy", 0});
+        }
+
+        jsonArray.push_back(jsonFormatSaveFile);
+    }
+    saveFile << jsonArray;
+    return true;
 }
 
 void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
@@ -684,7 +742,7 @@ int Game::Start() {
 
         //button variables so I can use them in functions
         Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton,
-                exitButton, moveArmyButton;
+                exitButton, moveArmyButton, saveGameButton;
 
         //to scroll text because it is insanely hard apparently
         float focus_y = 0.5f;
@@ -1114,6 +1172,9 @@ int Game::Start() {
         auto moveArmyStyle = ButtonOption::Animated(Color::Default, olive,
                                                     Color::Default, grayYellow);
 
+        auto saveGameStyle = ButtonOption::Animated(Color::Default, olive,
+                                                    Color::Default, grayYellow);
+
         //FUNCTIONS FOR BUTTONS
 
         auto onNextTurnButtonClick = [&] {
@@ -1321,10 +1382,27 @@ int Game::Start() {
 
         };
 
+        auto onSaveGameButtonClick = [&] {
+            //save
+            bool result = SaveGame();
+            if (result == true) {
+                AddElementToFTXUIContainer(gameWindow, paragraph("Game saved."));
+            } else {
+                AddElementToFTXUIContainer(gameWindow, paragraph("Save failed."));
+            }
+        };
+
         //GAME STATE CONTROL BUTTONS
 
-        nextTurnButton = Button("Next turn", onNextTurnButtonClick, nextTurnStyle);
+        nextTurnButton = Button("Next Turn", onNextTurnButtonClick, nextTurnStyle);
         gameStateButtonsContainer->Add(nextTurnButton);
+
+        AddHorizontalSpaceToFTXUIContainer(gameStateButtonsContainer);
+
+        saveGameButton = Button("Save Game", onSaveGameButtonClick, saveGameStyle);
+        gameStateButtonsContainer->Add(saveGameButton);
+
+        AddHorizontalSpaceToFTXUIContainer(gameStateButtonsContainer);
 
         exitButton = Button("Exit", onExitButtonClick, exitStyle);
         gameStateButtonsContainer->Add(exitButton);
@@ -1355,7 +1433,7 @@ int Game::Start() {
                        | frame //allows for a component to overflow with content (which is later made scrollable)
                        | size(HEIGHT, EQUAL, Terminal::Size().dimy / 100.0f * 85),
                        separator(),
-                       gameStateButtonsContainer->Render()
+                       gameStateButtonsContainer->Render() | size(WIDTH, EQUAL, Terminal::Size().dimx)
                        | frame
                        | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5),
                        separator(),
@@ -1522,6 +1600,12 @@ void Game::AddNewLineToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
 void Game::AddMoreLinesToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
     gameFlowWindow->Add(ftxui::Renderer([&] {
         return ftxui::paragraph(" ") | size(HEIGHT, EQUAL, 5);
+    }));
+}
+
+void Game::AddHorizontalSpaceToFTXUIContainer(const ftxui::Component &gameFlowWindow) {
+    gameFlowWindow->Add(ftxui::Renderer([&] {
+        return ftxui::paragraph(" ") | size(WIDTH, EQUAL, 5);
     }));
 }
 

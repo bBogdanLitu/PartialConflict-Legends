@@ -17,8 +17,8 @@ private:
     void display(std::ostream &) const override;
 
 public:
-    Emperor(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_,
-            int melee_, int ranged_, int armour_, int str_, int acc_, int dex_);
+    Emperor(const std::string &firstName_, const std::string &lastName_, int type_, int rarity_, int melee_,
+            int ranged_, int armour_, int str_, int acc_, int dex_);
 
     [[nodiscard]] std::shared_ptr<Unit> clone() const override { return std::make_shared<Emperor>(*this); }
 };
