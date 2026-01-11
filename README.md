@@ -1,6 +1,8 @@
 # Partial Conflict: Legends
 
-### Description
+<a href="#eng_start">ENG</a> / <a href="#ro_start">RO</a>
+
+<h2 id="eng_start">Description</h2>
 
 <p align="justify">Command your All-Star army to victory in a turn-based strategy game heavily inspired by my passion for the 'Total War' series by Creative Assembly. Begin as a Contender, with one starting general from a (stat-wise) slightly underwhelming pool. Fight your neighbouring Warlords, loyal to the Emperor, and take over their Settlements to increase your power and influence, but make sure to setup your defence! Periodic attacks from all Warlords who can directly reach one of your controlled Settlements are meant to test your grasp over the realm. Master their routines and exploit their weaknesses in order to progress towards the Emperor himself! If defeating his underlings wasn't a hard task, you might find taking him on to be a real challenge. Strengthen your armies, hire new generals and make sure you're ready for any situation. Other bot Contenders will follow their path to glory (decided by me) until prevented from doing so, you don't have unlimited time. Defeat the Emperor and take control of his Settlements to claim victory.
 
@@ -10,7 +12,24 @@ Why the name 'Partial Conflict'? Because it can't be compared to its 'inspiratio
 
 Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 
-### Descriere
+### Brief
+
+<p align="justify">Choose to start a new game or load from a previous save file
+if you've already played the game before. If there are no saves and you click
+"Load Game", a new game will start instead.
+
+<p align="justify"> The place where most of the game's action takes place will now
+appear. As of v0.2.1, you cannot create new armies, so managing the one I give you
+is essential. Add up to 3 units to it, move it to attack enemies' settlements and
+own a total of 4 to win the game, for now. Pressing Next Turn will reset the 
+Action Points of all armies.
+
+## External Libraries
+
+- [Nlohmann Json](https://github.com/nlohmann/json) for reading user-configurable data. Used without any modifications;
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) for terminal beautification and endless suffering.
+
+<h2 id="ro_start">Descriere</h2>
 
 <p align="justify">Condu-ți armata de vedete către victorie în jocul meu de strategie pe ture (sună ciudat) inspirat din seria de jocuri „Total War” a celor de la Creative Assembly. Începe ca un Necunoscut, cu un general dintr-o listă slabă (din punct de vedere al puterii). Luptă-te cu Războinicii, cei loiali Împăratului, și preia controlul Orașelor pentru a-ți crește puterea și influența, dar asigură-te că le și aperi! Atacurile periodice de la toți Războinicii care au rută directă spre unul dintre Orașele tale sunt menite să te pună la încercare. Învață-le obiceiurile și exploatează-le slăbiciunile (au) pentru a progresa către Împărat! Dacă, până acum, nu ți s-a părut mare lucru, s-ar putea ca acesta să reprezinte o încercare mai grea. Îmbunătățește-ți generalii și angajează alții, doar asigură-te că armata ta poate trece peste orice situație. Alți boți Necunoscuți își vor urma drumul spre victorie (codat de mine) până când nu mai pot face pași, așa că timpul nu este nelimitat. Doboară Împăratul și stăpânește-i orașele pentru a obține gloria supremă (e doar un joc, totuși).
 
@@ -19,6 +38,14 @@ Why 'Legends'? Because you can field Sachil Onil to do your dirty work.
 Numele se „justifică” pentru că nu îmi imaginez că acesta va fi măcar comparabil cu jocul [Total War: THREE KINGDOMS](https://www.totalwar.com/total-war/total-war-three-kingdoms) - [Gameplay (al meu)](https://www.youtube.com/watch?v=EjgtD9rqzyU).
 
 Mai mult, poți pune la treabă niște generali „interesanți” (exemplu în engleză).
+
+## Resurse
+
+- [Nlohmann Json](https://github.com/nlohmann/json) pentru citirea unor date ce pot fi schimbate după preferințele
+  fiecăruia. Nu am efectuat nicio modificare proprie;
+- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) pentru oportunitati de infrumusetare a terminalului si dureri de cap
+  cum rar se intalnesc.
+- adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit
 
 ### Important!
 
@@ -222,14 +249,3 @@ Comanda este aceeași ca la pasul 1 sau 2. Nu merge combinat cu Valgrind.
 # sau
 ./install_dir/bin/oop
 ```
-## External Libraries
-
-- [Nlohmann Json](https://github.com/nlohmann/json) for reading user-configurable data. Used without any modifications;
-- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) for terminal beautification and endless suffering.
-
-## Resurse
-
-- [Nlohmann Json](https://github.com/nlohmann/json) pentru citirea unor date ce pot fi schimbate după preferințele fiecăruia. Nu am efectuat nicio modificare proprie;
-- [FTXUI](https://github.com/ArthurSonzogni/FTXUI) pentru oportunitati de infrumusetare a terminalului si dureri de cap
-  cum rar se intalnesc.
-- adăugați trimiteri **detaliate** către resursele externe care v-au ajutat sau pe care le-ați folosit

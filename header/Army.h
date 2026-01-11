@@ -13,7 +13,7 @@ private:
     std::vector<std::shared_ptr<Unit> > AssignedUnits;
 
     //These attributes shouldn't be modified by the constructor, they are initialized here and updated (eventually) through functions
-    int defaultActionPoints = 1, currentActionPoints = defaultActionPoints, totalOverallPower = 0; //Default
+    int defaultActionPoints = 3, currentActionPoints = defaultActionPoints, totalOverallPower = 0; //Default
     bool isStationed = true; //All armies must start in a Settlement
 
     //Will be called whenever a general is added or removed

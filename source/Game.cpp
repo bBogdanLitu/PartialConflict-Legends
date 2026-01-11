@@ -34,7 +34,7 @@ ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Col
 }
 
 //helper function for time
-std::string get_current_time(const std::string &format = "%Y-%m-%d-%H:%M:%S") {
+std::string get_current_time(const std::string &format = "%d-%m-%Y @ %H:%M:%S") {
     const std::time_t now = std::time(nullptr);
     const std::tm *local_time = std::localtime(&now);
 
@@ -545,11 +545,13 @@ void Game::ShowMenu() {
         buttonsContainer->DetachAllChildren();
 
         //list all saves
+        int foundSaves = 0;
         std::filesystem::path pathToCurrentDirectory = std::filesystem::current_path();
 
         for (const auto &file: std::filesystem::directory_iterator(pathToCurrentDirectory)) {
             std::string fileName = file.path().filename().string();
             if (fileName.contains("Save")) {
+                foundSaves++;
                 //because I need this exact instance of fileName, I will define the button function here
                 //can't capture fileName by reference, so I have to capture by value and the rest by reference
                 auto saveSelectButton = Button(fileName, [&buttonsContainer, fileName, &screen, this] {
@@ -567,6 +569,9 @@ void Game::ShowMenu() {
                     AddNewLineToFTXUIContainer(buttonsContainer);
                 }
             }
+        }
+        if (foundSaves == 0) {
+            screen.Exit();
         }
     };
 
@@ -625,7 +630,7 @@ void Game::SaveGame() const {
     if (currentTurn < 2) {
         throw(InvalidSaveAttempt("Can't save before turn 2!"));
     }
-    std::ofstream saveFile("Save on Turn: " + std::to_string(currentTurn) + " at time:" + currentTime);
+    std::ofstream saveFile("Save on " + currentTime);
     //the output in json formatting
     nlohmann::json jsonArray = nlohmann::json::array();
     nlohmann::json jsonFormatExtraParameters;
@@ -684,11 +689,12 @@ void Game::ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui
     int alliedSettlementCount = 0;
     int alliedUnitCount = 0;
     int alliedArmiesCount = 0;
+    int currentTurnOnSave = 0;
 
     for (const auto &row: data) {
         if (row.contains("savedTurn")) {
             //set the turn and skip to the next row, this one doesn't contain anything else.
-            currentTurn = row["savedTurn"];
+            currentTurnOnSave = row["savedTurn"];
             continue;
         }
         if (!row.contains("settlementIndex") || !row.contains("owner") || !row.contains("unitsInArmy")) {
@@ -701,7 +707,8 @@ void Game::ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui
             alliedArmiesCount++;
         }
     }
-
+    AddElementToFTXUIContainer(whereToDisplay,
+                               paragraph("Turn: " + std::to_string(currentTurnOnSave)));
     AddElementToFTXUIContainer(whereToDisplay,
                                paragraph("Player Owned Settlements: " + std::to_string(alliedSettlementCount)));
     AddElementToFTXUIContainer(whereToDisplay,
