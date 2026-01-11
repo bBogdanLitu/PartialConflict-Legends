@@ -19,6 +19,7 @@ private:
     unsigned int ans1 = 0, ans2 = 0, ans3 = 0;
     unsigned long currentTurn = 0;
     long int sarmale = 0; //this is the 'gold' of my game
+    bool savedGameLoaded = false;
     ftxui::Component gameWindow;
 
     void PopulateEnemies(std::ifstream enemiesJson);
@@ -68,9 +69,13 @@ private:
 
     void NextTurn();
 
-    void ShowMenu() const;
+    void ShowMenu();
 
-    bool SaveGame();
+    void SaveGame() const;
+
+    static void ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui::Component &whereToDisplay);
+
+    void ReadSaveToReloadGame(const std::string &fileName);
 
 public:
     int Start();

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <vector>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
@@ -19,7 +20,7 @@
 
 using namespace ftxui;
 
-//helper functions for ftxui
+//helper function for ftxui
 ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Color background, Color backgroundActive) {
     auto option = ButtonOption::Animated(background, foreground, backgroundActive, foregroundActive);
     option.transform = [](const EntryState &s) {
@@ -30,6 +31,17 @@ ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Col
         return element | center | borderEmpty | flex;
     };
     return option;
+}
+
+//helper function for time
+std::string get_current_time(const std::string& format = "%Y-%m-%d-%H:%M:%S") {
+    std::time_t now = std::time(nullptr);
+    std::tm* local_time = std::localtime(&now);
+
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), format.c_str(), local_time);
+
+    return std::string(buffer);
 }
 
 void Game::PopulateEnemies(std::ifstream enemiesJson) {
@@ -502,7 +514,7 @@ void Game::NextTurn() {
     AddNewLineToFTXUIContainer(gameWindow);
 }
 
-void Game::ShowMenu() const {
+void Game::ShowMenu() {
     using namespace ftxui;
 
     auto screen = ScreenInteractive::FitComponent();
@@ -529,8 +541,33 @@ void Game::ShowMenu() const {
     };
 
     auto onLoadGameButtonClicked = [&] {
-        //not working temporarily
-        screen.Exit();
+        //remove buttons
+        buttonsContainer->DetachAllChildren();
+
+        //list all saves
+        std::filesystem::path pathToCurrentDirectory = std::filesystem::current_path();
+
+        for (const auto &file : std::filesystem::directory_iterator(pathToCurrentDirectory)) {
+            std::string fileName = file.path().filename();
+            if (fileName.contains("Save")) {
+                //because I need this exact instance of fileName, I will define the button function here
+                //can't capture fileName by reference, so I have to capture by value and the rest by reference
+                auto saveSelectButton = Button(fileName, [&buttonsContainer, fileName, &screen, this] {
+                    AddElementToFTXUIContainer(buttonsContainer, paragraph(fileName));
+                    ReadSaveToReloadGame(fileName);
+                    //continue
+                    screen.Exit();
+                }, ButtonStyleCenterText(kaki, beautifulGreen, backgroundGrey, backgroundGrey));
+                try {
+                    ReadSaveToDisplayDetailsOnly(fileName, buttonsContainer);
+                    buttonsContainer->Add(saveSelectButton);
+                    AddNewLineToFTXUIContainer(buttonsContainer);
+                } catch (const BrokenFile &err) {
+                    AddElementToFTXUIContainer(buttonsContainer, paragraph(std::string(err.what())));
+                    AddNewLineToFTXUIContainer(buttonsContainer);
+                }
+            }
+        }
     };
 
     auto onExitButtonClicked = [&] {
@@ -575,18 +612,17 @@ void Game::ShowMenu() const {
         return vbox({
                    introContainer->Render(),
                    separator(),
-
-                   buttonsContainer->Render() | center,
+                   //scrollable because there could be many saves
+                   buttonsContainer->Render() | center | frame,
                }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
     });
 
     screen.Loop(renderer);
 }
 
-bool Game::SaveGame() {
-    time_t timestamp;
-    time(&timestamp);
-    std::ofstream saveFile("Save " + std::string(ctime(&timestamp)));
+void Game::SaveGame() const {
+    auto currentTime = get_current_time();
+    std::ofstream saveFile("Save Turn: " + std::to_string(currentTurn) + " time:" + currentTime);
     //the output in json formatting
     nlohmann::json jsonArray = nlohmann::json::array();
 
@@ -594,6 +630,7 @@ bool Game::SaveGame() {
         throw(BrokenFile("Save file"));
     }
     //else it's ok
+    //should also add currentTurn
     //Go through each Settlement and save their owner and index, along with the stationedArmy (if it's the case)
     for (const auto &settlement: Settlements) {
         nlohmann::json jsonFormatSaveFile;
@@ -623,7 +660,134 @@ bool Game::SaveGame() {
         jsonArray.push_back(jsonFormatSaveFile);
     }
     saveFile << jsonArray;
-    return true;
+
+    saveFile.close();
+}
+
+void Game::ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui::Component &whereToDisplay) {
+    std::ifstream saveFile(fileName);
+
+    if (!saveFile.is_open()) {
+        throw(BrokenFile("saveFile" + fileName));
+    }
+
+    nlohmann::json data = nlohmann::json::parse(saveFile);
+
+    int alliedSettlementCount = 0;
+    int alliedUnitCount = 0;
+    int alliedArmiesCount = 0;
+
+    for (const auto &row : data) {
+        if (!row.contains("settlementIndex") || !row.contains("owner") || !row.contains("unitsInArmy")) {
+            throw(BrokenFile("saveFile" + fileName));
+        }
+        if (row["owner"] == 0) {
+            int units = row["unitsInArmy"];
+            alliedSettlementCount++;
+            alliedUnitCount += units;
+            alliedArmiesCount++;
+        }
+    }
+
+    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player Owned Settlements: " + std::to_string(alliedSettlementCount)));
+    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player's number of armies: " + std::to_string(alliedArmiesCount)));
+    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player's number of units: " + std::to_string(alliedUnitCount)));
+
+    saveFile.close();
+}
+
+void Game::ReadSaveToReloadGame(const std::string &fileName) {
+    std::ifstream saveFile(fileName);
+
+    if (!saveFile.is_open()) {
+        throw (BrokenFile("saveFile"));
+    }
+
+    nlohmann::json data = nlohmann::json::parse(saveFile);
+    for (const auto &row : data) {
+        if (!row.contains("settlementIndex") || !row.contains("owner") || !row.contains("unitsInArmy")) {
+            throw(BrokenFile("saveFile" + fileName));
+        }
+
+        unsigned long settlementIndex = row["settlementIndex"];
+        int owner = row["owner"];
+        int unitCount = row["unitsInArmy"];
+
+        //set the game to the read progress
+        if (owner == 0) {
+            //give it to the player
+            Settlements[settlementIndex]->GiveToPlayer();
+        } else {
+            //check if the read owner is the same as the default, and give it to its current (read) owner, if applicable
+            int defaultOwner = Settlements[settlementIndex]->getOwner();
+            if (owner != defaultOwner) {
+                Settlements[settlementIndex]->ChangeOwnership(Enemies[owner-1].get());
+            }
+        }
+
+        //put the saved army in the settlement, eventually replacing the one that's already there
+        if (unitCount == 0) {
+                Settlements[settlementIndex]->DetachArmy();
+        } else {
+            for (int i = 0; i < unitCount; i++) {
+                unsigned long currentUnitIndex = row["unitIndex" + std::to_string(i)];
+                int currentUnitType = row["unitType" + std::to_string(i)];
+                std::shared_ptr<Army> armyPtr;
+
+                switch (currentUnitType) {
+                    case 0: {
+                        //starting player general
+                        Army army{StartingGenerals[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 1: {
+                        //player general
+                        Army army{PlayerGenerals[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 2: {
+                        //contender general
+                        Army army{ContenderGenerals[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 3: {
+                        //warlord general
+                        Army army{WarlordGenerals[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 4: {
+                        //emperor's general
+                        Army army{EmperorGenerals[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 5: {
+                        //captain
+                        Army army{Captains[currentUnitIndex]};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    case 777: {
+                        //emperor himself
+                        Army army{EmperorUnit};
+                        armyPtr = std::make_shared<Army>(army);
+                        break;
+                    }
+                    default: {
+
+                    }
+                }
+                //station the army in the corresponding settlement
+                Settlements[settlementIndex]->StationArmy(armyPtr);
+            }
+        }
+    }
+    savedGameLoaded = true;
+    saveFile.close();
 }
 
 void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
@@ -676,7 +840,7 @@ int Game::Start() {
         return -1;
     }
 
-    InitializeArmiesAndSettlements();
+    //InitializeArmiesAndSettlements();
 
     //TEMPORARILY UNDER CONSTRUCTION
 
@@ -697,7 +861,8 @@ int Game::Start() {
         sanitizeInputMore(ans3);
         if (ans3 > 1) {
             ans3 = 0;
-        } else {
+        }
+        if (ans3==1) {
             ShowPlayerGenerals();
         }
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);
@@ -729,6 +894,10 @@ int Game::Start() {
 
         //show menu first
         ShowMenu();
+
+        if (savedGameLoaded == false) {
+            InitializeArmiesAndSettlements();
+        }
 
         //where to store input
         std::string tempInput, modifiedArmyInputString, moveArmyInputString;
@@ -1384,11 +1553,11 @@ int Game::Start() {
 
         auto onSaveGameButtonClick = [&] {
             //save
-            bool result = SaveGame();
-            if (result == true) {
+            try {
+                SaveGame();
                 AddElementToFTXUIContainer(gameWindow, paragraph("Game saved."));
-            } else {
-                AddElementToFTXUIContainer(gameWindow, paragraph("Save failed."));
+            } catch (const BrokenFile &err) {
+                std::cerr << "Broken file - " << err.what() << std::endl;
             }
         };
 
@@ -1479,6 +1648,8 @@ int Game::Start() {
 
         PlayerArmies.clear();
     } else {
+        InitializeArmiesAndSettlements();
+
         //Normal branch
         OutputFTXUIText(beginningGeneralText, gameAnnouncementsColor);
         DisplayStartingGenerals();
