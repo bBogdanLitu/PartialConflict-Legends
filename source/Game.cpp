@@ -624,7 +624,6 @@ void Game::SaveGame() const {
     auto currentTime = get_current_time();
     if (currentTurn < 2) {
         throw(InvalidSaveAttempt("Can't save before turn 2!"));
-        return;
     }
     std::ofstream saveFile("Save on Turn: " + std::to_string(currentTurn) + " at time:" + currentTime);
     //the output in json formatting
@@ -743,13 +742,11 @@ void Game::ReadSaveToReloadGame(const std::string &fileName) {
             }
             //give it to the player
             Settlements[settlementIndex]->GiveToPlayer();
-
         } else {
             //check if the read owner is the same as the default, and give it to its current (read) owner, if applicable
             int defaultOwner = Settlements[settlementIndex]->getOwner();
             if (owner != defaultOwner) {
                 Settlements[settlementIndex]->ChangeOwnership(Enemies[owner - 1].get());
-
             }
         }
 
@@ -814,7 +811,7 @@ void Game::ReadSaveToReloadGame(const std::string &fileName) {
         }
     }
     //set each enemy's turns to act to a (probably) correct number
-    for (const auto &enemy : Enemies) {
+    for (const auto &enemy: Enemies) {
         int newCurrentTurnsToAct = enemy->getDefaultTurnsToAct() - currentTurn % enemy->getDefaultTurnsToAct();
         enemy->setCurrentTurnsToAct(newCurrentTurnsToAct);
     }
@@ -863,11 +860,9 @@ void Game::ShowMainUI() {
         state.element |= color(userInputExpectedColor);
         if (state.focused) {
             state.element |= bgcolor(Color::Default);
-        }
-        else if (state.hovered) {
+        } else if (state.hovered) {
             state.element |= bgcolor(Color::Grey15);
-        }
-        else {
+        } else {
             state.element |= bgcolor(Color::Grey27);
         }
         return state.element;
@@ -1007,7 +1002,8 @@ void Game::ShowMainUI() {
                 }
                 if (addSuccess) {
                     AddElementToFTXUIContainer(
-                        gameWindow, paragraph("You have successfully modified your army - added " + addedUnit->getFullName()));
+                        gameWindow, paragraph(
+                            "You have successfully modified your army - added " + addedUnit->getFullName()));
                 }
 
 
@@ -1144,7 +1140,6 @@ void Game::ShowMainUI() {
                     validIndexes.push_back(neighbour->getIndex());
                     //show each neighbour
                     FTXUIDisplaySettlementAndArmy(gameWindow, *neighbour);
-
                 }
                 //moving the army means detaching it from its current settlement and sending it
                 //that will be done in the next input
@@ -1560,7 +1555,6 @@ void Game::ShowMainUI() {
     modifyPlayerArmyButton = Button("Modify an army", onModifyPlayerArmyButtonClick, modifyPlayerArmyStyle);
     moveArmyButton = Button("Move an army", onMoveArmyButtonClick, moveArmyStyle);
     gameContextualButtonsContainer->Add(testButton);
-
 
 
     //Add the input to the gameContainer
