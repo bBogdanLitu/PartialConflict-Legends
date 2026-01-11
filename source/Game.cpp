@@ -34,9 +34,9 @@ ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Col
 }
 
 //helper function for time
-std::string get_current_time(const std::string& format = "%Y-%m-%d-%H:%M:%S") {
-    std::time_t now = std::time(nullptr);
-    std::tm* local_time = std::localtime(&now);
+std::string get_current_time(const std::string &format = "%Y-%m-%d-%H:%M:%S") {
+    const std::time_t now = std::time(nullptr);
+    std::tm *local_time = std::localtime(&now);
 
     char buffer[100];
     std::strftime(buffer, sizeof(buffer), format.c_str(), local_time);
@@ -547,8 +547,8 @@ void Game::ShowMenu() {
         //list all saves
         std::filesystem::path pathToCurrentDirectory = std::filesystem::current_path();
 
-        for (const auto &file : std::filesystem::directory_iterator(pathToCurrentDirectory)) {
-            std::string fileName = file.path().filename();
+        for (const auto &file: std::filesystem::directory_iterator(pathToCurrentDirectory)) {
+            std::string fileName = std::string(file.path().filename());
             if (fileName.contains("Save")) {
                 //because I need this exact instance of fileName, I will define the button function here
                 //can't capture fileName by reference, so I have to capture by value and the rest by reference
@@ -677,7 +677,7 @@ void Game::ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui
     int alliedUnitCount = 0;
     int alliedArmiesCount = 0;
 
-    for (const auto &row : data) {
+    for (const auto &row: data) {
         if (!row.contains("settlementIndex") || !row.contains("owner") || !row.contains("unitsInArmy")) {
             throw(BrokenFile("saveFile" + fileName));
         }
@@ -689,9 +689,12 @@ void Game::ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui
         }
     }
 
-    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player Owned Settlements: " + std::to_string(alliedSettlementCount)));
-    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player's number of armies: " + std::to_string(alliedArmiesCount)));
-    AddElementToFTXUIContainer(whereToDisplay, paragraph("Player's number of units: " + std::to_string(alliedUnitCount)));
+    AddElementToFTXUIContainer(whereToDisplay,
+                               paragraph("Player Owned Settlements: " + std::to_string(alliedSettlementCount)));
+    AddElementToFTXUIContainer(whereToDisplay,
+                               paragraph("Player's number of armies: " + std::to_string(alliedArmiesCount)));
+    AddElementToFTXUIContainer(whereToDisplay,
+                               paragraph("Player's number of units: " + std::to_string(alliedUnitCount)));
 
     saveFile.close();
 }
@@ -704,7 +707,7 @@ void Game::ReadSaveToReloadGame(const std::string &fileName) {
     }
 
     nlohmann::json data = nlohmann::json::parse(saveFile);
-    for (const auto &row : data) {
+    for (const auto &row: data) {
         if (!row.contains("settlementIndex") || !row.contains("owner") || !row.contains("unitsInArmy")) {
             throw(BrokenFile("saveFile" + fileName));
         }
@@ -721,13 +724,13 @@ void Game::ReadSaveToReloadGame(const std::string &fileName) {
             //check if the read owner is the same as the default, and give it to its current (read) owner, if applicable
             int defaultOwner = Settlements[settlementIndex]->getOwner();
             if (owner != defaultOwner) {
-                Settlements[settlementIndex]->ChangeOwnership(Enemies[owner-1].get());
+                Settlements[settlementIndex]->ChangeOwnership(Enemies[owner - 1].get());
             }
         }
 
         //put the saved army in the settlement, eventually replacing the one that's already there
         if (unitCount == 0) {
-                Settlements[settlementIndex]->DetachArmy();
+            Settlements[settlementIndex]->DetachArmy();
         } else {
             for (int i = 0; i < unitCount; i++) {
                 unsigned long currentUnitIndex = row["unitIndex" + std::to_string(i)];
@@ -778,7 +781,6 @@ void Game::ReadSaveToReloadGame(const std::string &fileName) {
                         break;
                     }
                     default: {
-
                     }
                 }
                 //station the army in the corresponding settlement
@@ -1548,7 +1550,6 @@ int Game::Start() {
             AddElementToFTXUIContainer(gameWindow, separator());
             //add the input
             gameWindow->Add(moveArmyWhichSettlementInput);
-
         };
 
         auto onSaveGameButtonClick = [&] {
