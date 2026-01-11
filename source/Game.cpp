@@ -36,7 +36,7 @@ ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Col
 //helper function for time
 std::string get_current_time(const std::string &format = "%Y-%m-%d-%H:%M:%S") {
     const std::time_t now = std::time(nullptr);
-    std::tm *local_time = std::localtime(&now);
+    const std::tm *local_time = std::localtime(&now);
 
     char buffer[100];
     std::strftime(buffer, sizeof(buffer), format.c_str(), local_time);
@@ -548,7 +548,7 @@ void Game::ShowMenu() {
         std::filesystem::path pathToCurrentDirectory = std::filesystem::current_path();
 
         for (const auto &file: std::filesystem::directory_iterator(pathToCurrentDirectory)) {
-            std::string fileName = std::string(file.path().filename());
+            std::string fileName = file.path().filename().string();
             if (fileName.contains("Save")) {
                 //because I need this exact instance of fileName, I will define the button function here
                 //can't capture fileName by reference, so I have to capture by value and the rest by reference
