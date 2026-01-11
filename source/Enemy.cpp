@@ -114,6 +114,10 @@ int Enemy::getCurrentTurnsToAct() const {
     return currentTurnsToAct;
 }
 
+int Enemy::getDefaultTurnsToAct() const {
+    return defaultTurnsToAct;
+}
+
 const std::string& Enemy::getName() const {
     return name;
 }
@@ -121,5 +125,10 @@ const std::string& Enemy::getName() const {
 int Enemy::getIndex() const {
     return index;
 }
+
+void Enemy::setCurrentTurnsToAct(int newTurns) {
+    currentTurnsToAct = newTurns;
+}
+
 
 

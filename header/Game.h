@@ -73,9 +73,11 @@ private:
 
     void SaveGame() const;
 
-    static void ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui::Component &whereToDisplay);
+    void ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui::Component &whereToDisplay);
 
     void ReadSaveToReloadGame(const std::string &fileName);
+
+    void ShowMainUI();
 
 public:
     int Start();

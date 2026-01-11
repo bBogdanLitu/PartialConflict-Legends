@@ -32,9 +32,13 @@ public:
 
     [[nodiscard]] int getCurrentTurnsToAct() const;
 
+    [[nodiscard]] int getDefaultTurnsToAct() const;
+
     [[nodiscard]] const std::string &getName() const;
 
     [[nodiscard]] int getIndex() const;
+
+    void setCurrentTurnsToAct(int newTurns);
 };
 
 

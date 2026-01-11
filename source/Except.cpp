@@ -24,3 +24,9 @@ SizeViolation::SizeViolation(const Army *army) : ApplicationException{
 } {
     army->DisplayArmy();
 }
+
+InvalidSaveAttempt::InvalidSaveAttempt(const std::string &reason) : ApplicationException{
+    "Save failed! Reason: " + reason
+} {
+}
+

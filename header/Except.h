@@ -27,5 +27,10 @@ public:
     explicit SizeViolation(const Army *army);
 };
 
+class InvalidSaveAttempt : public ApplicationException {
+public:
+    explicit InvalidSaveAttempt(const std::string &reason);
+};
+
 
 #endif //EXCEPT_H
