@@ -2,6 +2,7 @@
 #define Constants_H
 #include <string>
 #include <vector>
+#include <memory>
 
 //Usual colours
 #define gameAnnouncementsColor ftxui::Color::Gold1
@@ -110,5 +111,18 @@ const inline std::vector<std::string> generalFightTableHeaders =
 {
     "Name", "Melee Power (Eff)", "Ranged Power (Eff)", "Armour Power (Eff)"
 };
+
+//template sorting function for any vectors of shared pointers
+template <class T>
+bool comparatorAsc(std::shared_ptr<T> a, std::shared_ptr<T> b) {
+    return *a < *b;
+}
+
+template <class T>
+std::vector<std::shared_ptr<T>> SortareVectorSharedPTR(std::vector<std::shared_ptr<T>> vector) {
+    sort(vector.begin(), vector.end(), comparatorAsc<T>);
+    return vector;
+}
+
 
 #endif

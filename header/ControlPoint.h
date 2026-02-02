@@ -17,7 +17,8 @@ private:
     int indexOfConnectedSettlement;
 
 public:
-    ControlPoint(const Scout<Unit> &appointedScout_, const std::string &name_, int travelCost_, int owner_, int connected_);
+    ControlPoint(const Scout<Unit> &appointedScout_, const std::string &name_, int travelCost_, int owner_,
+                 int connected_);
 
     /*void StationArmy(const Army& army) {
         stationedArmy = army;

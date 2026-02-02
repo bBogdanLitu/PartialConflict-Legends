@@ -96,6 +96,22 @@ public:
         return os;
     }
 
+    friend bool operator<(const Unit &lhs, const Unit &rhs) {
+        return lhs.overallPower < rhs.overallPower;
+    }
+
+    friend bool operator<=(const Unit &lhs, const Unit &rhs) {
+        return !(rhs < lhs);
+    }
+
+    friend bool operator>(const Unit &lhs, const Unit &rhs) {
+        return rhs < lhs;
+    }
+
+    friend bool operator>=(const Unit &lhs, const Unit &rhs) {
+        return !(lhs < rhs);
+    }
+
 protected:
     Unit(const Unit &other) = default;
 

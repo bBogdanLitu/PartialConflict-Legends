@@ -14,11 +14,13 @@
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ctime>
+#include <algorithm>
 
 #include "../header/Except.h"
 #include "../header/LocalLeader.h"
 
 using namespace ftxui;
+
 
 //helper function for ftxui
 ButtonOption ButtonStyleCenterText(Color foreground, Color foregroundActive, Color background, Color backgroundActive) {
@@ -183,6 +185,7 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) const {
 
 void Game::PopulateCaptains(std::ifstream captainsJson) {
     nlohmann::json data = nlohmann::json::parse(captainsJson);
+    int count = 0;
     for (const auto &i: data) {
         if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
             contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
@@ -195,22 +198,47 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
             i["melee"], i["ranged"], i["armour"],
             i["strength"], i["accuracy"], i["dexterity"], captainInitialHandicapMultiplier
         };
-
+        captain.setIndex(count++);
+        //count++;
         Captains.push_back(captain.clone());
     }
     //Also add the hardcoded captains - these are constantly the same, no matter what bullshit the user puts in the json
     Captains.push_back(CaptainFactory::meleeWeak().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::meleeMedium().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::meleeGood().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::meleeStrong().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::rangedWeak().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::rangedMedium().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::rangedGood().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::rangedStrong().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::bothWeak().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::bothMedium().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::bothGood().clone());
+    Captains[count]->setIndex(count);
+    count++;
     Captains.push_back(CaptainFactory::bothStrong().clone());
+    Captains[count]->setIndex(count);
+    count++;
 
     captainsJson.close();
 }
@@ -1638,6 +1666,16 @@ int Game::Start() {
     PopulateControlPoints(std::move(controlPointsJson));
     PopulateCaptains(std::move(captainsJson));
     PopulateLocalLeaders(std::move(localLeadersJson));
+
+    //sorting the unit vectors
+    StartingGenerals = SortareVectorSharedPTR(StartingGenerals);
+    PlayerGenerals = SortareVectorSharedPTR(PlayerGenerals);
+    ContenderGenerals = SortareVectorSharedPTR(ContenderGenerals);
+    WarlordGenerals = SortareVectorSharedPTR(WarlordGenerals);
+    EmperorGenerals = SortareVectorSharedPTR(EmperorGenerals);
+    Captains = SortareVectorSharedPTR(Captains);
+    LocalLeaders = SortareVectorSharedPTR(LocalLeaders);
+
 
     if (WarlordGenerals.size() < warlordMinimumGenerals) {
         std::cout << warlordCountWarningText;
