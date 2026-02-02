@@ -3,7 +3,7 @@
 
 int main() {
     try {
-        Game game;
+        Game& game = Game::getGame();
         game.Start();
     } catch (const ObjectFail &err) {
         std::cerr << "Object creation fail - " << err.what() << std::endl;

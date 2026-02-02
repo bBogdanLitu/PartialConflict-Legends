@@ -93,6 +93,17 @@ public:
 
     static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
 
+    //Singleton
+    Game() = default;
+
+    Game(const Game&) = delete;
+    Game& operator=(const Game&) = delete;
+
+    static Game& getGame() {
+        static Game game;
+        return game;
+    }
+
     ~Game();
 };
 
