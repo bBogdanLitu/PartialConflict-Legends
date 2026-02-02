@@ -26,19 +26,29 @@ public:
 class CaptainFactory {
 public:
     static Captain meleeWeak();
+
     static Captain meleeMedium();
+
     static Captain meleeGood();
+
     static Captain meleeStrong();
+
     static Captain rangedWeak();
+
     static Captain rangedMedium();
+
     static Captain rangedGood();
+
     static Captain rangedStrong();
+
     static Captain bothWeak();
+
     static Captain bothMedium();
+
     static Captain bothGood();
+
     static Captain bothStrong();
 };
-
 
 
 #endif //Captain_H

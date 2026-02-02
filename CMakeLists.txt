@@ -61,7 +61,6 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Constants.h
         header/Army.h
         header/Garrison.h
-        header/Scout.h
         header/ControlPoint.h
         header/Settlement.h
         header/Functions.h

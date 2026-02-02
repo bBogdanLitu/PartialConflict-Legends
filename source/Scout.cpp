@@ -1,8 +1,5 @@
-#include "../header/Scout.h"
 
-Scout::Scout(int viewRange_) : viewRange(viewRange_) {
-}
-
+/*
 Scout::Scout(const Scout &other) : viewRange(other.viewRange) {
     //std::cout << "Constructor de copiere pentru Scout\n";
 }
@@ -34,3 +31,4 @@ Scout::~Scout() {
 void Scout::setViewRange(int vR) {
     viewRange = vR;
 }
+*/

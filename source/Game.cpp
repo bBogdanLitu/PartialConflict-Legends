@@ -167,7 +167,7 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) const {
             throw ObjectFail("ControlPoint");
         }
 
-        Scout scout{i["scoutViewRange"]};
+        Scout<Unit> scout{i["scoutViewRange"]};
         ControlPoint controlPoint{scout, i["name"], i["cost"], i["ownedBy"], i["connectedTo"]};
 
         Settlements[i["ownedBy"]]->AddControlPoint(controlPoint);
@@ -1797,19 +1797,6 @@ int Game::Start() {
         OutputFTXUIText(enterToContinueText, userInputExpectedColor);
         std::cin.ignore(); //Flush \n from the buffer
         std::getline(std::cin, temp); //Wait until the player wants to continue
-
-
-        std::cout << "\n\n\n";
-        //Testarea cc si op=
-        Scout sc1{1};
-        Scout sc2{sc1};
-        assert((std::cout << "cc: Atributele se copiază corect\n", sc1 == sc2));
-        sc2.setViewRange(7);
-        assert((std::cout << "cc: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
-        sc1 = sc2;
-        assert((std::cout << "op=: Atributele se copiază corect\n", sc1 == sc2));
-        sc1.setViewRange(100);
-        assert((std::cout << "op=: Modificarea copiei nu modifică obiectul inițial\n", sc1 != sc2));
     }
 
 

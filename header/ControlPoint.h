@@ -10,14 +10,14 @@
 class  ControlPoint {
 private:
     std::optional<Army> stationedArmy;
-    Scout appointedScout;
+    Scout<Unit> appointedScout;
     std::string name;
     int travelCost; //consume the action points of an army passing through by the cost
     int indexOfOwnerSettlement;
     int indexOfConnectedSettlement;
 
 public:
-    ControlPoint(const Scout &appointedScout_, const std::string &name_, int travelCost_, int owner_, int connected_);
+    ControlPoint(const Scout<Unit> &appointedScout_, const std::string &name_, int travelCost_, int owner_, int connected_);
 
     /*void StationArmy(const Army& army) {
         stationedArmy = army;
