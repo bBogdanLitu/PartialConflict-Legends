@@ -23,5 +23,22 @@ public:
     [[nodiscard]] std::shared_ptr<Unit> clone() const override { return std::make_shared<Captain>(*this); }
 };
 
+class CaptainFactory {
+public:
+    static Captain meleeWeak();
+    static Captain meleeMedium();
+    static Captain meleeGood();
+    static Captain meleeStrong();
+    static Captain rangedWeak();
+    static Captain rangedMedium();
+    static Captain rangedGood();
+    static Captain rangedStrong();
+    static Captain bothWeak();
+    static Captain bothMedium();
+    static Captain bothGood();
+    static Captain bothStrong();
+};
+
+
 
 #endif //Captain_H

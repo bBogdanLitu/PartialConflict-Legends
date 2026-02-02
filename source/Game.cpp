@@ -198,6 +198,20 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
 
         Captains.push_back(captain.clone());
     }
+    //Also add the hardcoded captains - these are constantly the same, no matter what bullshit the user puts in the json
+    Captains.push_back(CaptainFactory::meleeWeak().clone());
+    Captains.push_back(CaptainFactory::meleeMedium().clone());
+    Captains.push_back(CaptainFactory::meleeGood().clone());
+    Captains.push_back(CaptainFactory::meleeStrong().clone());
+    Captains.push_back(CaptainFactory::rangedWeak().clone());
+    Captains.push_back(CaptainFactory::rangedMedium().clone());
+    Captains.push_back(CaptainFactory::rangedGood().clone());
+    Captains.push_back(CaptainFactory::rangedStrong().clone());
+    Captains.push_back(CaptainFactory::bothWeak().clone());
+    Captains.push_back(CaptainFactory::bothMedium().clone());
+    Captains.push_back(CaptainFactory::bothGood().clone());
+    Captains.push_back(CaptainFactory::bothStrong().clone());
+
     captainsJson.close();
 }
 

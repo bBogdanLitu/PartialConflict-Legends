@@ -61,4 +61,57 @@ Captain::Captain(const std::string &firstName_, const std::string &lastName_, in
                                                 acc_, dex_), captainHandicap(captainHandicap_) {
 }
 
+Captain CaptainFactory::meleeWeak() {
+    return Captain{"Farmer", "Joe", 5, 0, 20, 0, 10, 10, 0, 20, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::meleeMedium() {
+    return Captain{"Billy", "Bolly", 5, 1, 50, 0, 20, 30, 0, 30, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::meleeGood() {
+    return Captain{"Lirili", "Larila", 5, 2, 80, 0, 50, 60, 0, 60, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::meleeStrong() {
+    return Captain{"Strongus", "Mylyus", 5, 3, 95, 0, 85, 90, 0, 95, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::rangedWeak() {
+    return Captain{"Prastie", "McGee", 5, 0, 5, 20, 5, 10, 10, 10, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::rangedMedium() {
+    return Captain{"Temutus", "Arcus", 5, 1, 5, 60, 15, 25, 25, 25, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::rangedGood() {
+    return Captain{"Scopicus", "Armatus", 5, 2, 15, 80, 25, 60, 60, 30, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::rangedStrong() {
+    return Captain{"Nimeritus", "Anythingus", 5, 3, 35, 99, 55, 88, 88, 88, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::bothWeak() {
+    return Captain{"Brutalicus", "Nonganditus", 5, 0, 10, 10, 10, 10, 10, 10, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::bothMedium() {
+    return Captain{"Prapaditus", "Macaroni", 5, 1, 27, 27, 27, 27, 27, 27, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::bothGood() {
+    return Captain{"Preponderentus", "Batutix", 5, 2, 55, 55, 55, 55, 55, 55, captainInitialHandicapMultiplier};
+}
+
+Captain CaptainFactory::bothStrong() {
+    return Captain{"Warius", "Larius", 5, 3, 99, 99, 99, 67, 67, 67, captainInitialHandicapMultiplier};
+}
+
+
+
+
+
+
 
