@@ -54,7 +54,7 @@ int Saboteur<T>::Sabotage() {
         chanceOfDebuff = 100.0f;
         canKill = true;
         chanceOfKilling = 100.0f;
-    } else if (std::is_base_of_v<Unit, T> == true) {
+    } else if constexpr  (std::is_base_of_v<Unit, T> == true) {
         std::cout << "Any other unit that is later introduced\n";
         chanceOfDebuff = 77.7f;
         canKill = false;
