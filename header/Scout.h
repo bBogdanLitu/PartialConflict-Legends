@@ -14,9 +14,6 @@ public:
         os << "This scout has a view range of: " << scout.viewRange << "\n";
         return os;
     }
-
-    //GETTERS / SETTERS (TEMP)
-    void setViewRange(int viewRange_);
 };
 
 

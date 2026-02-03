@@ -1683,18 +1683,18 @@ int Game::Start() {
     LocalLeaders = SortareVectorSharedPTR(LocalLeaders);
 
     //Saboteur tests - will implement
-    std::cout<<"Results from trying to sabotage using 4 kinds of saboteurs.\n(1-debuff, 2-kill, 0-fail)\n";
+    std::cout << "Results from trying to sabotage using 4 kinds of saboteurs.\n(1-debuff, 2-kill, 0-fail)\n";
     Saboteur s1 = Saboteur<Captain>{std::dynamic_pointer_cast<Captain>(Captains[0])};
-    std::cout<<s1.Sabotage()<<"\n";
+    std::cout << s1.Sabotage() << "\n";
 
     Saboteur s2 = Saboteur<General>{std::dynamic_pointer_cast<General>(PlayerGenerals[0])};
-    std::cout<<s2.Sabotage()<<"\n";
+    std::cout << s2.Sabotage() << "\n";
 
     Saboteur s3 = Saboteur<LocalLeader>{std::dynamic_pointer_cast<LocalLeader>(LocalLeaders[0])};
-    std::cout<<s3.Sabotage()<<"\n";
+    std::cout << s3.Sabotage() << "\n";
 
     Saboteur s4 = Saboteur<Emperor>{EmperorUnit};
-    std::cout<<s4.Sabotage()<<"\n";
+    std::cout << s4.Sabotage() << "\n";
 
 
     if (WarlordGenerals.size() < warlordMinimumGenerals) {

@@ -9,7 +9,7 @@
 #include "LocalLeader.h"
 
 //Any unit can be a saboteur, and it has different stats depending on the type
-template <class T>
+template<class T>
 class Saboteur {
 private:
     std::weak_ptr<T> unit;
@@ -24,13 +24,14 @@ public:
 
     Saboteur(Saboteur &&other) noexcept = delete;
 
-    Saboteur & operator=(const Saboteur &other) = delete;
+    Saboteur &operator=(const Saboteur &other) = delete;
 
-    Saboteur & operator=(Saboteur &&other) noexcept = delete;
+    Saboteur &operator=(Saboteur &&other) noexcept = delete;
 };
 
 template<class T>
-Saboteur<T>::Saboteur(std::weak_ptr<T> unit_) : unit(unit_) {}
+Saboteur<T>::Saboteur(std::weak_ptr<T> unit_) : unit(unit_) {
+}
 
 template<class T>
 int Saboteur<T>::Sabotage() {
@@ -42,27 +43,22 @@ int Saboteur<T>::Sabotage() {
 
     if (typeid(T) == typeid(Captain)) {
         chanceOfDebuff = 50.0f;
-    }
-    else if (typeid(T) == typeid(General)) {
+    } else if (typeid(T) == typeid(General)) {
         chanceOfDebuff = 80.5f;
         canKill = true;
         chanceOfKilling = 33.3f;
-    }
-    else if (typeid(T) == typeid(LocalLeader)) {
+    } else if (typeid(T) == typeid(LocalLeader)) {
         chanceOfDebuff = 66.6f;
         canKill = false;
-    }
-    else if (typeid(T) == typeid(Emperor)) {
+    } else if (typeid(T) == typeid(Emperor)) {
         chanceOfDebuff = 100.0f;
         canKill = true;
         chanceOfKilling = 100.0f;
-    }
-    else if (std::is_base_of_v<Unit, T> == true) {
-        std::cout<<"Any other unit that is later introduced\n";
+    } else if (std::is_base_of_v<Unit, T> == true) {
+        std::cout << "Any other unit that is later introduced\n";
         chanceOfDebuff = 77.7f;
         canKill = false;
-    }
-    else {
+    } else {
         //a non-unit can't sabotage
         return 0;
     }
@@ -88,8 +84,6 @@ int Saboteur<T>::Sabotage() {
     //all failed
     return 0;
 }
-
-
 
 
 #endif //OOP_SABOTEUR_H
