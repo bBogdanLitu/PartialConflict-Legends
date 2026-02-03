@@ -1,6 +1,6 @@
 #include "../header/ControlPoint.h"
 
-ControlPoint::ControlPoint(const Scout<Unit> &appointedScout_, const std::string &name_,
+ControlPoint::ControlPoint(const Scout &appointedScout_, const std::string &name_,
                            int travelCost_, int owner_, int connected_) : appointedScout(appointedScout_), name(name_),
                                                                           travelCost(travelCost_),
                                                                           indexOfOwnerSettlement(owner_),

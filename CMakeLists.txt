@@ -65,6 +65,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Settlement.h
         header/Functions.h
         header/Game.h
+        header/Scout.h
         source/Game.cpp
         source/ControlPoint.cpp
         source/Army.cpp
@@ -84,6 +85,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         header/Except.h
         source/Emperor.cpp
         header/Emperor.h
+        header/Saboteur.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

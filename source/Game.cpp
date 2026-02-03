@@ -18,6 +18,7 @@
 
 #include "../header/Except.h"
 #include "../header/LocalLeader.h"
+#include "../header/Saboteur.h"
 
 using namespace ftxui;
 
@@ -169,7 +170,8 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) const {
             throw ObjectFail("ControlPoint");
         }
 
-        Scout<Unit> scout{i["scoutViewRange"]};
+        Scout scout{i["scoutViewRange"]};
+
         ControlPoint controlPoint{scout, i["name"], i["cost"], i["ownedBy"], i["connectedTo"]};
 
         Settlements[i["ownedBy"]]->AddControlPoint(controlPoint);
@@ -186,22 +188,7 @@ void Game::PopulateControlPoints(std::ifstream controlPointsJson) const {
 void Game::PopulateCaptains(std::ifstream captainsJson) {
     nlohmann::json data = nlohmann::json::parse(captainsJson);
     int count = 0;
-    for (const auto &i: data) {
-        if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
-            contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
-            contains("accuracy") || !i.contains("dexterity")) {
-            throw ObjectFail("Captain");
-        }
 
-        Captain captain{
-            i["firstName"], i["lastName"], i["type"], i["rarity"],
-            i["melee"], i["ranged"], i["armour"],
-            i["strength"], i["accuracy"], i["dexterity"], captainInitialHandicapMultiplier
-        };
-        captain.setIndex(count++);
-        //count++;
-        Captains.push_back(captain.clone());
-    }
     //Also add the hardcoded captains - these are constantly the same, no matter what bullshit the user puts in the json
     Captains.push_back(CaptainFactory::meleeWeak().clone());
     Captains[count]->setIndex(count);
@@ -239,6 +226,25 @@ void Game::PopulateCaptains(std::ifstream captainsJson) {
     Captains.push_back(CaptainFactory::bothStrong().clone());
     Captains[count]->setIndex(count);
     count++;
+
+    //Add captains from json
+    for (const auto &i: data) {
+        if (!i.contains("firstName") || !i.contains("lastName") || !i.contains("type") || !i.contains("rarity") || !i.
+            contains("armour") || !i.contains("strength") || !i.contains("melee") || !i.contains("ranged") || !i.
+            contains("accuracy") || !i.contains("dexterity")) {
+            throw ObjectFail("Captain");
+        }
+
+        Captain captain{
+            i["firstName"], i["lastName"], i["type"], i["rarity"],
+            i["melee"], i["ranged"], i["armour"],
+            i["strength"], i["accuracy"], i["dexterity"], captainInitialHandicapMultiplier
+        };
+        captain.setIndex(count++);
+        //count++;
+        Captains.push_back(captain.clone());
+    }
+
 
     captainsJson.close();
 }
@@ -1662,10 +1668,10 @@ int Game::Start() {
     }
     PopulateEnemies(std::move(enemiesJson));
     PopulateGenerals(std::move(generalsJson));
-    PopulateSettlements(std::move(settlementsJson));
-    PopulateControlPoints(std::move(controlPointsJson));
     PopulateCaptains(std::move(captainsJson));
     PopulateLocalLeaders(std::move(localLeadersJson));
+    PopulateSettlements(std::move(settlementsJson));
+    PopulateControlPoints(std::move(controlPointsJson));
 
     //sorting the unit vectors
     StartingGenerals = SortareVectorSharedPTR(StartingGenerals);
@@ -1675,6 +1681,20 @@ int Game::Start() {
     EmperorGenerals = SortareVectorSharedPTR(EmperorGenerals);
     Captains = SortareVectorSharedPTR(Captains);
     LocalLeaders = SortareVectorSharedPTR(LocalLeaders);
+
+    //Saboteur tests - will implement
+    std::cout<<"Results from trying to sabotage using 4 kinds of saboteurs.\n(1-debuff, 2-kill, 0-fail)\n";
+    Saboteur s1 = Saboteur<Captain>{std::dynamic_pointer_cast<Captain>(Captains[0])};
+    std::cout<<s1.Sabotage()<<"\n";
+
+    Saboteur s2 = Saboteur<General>{std::dynamic_pointer_cast<General>(PlayerGenerals[0])};
+    std::cout<<s2.Sabotage()<<"\n";
+
+    Saboteur s3 = Saboteur<LocalLeader>{std::dynamic_pointer_cast<LocalLeader>(LocalLeaders[0])};
+    std::cout<<s3.Sabotage()<<"\n";
+
+    Saboteur s4 = Saboteur<Emperor>{EmperorUnit};
+    std::cout<<s4.Sabotage()<<"\n";
 
 
     if (WarlordGenerals.size() < warlordMinimumGenerals) {

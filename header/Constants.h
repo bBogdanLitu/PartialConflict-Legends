@@ -113,13 +113,13 @@ const inline std::vector<std::string> generalFightTableHeaders =
 };
 
 //template sorting function for any vectors of shared pointers
-template <class T>
+template<class T>
 bool comparatorAsc(std::shared_ptr<T> a, std::shared_ptr<T> b) {
     return *a < *b;
 }
 
-template <class T>
-std::vector<std::shared_ptr<T>> SortareVectorSharedPTR(std::vector<std::shared_ptr<T>> vector) {
+template<class T>
+std::vector<std::shared_ptr<T> > SortareVectorSharedPTR(std::vector<std::shared_ptr<T> > vector) {
     sort(vector.begin(), vector.end(), comparatorAsc<T>);
     return vector;
 }
