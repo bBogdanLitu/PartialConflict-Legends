@@ -576,12 +576,11 @@ void Game::ShowMenu() {
     auto introContainer = Container::Vertical({});
     auto buttonsContainer = Container::Vertical({});
 
-
     //paragraphs
-    auto introductionParagraph = paragraph("PARTIAL CONFLICT: LEGENDS") | center | bold | color(honeydew);
+    auto introductionParagraph = paragraph(gameTitle) | center | bold | color(honeydew);
 
     //button-related
-    //STYLES are done throught the helper function
+    //STYLES are done through the helper function
 
     //FUNCTIONS
     auto onStartGameButtonClicked = [&] {
@@ -629,17 +628,17 @@ void Game::ShowMenu() {
     };
 
     //button definition
-    startGameButton = Button("Start a New Game", onStartGameButtonClicked,
+    startGameButton = Button(startGameButtonText, onStartGameButtonClicked,
                              ButtonStyleCenterText(kaki, susPink, backgroundGrey, backgroundGrey))
                       | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
-    loadGameButton = Button("Load Progress", onLoadGameButtonClicked,
+    loadGameButton = Button(loadGameButtonText, onLoadGameButtonClicked,
                             ButtonStyleCenterText(beautifulBlue, beautifulGreen, backgroundGrey, backgroundGrey))
                      | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
                      | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
-    exitButton = Button("Exit", onExitButtonClicked,
+    exitButton = Button(exitButtonText, onExitButtonClicked,
                         ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey))
                  | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
                  | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
@@ -928,22 +927,22 @@ void Game::ShowMainUI() {
     //Every time I want to listen to input from the user, I will have to add an input such as this one
     Component starterGeneralInput = Input(&tempInput, starterPreChoiceText, inputOption)
                                     | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-    Component modifyArmyCountInput = Input(&modifiedArmyInputString, "Count of the army you want to modify:",
+    Component modifyArmyCountInput = Input(&modifiedArmyInputString, modifyArmyCountInputText,
                                            inputOption)
                                      | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
     Component modifyArmyWhatInput = Input(&modifiedArmyInputString,
-                                          "0 - ADD UNIT | 1 - REMOVE UNIT | 2 - DELETE ARMY | 3 - CANCEL",
+                                          modifyArmyWhatInputText,
                                           inputOption)
                                     | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-    Component modifyArmyAddInput = Input(&modifiedArmyInputString, "Index of the general you'd wish to add:",
+    Component modifyArmyAddInput = Input(&modifiedArmyInputString, modifyArmyAddInputText,
                                          inputOption)
                                    | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-    Component modifyArmyRemoveInput = Input(&modifiedArmyInputString, "Index of the general you want to remove:",
+    Component modifyArmyRemoveInput = Input(&modifiedArmyInputString, modifyArmyCountInputText,
                                             inputOption)
                                       | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-    Component moveArmyWhichSettlementInput = Input(&moveArmyInputString, "Index of the settlement", inputOption)
+    Component moveArmyWhichSettlementInput = Input(&moveArmyInputString, modifyArmyCountInputText, inputOption)
                                              | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
-    Component moveArmyWhereInput = Input(&moveArmyInputString, "Index of the neighbour:", inputOption)
+    Component moveArmyWhereInput = Input(&moveArmyInputString, moveArmyWhereInputText, inputOption)
                                    | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
     //CATCH EVENTS FOR INPUTS
 
@@ -968,16 +967,16 @@ void Game::ShowMainUI() {
                     tempInput = "";
                 } else {
                     //in range, can proceed
-                    gameWindow->DetachAllChildren(); //remove text that becomes useless
+                    gameWindow->DetachAllChildren(); //remove text that has become useless (am luat restanta la eng)
 
                     Army starterArmy{StartingGenerals[startingGeneralChosenIndex]};
-                    //temp (so that the selection screen is actually usable
+                    //temp (so that the selection screen is actually usable)
                     starterArmy.AddUnit(PlayerGenerals[10]);
                     starterArmy.AddUnit(PlayerGenerals[33]);
                     Settlements[0]->StationArmy(std::make_shared<Army>(starterArmy));
                     AddElementToFTXUIContainer(
                         gameWindow,
-                        paragraph("You should check out your settlements now!") | color(
+                        paragraph(checkSettlementsButtonUnlockText) | color(
                             importantGameInformationColor));
                     gameContextualButtonsContainer->Add(checkSettlementsButton);
                 }
@@ -1007,8 +1006,9 @@ void Game::ShowMainUI() {
                 }
                 PlayerArmies[whichArmyToModify]->RemoveUnit(whichUnitToRemove);
 
+                //Might modify the whole thing to show who was removed and where from
                 AddElementToFTXUIContainer(
-                    gameWindow, paragraph("You have successfully modified your army! You should check it out :)"));
+                    gameWindow, paragraph(armyUnitRemovedSuccessText));
 
                 modifyArmyRemoveInput->Detach();
             }
@@ -1051,14 +1051,15 @@ void Game::ShowMainUI() {
                 try {
                     PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
                 } catch (const SizeViolation &) {
+
                     //Because I can't output with std::cout in ftxui, I will define the custom behaviour here
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Army is full already!"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph(armyFullSizeWarningText));
                     addSuccess = false;
                 }
                 if (addSuccess) {
                     AddElementToFTXUIContainer(
                         gameWindow, paragraph(
-                            "You have successfully modified your army - added " + addedUnit->getFullName()));
+                             armyUnitAddedSuccessText + addedUnit->getFullName()));
                 }
 
 
@@ -1090,11 +1091,11 @@ void Game::ShowMainUI() {
                     case 0: {
                         //add
                         //I want to inform the player about what choices he has
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Choose from this list of starters:"));
+                        AddElementToFTXUIContainer(gameWindow, paragraph(modifyArmyChooseStartersText));
                         AddElementToFTXUIContainer(gameWindow, FTXUIDisplayStaringGenerals());
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of non-starters:"));
+                        AddElementToFTXUIContainer(gameWindow, paragraph(modifyArmyChooseNonStartersText));
                         AddElementToFTXUIContainer(gameWindow, FTXUIDisplayAdditionalPlayerGenerals());
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Or from this list of captains:"));
+                        AddElementToFTXUIContainer(gameWindow, paragraph(modifyArmyChooseCaptainText));
                         AddElementToFTXUIContainer(gameWindow, FTXUIDisplayCaptains());
 
                         gameWindow->Add(modifyArmyAddInput);
@@ -1108,12 +1109,12 @@ void Game::ShowMainUI() {
                     case 2: {
                         //delete whole army
                         PlayerArmies[whichArmyToModify]->Disband();
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Army obliterated."));
+                        AddElementToFTXUIContainer(gameWindow, paragraph(modifyArmyDeleteSuccessText));
                         break;
                     }
                     default: {
                         //cancel
-                        AddElementToFTXUIContainer(gameWindow, paragraph("Nothing was done"));
+                        AddElementToFTXUIContainer(gameWindow, paragraph(cancelOptionChosenText));
                     }
                 }
                 modifyArmyWhatInput->Detach();
@@ -1143,7 +1144,7 @@ void Game::ShowMainUI() {
                     modifiedArmyInputString = "";
                     modifyArmyCountInput->Detach();
                     //inform the player
-                    AddElementToFTXUIContainer(gameWindow, paragraph("You are modifying this army:"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph(modifyArmyInformWhichText));
                     AddElementToFTXUIContainer(gameWindow, PlayerArmies[whichArmyToModify]->FTXUIDisplayArmy());
                     AddElementToFTXUIContainer(gameWindow, separator());
                     //add input to know what we want to do
@@ -1187,8 +1188,9 @@ void Game::ShowMainUI() {
                 auto Neighbours = originalSettlement->getNeighbours();
                 //inform the player about the possibilities
                 AddNewLineToFTXUIContainer(gameWindow);
+
                 AddElementToFTXUIContainer(
-                    gameWindow, paragraph("Neighbours of settlement " + originalSettlement->getName() + ":"));
+                    gameWindow, paragraph( moveArmySettlementNeighbourInformationText + originalSettlement->getName() + ":"));
                 AddNewLineToFTXUIContainer(gameWindow);
                 for (const auto &neighbour: Neighbours) {
                     //initialize the vector of valid indexes of neighbours
@@ -1200,8 +1202,9 @@ void Game::ShowMainUI() {
                 //that will be done in the next input
                 //should use SendArmy or another func from Settlement!!!
                 AddNewLineToFTXUIContainer(gameWindow);
+
                 AddElementToFTXUIContainer(
-                    gameWindow, paragraph("Now choose the index of the neighbour you want to move to."));
+                    gameWindow, paragraph(moveArmyNeighbourChooseWhichText));
                 AddElementToFTXUIContainer(gameWindow, separator());
                 gameWindow->Add(moveArmyWhereInput);
 
@@ -1240,7 +1243,7 @@ void Game::ShowMainUI() {
                 }
                 if (!found) {
                     //invalid input
-                    AddElementToFTXUIContainer(gameWindow, paragraph("Invalid index"));
+                    AddElementToFTXUIContainer(gameWindow, paragraph(indexInvalidText));
                     return true;
                 }
                 //else it's valid, and we should move the army to this neighbour, if it's allowed
@@ -1248,9 +1251,9 @@ void Game::ShowMainUI() {
                     //if we are trying to move to an allied settlement, check if it already has an army
                     if (targetSettlement->getStationedArmy().has_value()) {
                         //we can't move another army to it, retry
+
                         AddElementToFTXUIContainer(gameWindow, paragraph(
-                                                       "Settlement" + std::to_string(moveArmyToIndex) +
-                                                       "already has an army. Retry"));
+                                                       moveArmyWhereSettlementHasArmyText));
                         moveArmyInputString = "";
                         return true;
                     }
@@ -1259,16 +1262,16 @@ void Game::ShowMainUI() {
 
                     if (sendRes) {
                         AddElementToFTXUIContainer(
-                            gameWindow, paragraph("Army moved successfully to an allied settlement!"));
+                            gameWindow, paragraph(moveArmyWhereSuccessText));
                     } else {
                         AddElementToFTXUIContainer(
-                            gameWindow, paragraph("Army couldn't be moved!"));
+                            gameWindow, paragraph(moveArmyWhereFailText));
                     }
                 } else {
                     //attack
                     AddElementToFTXUIContainer(
                         gameWindow,
-                        paragraph("This settlement isn't yours. This action will trigger an attack...")
+                        paragraph(moveArmyWhereAttackInformationText)
                         | color(importantGameInformationColor));
 
                     std::vector<int> targetIndexes = {static_cast<int>(moveArmyToIndex)};
@@ -1282,7 +1285,7 @@ void Game::ShowMainUI() {
                         originalSettlement->DetachArmy();
                     } else {
                         AddElementToFTXUIContainer(
-                            gameWindow, paragraph("Couldn't send army, probably not enough action points!"));
+                            gameWindow, paragraph(moveArmyWhereLackingActionPointsFailText));
                     }
                 }
                 moveArmyWhereInput->Detach();
@@ -1330,7 +1333,7 @@ void Game::ShowMainUI() {
             checkEnemyIntentsClickedCurrentTurn = false;
         } else {
             AddElementToFTXUIContainer(gameWindow,
-                                       paragraph("There still are things you should do!") | color(beautifulBlue));
+                                       paragraph(forgorToDoAllRequiredOperationsErrorText) | color(beautifulBlue));
         }
     };
 
@@ -1347,9 +1350,9 @@ void Game::ShowMainUI() {
     auto onCheckSettlementsButtonClick = [&] {
         AddNewLineToFTXUIContainer(gameWindow);
         AddElementToFTXUIContainer(gameWindow, separator());
-        AddElementToFTXUIContainer(gameWindow, paragraph("CHECKING SETTLEMENTS") | center | color(beautifulGreen));
+        AddElementToFTXUIContainer(gameWindow, paragraph(checkSettlementsCaptionText) | center | color(beautifulGreen));
         AddNewLineToFTXUIContainer(gameWindow);
-        AddElementToFTXUIContainer(gameWindow, paragraph("These are your settlements:"));
+        AddElementToFTXUIContainer(gameWindow, paragraph(checkSettlementsPlayerSettlementsInformationText));
         //Get all player owned settlements and display their information
         int alliedSettlementCount = 0;
         for (unsigned long i = 0; i < Settlements.size(); i++) {
@@ -1361,22 +1364,23 @@ void Game::ShowMainUI() {
         }
         if (alliedSettlementCount == 0) {
             AddNewLineToFTXUIContainer(gameWindow);
+
             AddElementToFTXUIContainer(
-                gameWindow, paragraph("Wait... There are none! YOU LOST?!") | color(importantGameInformationColor));
+                gameWindow, paragraph(checkSettlementsGameLostText) | color(importantGameInformationColor));
             //The game won't end. I will give the player 1 more chance (insane lore).
             if (timesWithoutSettlements == 0 && (savedGameLoaded == 0 || currentTurn == 1)) {
                 AddNewLineToFTXUIContainer(gameWindow);
-                AddElementToFTXUIContainer(gameWindow, paragraph("It can't be...") | color(storyRelatedTextColor));
+                AddElementToFTXUIContainer(gameWindow, paragraph(storyBeginning1) | color(storyRelatedTextColor));
                 AddElementToFTXUIContainer(
                     gameWindow,
-                    paragraph("You were supposed to make a difference!") | color(storyRelatedTextColor));
+                    paragraph(storyBeginning2) | color(storyRelatedTextColor));
                 AddElementToFTXUIContainer(gameWindow, paragraph("...") | color(storyRelatedTextColor));
                 AddElementToFTXUIContainer(
                     gameWindow,
-                    paragraph("I won't allow you to escape this easily.") | color(storyRelatedTextColor));
+                    paragraph(storyBeginning3) | color(storyRelatedTextColor));
                 AddElementToFTXUIContainer(
                     gameWindow,
-                    paragraph("Rise again and show everyone why I chose you!") | color(storyRelatedTextColor));
+                    paragraph(storyBeginning4) | color(storyRelatedTextColor));
                 AddNewLineToFTXUIContainer(gameWindow);
 
                 //Regiving the first settlement to the player and resetting the army
@@ -1396,7 +1400,7 @@ void Game::ShowMainUI() {
                 warlord1VlascaArmy2.AddUnit(WarlordGenerals[2]);
                 Settlements[1]->StationArmy(std::make_shared<Army>(warlord1VlascaArmy2));
 
-                //HINTS:
+                //HINTS - temp:
                 AddNewLineToFTXUIContainer(gameWindow);
                 AddElementToFTXUIContainer(gameWindow, paragraph("HINTS:"));
                 AddElementToFTXUIContainer(gameWindow, paragraph("1. AVOID PIBBLE;"));
@@ -1424,7 +1428,7 @@ void Game::ShowMainUI() {
             gameWindow->DetachAllChildren();
             AddNewLineToFTXUIContainer(gameWindow);
             AddElementToFTXUIContainer(
-                gameWindow, paragraph("You won! (temporarily)") | color(storyRelatedTextColor));
+                gameWindow, paragraph(gameWinText) | color(storyRelatedTextColor));
 
             //only button becomes exit
             ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
@@ -1435,7 +1439,7 @@ void Game::ShowMainUI() {
             AddElementToFTXUIContainer(gameWindow,
                                        paragraph(" "));
             AddElementToFTXUIContainer(gameWindow,
-                                       paragraph("Now take a look at your enemy's intents!") | color(beautifulOrange));
+                                       paragraph(checkEnemyIntentsButtonUnlockText) | color(beautifulOrange));
             gameContextualButtonsContainer->Add(checkEnemyIntentsButton);
         }
         checkSettlementClickedFirstTime = true;
@@ -1448,7 +1452,7 @@ void Game::ShowMainUI() {
         AddNewLineToFTXUIContainer(gameWindow);
         AddElementToFTXUIContainer(gameWindow, separator());
         AddElementToFTXUIContainer(
-            gameWindow, paragraph("CHECKING ENEMY INTENTS ") | center | color(beautifulOrange));
+            gameWindow, paragraph(checkEnemyIntentsCaptionText) | center | color(beautifulOrange));
 
         //We can only get information about the enemies we currently have contact with.
         for (const auto &Enemy: Enemies) {
@@ -1463,17 +1467,17 @@ void Game::ShowMainUI() {
                 AddNewLineToFTXUIContainer(gameWindow);
                 AddElementToFTXUIContainer(gameWindow,
                                            paragraph(
-                                               name + " intends to act in " + std::to_string(
-                                                   turnsToAct) + " turn(s)."));
+                                               name + checkEnemyIntentsTurnsToActInformationText + std::to_string(
+                                                   turnsToAct) + " turn(s).")); //ehhhhhhhhhhhhhhhhhhhhh can't make everything a const I guess?
                 //If the discovered enemy is about to act, the player might get attacked.
                 //A player should check what settlements they have in contact with an enemy to know where to expect it.
                 if (turnsToAct == 1) {
                     AddElementToFTXUIContainer(gameWindow,
-                                               paragraph("You will likely be attacked!"));
+                                               paragraph(checkEnemyIntentsAttackImminentText));
                 }
                 AddNewLineToFTXUIContainer(gameWindow);
                 AddElementToFTXUIContainer(gameWindow,
-                                           paragraph("Owned settlements:"));
+                                           paragraph(checkSettlementsPlayerSettlementsInformationText));
                 for (const auto &settlement: enemySettlements) {
                     FTXUIDisplaySettlementAndArmy(gameWindow, settlement);
                 }
@@ -1486,7 +1490,7 @@ void Game::ShowMainUI() {
         Component armyDisplayContainer = Container::Horizontal({});
         //display all player-owned armies
         AddNewLineToFTXUIContainer(gameWindow);
-        AddElementToFTXUIContainer(gameWindow, paragraph("These are your armies:"));
+        AddElementToFTXUIContainer(gameWindow, paragraph(modifyPlayerArmyOwnedOnesInformationText));
         for (const auto &settlement: Settlements) {
             if (settlement->getOwner() == 0 && settlement->getStationedArmy().has_value()) {
                 AddElementToFTXUIContainer(armyDisplayContainer,
@@ -1511,14 +1515,14 @@ void Game::ShowMainUI() {
         AddNewLineToFTXUIContainer(gameWindow);
         AddElementToFTXUIContainer(gameWindow, separator());
         AddElementToFTXUIContainer(gameWindow, paragraph(
-                                                   "MOVING ARMY") | center | color(userInputExpectedColor));
+                                                   moveArmyCaptionText) | center | color(userInputExpectedColor));
         AddElementToFTXUIContainer(gameWindow, separator());
         AddNewLineToFTXUIContainer(gameWindow);
         AddElementToFTXUIContainer(gameWindow, paragraph(
-                                       "These are your settlements with armies:"));
+                                       moveArmyPossibleSettlementsInformationText));
         FTXUIDisplayOnlyPlayerSettlementsWithArmies(gameWindow);
         AddElementToFTXUIContainer(gameWindow, paragraph(
-                                       "Enter the index of the settlement whose army you'd like to move."));
+                                       moveArmySettlementChoiceInformationText));
         AddElementToFTXUIContainer(gameWindow, separator());
         //add the input
         gameWindow->Add(moveArmyWhichSettlementInput);
@@ -1528,7 +1532,7 @@ void Game::ShowMainUI() {
         //save
         try {
             SaveGame();
-            AddElementToFTXUIContainer(gameWindow, paragraph("Game saved."));
+            AddElementToFTXUIContainer(gameWindow, paragraph(gameSavedSuccessText));
         } catch (const BrokenFile &err) {
             AddElementToFTXUIContainer(gameWindow, paragraph("Broken file - " + std::string(err.what())));
         } catch (const InvalidSaveAttempt &err) {
@@ -1538,17 +1542,19 @@ void Game::ShowMainUI() {
 
     //GAME STATE CONTROL BUTTONS
 
-    nextTurnButton = Button("Next Turn", onNextTurnButtonClick, nextTurnStyle);
+
+
+    nextTurnButton = Button(nextTurnButtonText, onNextTurnButtonClick, nextTurnStyle);
     gameStateButtonsContainer->Add(nextTurnButton);
 
     AddHorizontalSpaceToFTXUIContainer(gameStateButtonsContainer);
 
-    saveGameButton = Button("Save Game", onSaveGameButtonClick, saveGameStyle);
+    saveGameButton = Button(saveGameButtonText, onSaveGameButtonClick, saveGameStyle);
     gameStateButtonsContainer->Add(saveGameButton);
 
     AddHorizontalSpaceToFTXUIContainer(gameStateButtonsContainer);
 
-    exitButton = Button("Exit", onExitButtonClick, exitStyle);
+    exitButton = Button(exitButtonText, onExitButtonClick, exitStyle);
     gameStateButtonsContainer->Add(exitButton);
 
 
@@ -1563,7 +1569,7 @@ void Game::ShowMainUI() {
         return vbox({
                    separator(),
                    hbox({
-                       text("Current turn: ") | color(gameAnnouncementsColor),
+                       text(currentTurnInformationText) | color(gameAnnouncementsColor),
                        text(std::to_string(currentTurn)),
                    }),
                    separator(),
@@ -1604,11 +1610,11 @@ void Game::ShowMainUI() {
     //This is where I can basically add whatever needs to be shown to the player throughout the game.
 
     //Define contextual buttons that will be added progressively
-    testButton = Button("Show ALL settlements", onTestButtonClick, testStyle);
-    checkSettlementsButton = Button("Check my settlements", onCheckSettlementsButtonClick, checkSettlementsStyle);
-    checkEnemyIntentsButton = Button("Check enemy intents", onCheckEnemyIntentButtonClick, checkEnemyIntentsStyle);
-    modifyPlayerArmyButton = Button("Modify an army", onModifyPlayerArmyButtonClick, modifyPlayerArmyStyle);
-    moveArmyButton = Button("Move an army", onMoveArmyButtonClick, moveArmyStyle);
+    testButton = Button(testButtonText, onTestButtonClick, testStyle);
+    checkSettlementsButton = Button( checkSettlementsButtonText, onCheckSettlementsButtonClick, checkSettlementsStyle);
+    checkEnemyIntentsButton = Button(checkEnemyIntentsButtonText, onCheckEnemyIntentButtonClick, checkEnemyIntentsStyle);
+    modifyPlayerArmyButton = Button(modifyPlayerArmyButtonText, onModifyPlayerArmyButtonClick, modifyPlayerArmyStyle);
+    moveArmyButton = Button(moveArmyButtonText, onMoveArmyButtonClick, moveArmyStyle);
     gameContextualButtonsContainer->Add(testButton);
 
 
@@ -1641,30 +1647,30 @@ void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const
 int Game::Start() {
     std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson, enemiesJson, localLeadersJson;
 
-    generalsJson.open("generals.json");
-    settlementsJson.open("settlements.json");
-    controlPointsJson.open("controlPoints.json");
-    captainsJson.open("captains.json");
-    enemiesJson.open("enemies.json");
-    localLeadersJson.open("localLeaders.json");
+    generalsJson.open(generalsJsonFileName);
+    settlementsJson.open(settlementsJsonFileName);
+    controlPointsJson.open(controlPointsJsonFileName);
+    captainsJson.open(captainsJsonFileName);
+    enemiesJson.open(enemiesJsonFileName);
+    localLeadersJson.open(localLeadersJsonFileName);
 
     if (!generalsJson) {
-        throw BrokenFile("generals.json");
+        throw BrokenFile(generalsJsonFileName);
     }
     if (!settlementsJson) {
-        throw BrokenFile("settlements.json");
+        throw BrokenFile(settlementsJsonFileName);
     }
     if (!captainsJson) {
-        throw BrokenFile("captains.json");
+        throw BrokenFile(captainsJsonFileName);
     }
     if (!controlPointsJson) {
-        throw BrokenFile("controlPoints.json");
+        throw BrokenFile(controlPointsJsonFileName);
     }
     if (!enemiesJson) {
-        throw BrokenFile("enemies.json");
+        throw BrokenFile(enemiesJsonFileName);
     }
     if (!localLeadersJson) {
-        throw BrokenFile("localLeaders.json");
+        throw BrokenFile(localLeadersJsonFileName);
     }
     PopulateEnemies(std::move(enemiesJson));
     PopulateGenerals(std::move(generalsJson));
@@ -1674,15 +1680,15 @@ int Game::Start() {
     PopulateControlPoints(std::move(controlPointsJson));
 
     //sorting the unit vectors
-    StartingGenerals = SortareVectorSharedPTR(StartingGenerals);
-    PlayerGenerals = SortareVectorSharedPTR(PlayerGenerals);
-    ContenderGenerals = SortareVectorSharedPTR(ContenderGenerals);
-    WarlordGenerals = SortareVectorSharedPTR(WarlordGenerals);
-    EmperorGenerals = SortareVectorSharedPTR(EmperorGenerals);
-    Captains = SortareVectorSharedPTR(Captains);
-    LocalLeaders = SortareVectorSharedPTR(LocalLeaders);
+    StartingGenerals = SortVectorSharedPTR(StartingGenerals);
+    PlayerGenerals = SortVectorSharedPTR(PlayerGenerals);
+    ContenderGenerals = SortVectorSharedPTR(ContenderGenerals);
+    WarlordGenerals = SortVectorSharedPTR(WarlordGenerals);
+    EmperorGenerals = SortVectorSharedPTR(EmperorGenerals);
+    Captains = SortVectorSharedPTR(Captains);
+    LocalLeaders = SortVectorSharedPTR(LocalLeaders);
 
-    //Saboteur tests - will implement
+    //Saboteur tests - will implement (who is Will?)
     std::cout << "Results from trying to sabotage using 4 kinds of saboteurs.\n(1-debuff, 2-kill, 0-fail)\n";
     Saboteur s1 = Saboteur<Captain>{std::dynamic_pointer_cast<Captain>(Captains[0])};
     std::cout << s1.Sabotage() << "\n";
