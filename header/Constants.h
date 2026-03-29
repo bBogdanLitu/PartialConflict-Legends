@@ -130,8 +130,10 @@ const inline std::string modifyArmyChooseCaptainText = "Or from this list of cap
 const inline std::string cancelOptionChosenText = "Operation canceled";
 const inline std::string modifyArmyInformWhichText = "You are modifying this army:";
 const inline std::string moveArmySettlementNeighbourInformationText = "Neighbours of settlement ";
-const inline std::string moveArmyNeighbourChooseWhichText = "Now choose the index of the neighbour you want to move to.";
-const inline std::string moveArmyWhereAttackInformationText = "This settlement isn't yours. This action will trigger an attack...";
+const inline std::string moveArmyNeighbourChooseWhichText =
+        "Now choose the index of the neighbour you want to move to.";
+const inline std::string moveArmyWhereAttackInformationText =
+        "This settlement isn't yours. This action will trigger an attack...";
 const inline std::string checkSettlementsCaptionText = "CHECKING SETTLEMENTS";
 const inline std::string checkEnemyIntentsCaptionText = "CHECKING ENEMY INTENTS";
 const inline std::string moveArmyCaptionText = "MOVING ARMY";
@@ -141,7 +143,8 @@ const inline std::string checkEnemyIntentsAttackImminentText = "You will likely 
 const inline std::string checkEnemyIntentsSettlementsInformationText = "Owned settlements:";
 const inline std::string modifyPlayerArmyOwnedOnesInformationText = "These are your armies:";
 const inline std::string moveArmyPossibleSettlementsInformationText = "These are your settlements with armies:";
-const inline std::string moveArmySettlementChoiceInformationText = "Enter the index of the settlement whose army you'd like to move.";
+const inline std::string moveArmySettlementChoiceInformationText =
+        "Enter the index of the settlement whose army you'd like to move.";
 const inline std::string currentTurnInformationText = "Current turn: ";
 
 //Successful operations
@@ -154,7 +157,8 @@ const inline std::string gameSavedSuccessText = "Game saved.";
 //Unsuccessful operations
 const inline std::string armyFullSizeWarningText = "Army is full already!";
 const inline std::string moveArmyWhereFailText = "Army couldn't be moved!";
-const inline std::string moveArmyWhereLackingActionPointsFailText = "Couldn't send army, probably not enough action points!";
+const inline std::string moveArmyWhereLackingActionPointsFailText =
+        "Couldn't send army, probably not enough action points!";
 const inline std::string moveArmyWhereSettlementHasArmyText = "The chosen settlement already had an army stationed.";
 const inline std::string indexInvalidText = "Invalid index";
 const inline std::string forgorToDoAllRequiredOperationsErrorText = "There still are things you should do!";
