@@ -584,6 +584,7 @@ void Game::ShowMenu() {
 
     //FUNCTIONS
     auto onStartGameButtonClicked = [&] {
+        ConfirmAge();
         screen.Exit();
     };
 
@@ -666,6 +667,85 @@ void Game::ShowMenu() {
                    separator(),
                    //scrollable because there could be many saves
                    buttonsContainer->Render() | center | frame,
+               }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
+    });
+
+    screen.Loop(renderer);
+}
+
+void Game::ConfirmAge() {
+    using namespace ftxui;
+
+    std::string userDeclaredAgeInput;
+    unsigned int userDeclaredAge = 0;
+
+    auto screen = ScreenInteractive::FitComponent();
+
+    auto verificationContainer = Container::Vertical({});
+
+    auto introContainer = Container::Vertical({});
+    auto mainContainer = Container::Vertical({});
+
+    //paragraphs
+    auto introductionCaption = paragraph(ageConfirmationCaptionText) | center | bold | color(honeydew);
+    auto explanationParagraph = paragraph(ageConfirmationExplanationText) | flex | color(kaki);
+
+    //for inputs
+    InputOption inputOption = InputOption::Spacious();
+    inputOption.transform = [](InputState state) {
+        state.element |= color(userInputExpectedColor);
+        if (state.focused) {
+            state.element |= bgcolor(Color::Default);
+        } else if (state.hovered) {
+            state.element |= bgcolor(Color::Grey15);
+        } else {
+            state.element |= bgcolor(Color::Grey27);
+        }
+        return state.element;
+    };
+
+    //INPUTS
+    Component ageInput = Input(&userDeclaredAgeInput, ageInputText, inputOption)
+                                    | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 5);
+
+    ageInput |= CatchEvent([&](const Event &event) {
+        if (event.is_character() && !std::isdigit(event.character()[0])) {
+            return true; //it's not a digit, catch it and prevent it from modifying tempInput
+        }
+        return false; //it's a digit
+    });
+    //I only want to prevent/repurpose enter, anything else can go through (and to other catchers, eventually)
+    ageInput |= CatchEvent([&](const Event &event) {
+        if (event == Event::Return) {
+            if (!userDeclaredAgeInput.empty()) {
+                userDeclaredAge = std::stoul(userDeclaredAgeInput); //try to parse as unsigned long
+                if (userDeclaredAge >= minimumAgeRequirement) {
+                    //government approved, can continue
+                    screen.Exit();
+                } else {
+                    const unsigned int missingYears = minimumAgeRequirement - userDeclaredAge;
+                    //not approved!
+                    AddElementToFTXUIContainer(mainContainer, paragraph(ageConfirmationFailedText + std::to_string(missingYears)) | flex | color(justRed) );
+                }
+            }
+            return true; //Catch the enter and do something else
+        }
+        return false; //Don't mess with any other event
+    });
+
+    AddElementToFTXUIContainer(introContainer, introductionCaption);
+    AddElementToFTXUIContainer(mainContainer, explanationParagraph);
+    mainContainer->Add(ageInput);
+
+    verificationContainer->Add(introContainer);
+    verificationContainer->Add(mainContainer);
+
+    auto renderer = Renderer(verificationContainer, [&] {
+        return vbox({
+                   introContainer->Render(),
+                   separator(),
+                   //scrollable because there could be many saves
+                   mainContainer->Render() | center | xflex | yframe,
                }) | size(WIDTH, EQUAL, Terminal::Size().dimx);
     });
 
@@ -1051,7 +1131,6 @@ void Game::ShowMainUI() {
                 try {
                     PlayerArmies[whichArmyToModify]->AddUnit(PlayerGenerals[whichUnitToAdd]);
                 } catch (const SizeViolation &) {
-
                     //Because I can't output with std::cout in ftxui, I will define the custom behaviour here
                     AddElementToFTXUIContainer(gameWindow, paragraph(armyFullSizeWarningText));
                     addSuccess = false;
@@ -1059,7 +1138,7 @@ void Game::ShowMainUI() {
                 if (addSuccess) {
                     AddElementToFTXUIContainer(
                         gameWindow, paragraph(
-                             armyUnitAddedSuccessText + addedUnit->getFullName()));
+                            armyUnitAddedSuccessText + addedUnit->getFullName()));
                 }
 
 
@@ -1190,7 +1269,8 @@ void Game::ShowMainUI() {
                 AddNewLineToFTXUIContainer(gameWindow);
 
                 AddElementToFTXUIContainer(
-                    gameWindow, paragraph( moveArmySettlementNeighbourInformationText + originalSettlement->getName() + ":"));
+                    gameWindow, paragraph(
+                        moveArmySettlementNeighbourInformationText + originalSettlement->getName() + ":"));
                 AddNewLineToFTXUIContainer(gameWindow);
                 for (const auto &neighbour: Neighbours) {
                     //initialize the vector of valid indexes of neighbours
@@ -1468,7 +1548,8 @@ void Game::ShowMainUI() {
                 AddElementToFTXUIContainer(gameWindow,
                                            paragraph(
                                                name + checkEnemyIntentsTurnsToActInformationText + std::to_string(
-                                                   turnsToAct) + " turn(s).")); //ehhhhhhhhhhhhhhhhhhhhh can't make everything a const I guess?
+                                                   turnsToAct) + " turn(s)."));
+                //ehhhhhhhhhhhhhhhhhhhhh can't make everything a const I guess?
                 //If the discovered enemy is about to act, the player might get attacked.
                 //A player should check what settlements they have in contact with an enemy to know where to expect it.
                 if (turnsToAct == 1) {
@@ -1543,7 +1624,6 @@ void Game::ShowMainUI() {
     //GAME STATE CONTROL BUTTONS
 
 
-
     nextTurnButton = Button(nextTurnButtonText, onNextTurnButtonClick, nextTurnStyle);
     gameStateButtonsContainer->Add(nextTurnButton);
 
@@ -1611,8 +1691,9 @@ void Game::ShowMainUI() {
 
     //Define contextual buttons that will be added progressively
     testButton = Button(testButtonText, onTestButtonClick, testStyle);
-    checkSettlementsButton = Button( checkSettlementsButtonText, onCheckSettlementsButtonClick, checkSettlementsStyle);
-    checkEnemyIntentsButton = Button(checkEnemyIntentsButtonText, onCheckEnemyIntentButtonClick, checkEnemyIntentsStyle);
+    checkSettlementsButton = Button(checkSettlementsButtonText, onCheckSettlementsButtonClick, checkSettlementsStyle);
+    checkEnemyIntentsButton = Button(checkEnemyIntentsButtonText, onCheckEnemyIntentButtonClick,
+                                     checkEnemyIntentsStyle);
     modifyPlayerArmyButton = Button(modifyPlayerArmyButtonText, onModifyPlayerArmyButtonClick, modifyPlayerArmyStyle);
     moveArmyButton = Button(moveArmyButtonText, onMoveArmyButtonClick, moveArmyStyle);
     gameContextualButtonsContainer->Add(testButton);

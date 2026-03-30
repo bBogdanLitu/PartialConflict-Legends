@@ -71,6 +71,8 @@ private:
 
     void ShowMenu();
 
+    void ConfirmAge();
+
     void SaveGame() const;
 
     void ReadSaveToDisplayDetailsOnly(const std::string &fileName, const ftxui::Component &whereToDisplay);
