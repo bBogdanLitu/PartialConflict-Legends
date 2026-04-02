@@ -7,6 +7,7 @@
 #include "Emperor.h"
 #include "Settlement.h"
 #include "Enemy.h"
+#include "ftxui/component/screen_interactive.hpp"
 
 class Game {
 private:
@@ -19,8 +20,10 @@ private:
     unsigned int ans1 = 0, ans2 = 0, ans3 = 0;
     unsigned long currentTurn = 0;
     long int sarmale = 0; //this is the 'gold' of my game
+    int timesWithoutSettlements = 0;
     bool savedGameLoaded = false;
-    ftxui::Component gameWindow;
+    ftxui::Component gameWindow, gameContainer;
+    ftxui::ScreenInteractive mainGameScreen = ftxui::ScreenInteractive::FitComponent();
 
     void PopulateEnemies(std::ifstream enemiesJson);
 
@@ -81,8 +84,13 @@ private:
 
     void ShowMainUI();
 
+    void TerminateGame();
+
 public:
     int Start();
+
+    //Called after a combat. If 0, forces the user to press 'Check my settlements';
+    void CheckPlayerSettlementCount();
 
     //useful to add text, tables and other non-interactive elements
     static void AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd);
@@ -94,6 +102,10 @@ public:
     static void AddHorizontalSpaceToFTXUIContainer(const ftxui::Component &gameFlowWindow);
 
     static void ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button);
+
+    static void AddExitButton(const ftxui::Component &container, ftxui::ScreenInteractive &screen);
+
+    static void AddBigExitButton(const ftxui::Component &container, ftxui::ScreenInteractive &screen);
 
     //Singleton
     Game() = default;

@@ -568,7 +568,7 @@ void Game::ShowMenu() {
     auto screen = ScreenInteractive::FitComponent();
 
     //button variables so I can use them in functions
-    Component startGameButton, exitButton, loadGameButton;
+    Component startGameButton, loadGameButton;
 
     //parent container for everything
     auto menuContainer = Container::Horizontal({});
@@ -623,11 +623,6 @@ void Game::ShowMenu() {
         }
     };
 
-    auto onExitButtonClicked = [&] {
-        screen.Exit();
-        throw(ApplicationException("Premature exit triggered by player"));
-    };
-
     //button definition
     startGameButton = Button(startGameButtonText, onStartGameButtonClicked,
                              ButtonStyleCenterText(kaki, susPink, backgroundGrey, backgroundGrey))
@@ -638,11 +633,6 @@ void Game::ShowMenu() {
                             ButtonStyleCenterText(beautifulBlue, beautifulGreen, backgroundGrey, backgroundGrey))
                      | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
                      | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
-
-    exitButton = Button(exitButtonText, onExitButtonClicked,
-                        ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey))
-                 | size(WIDTH, GREATER_THAN, Terminal::Size().dimx / 100.0f * 35)
-                 | size(HEIGHT, GREATER_THAN, Terminal::Size().dimy / 100.0f * 10);
 
 
     //add all components to parents
@@ -655,7 +645,7 @@ void Game::ShowMenu() {
     AddNewLineToFTXUIContainer(buttonsContainer);
     buttonsContainer->Add(loadGameButton);
     AddNewLineToFTXUIContainer(buttonsContainer);
-    buttonsContainer->Add(exitButton);
+    AddBigExitButton(buttonsContainer, screen);
     AddMoreLinesToFTXUIContainer(buttonsContainer);
 
     menuContainer->Add(introContainer);
@@ -959,22 +949,19 @@ void Game::ShowMainUI() {
 
     //variables that will be used
     unsigned long startingGeneralChosenIndex = 0, whichArmyToModify = 0, moveArmyFromIndex = 0;
-    int timesWithoutSettlements = 0;
-    bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false;
+    bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false, nextTurnWarningDisplayed = false;
     std::vector<std::shared_ptr<Army> > PlayerArmies;
     std::vector<unsigned long> validIndexes; //for moving an army - valid neighbours
 
     //button variables so I can use them in functions
     Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton,
-            exitButton, moveArmyButton, saveGameButton;
+        moveArmyButton, saveGameButton;
 
     //to scroll text because it is insanely hard apparently
     float focus_y = 0.5f;
     float step = 0.08f;
     float upperLimit = 1.f;
     float lowerLimit = 0.f;
-
-    auto screen = ScreenInteractive::FitComponent(); //a responsive screen that fits the terminal
 
     //container where all the feedback is - made scrollable using | focusPositionRelative
     gameWindow = Container::Vertical({});
@@ -983,7 +970,7 @@ void Game::ShowMainUI() {
     auto gameStateButtonsContainer = Container::Horizontal({});
 
     //container to have all things related to game display in it
-    auto gameContainer = Container::Horizontal({});
+    gameContainer = Container::Horizontal({});
 
     //container for the contextual buttons that can be used
     auto gameContextualButtonsContainer = Container::Horizontal({});
@@ -1380,8 +1367,7 @@ void Game::ShowMainUI() {
     auto nextTurnStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                                 Color::Default, Color::White);
 
-    auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
-                                            Color::Default, Color::Red);
+
 
     auto testStyle = ButtonOption::Animated(Color::Default, Color::GrayDark,
                                             Color::Default, Color::White);
@@ -1404,9 +1390,10 @@ void Game::ShowMainUI() {
     //FUNCTIONS FOR BUTTONS
 
     auto onNextTurnButtonClick = [&] {
-        if (checkEnemyIntentsClickedCurrentTurn == true) {
+        if (checkEnemyIntentsClickedCurrentTurn == true || nextTurnWarningDisplayed == true) {
             gameWindow->DetachAllChildren(); //clear last turn output
             NextTurn();
+            nextTurnWarningDisplayed = false;
             focus_y = upperLimit; //So we see the last thing added
 
             //reset all checks
@@ -1414,12 +1401,13 @@ void Game::ShowMainUI() {
         } else {
             AddElementToFTXUIContainer(gameWindow,
                                        paragraph(forgorToDoAllRequiredOperationsErrorText) | color(beautifulBlue));
+            if (currentTurn > 1) {
+                nextTurnWarningDisplayed = true;
+            }
         }
     };
 
-    auto onExitButtonClick = [&] {
-        screen.Exit();
-    };
+
 
     auto onTestButtonClick = [&] {
         for (const auto &settlementPtr: Settlements) {
@@ -1498,8 +1486,8 @@ void Game::ShowMainUI() {
                 gameContextualButtonsContainer->Add(moveArmyButton);
             } else {
                 //the only available button becomes exit
-                ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
-                ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);
+                /*ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
+                ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);*/
             }
             timesWithoutSettlements++;
         } else if (alliedSettlementCount > 3) {
@@ -1511,8 +1499,8 @@ void Game::ShowMainUI() {
                 gameWindow, paragraph(gameWinText) | color(storyRelatedTextColor));
 
             //only button becomes exit
-            ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
-            ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);
+            /*ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
+            ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);*/
         }
         if (checkSettlementClickedFirstTime == false) {
             //after it being clicked the first time, we can continue the tutorial
@@ -1634,8 +1622,9 @@ void Game::ShowMainUI() {
 
     AddHorizontalSpaceToFTXUIContainer(gameStateButtonsContainer);
 
-    exitButton = Button(exitButtonText, onExitButtonClick, exitStyle);
-    gameStateButtonsContainer->Add(exitButton);
+
+    //gameStateButtonsContainer->Add(exitButton);
+    AddExitButton(gameStateButtonsContainer, mainGameScreen);
 
 
     //Adding all containers to the main one
@@ -1715,15 +1704,54 @@ void Game::ShowMainUI() {
         gameWindow->Add(starterGeneralInput);
     }
     //Display what we render AND ALL THE CHANGES
-    screen.Loop(renderer);
+    mainGameScreen.Loop(renderer);
 
     PlayerArmies.clear();
+}
+
+void Game::TerminateGame() {
+    //Reset the main container and add only what is needed
+    gameContainer->DetachAllChildren();
+    gameContainer->Render();
+    gameContainer->Add(gameWindow);
+    AddElementToFTXUIContainer(gameWindow, paragraph(gameTerminatedText1) | color(storyRelatedTextColor));
+    AddElementToFTXUIContainer(gameWindow, paragraph(gameTerminatedText2) | color(storyRelatedTextColor));
+    AddElementToFTXUIContainer(gameWindow, paragraph(gameTerminatedText3) | color(storyRelatedTextColor));
+    AddElementToFTXUIContainer(gameWindow, paragraph(gameTerminatedText4) | color(storyRelatedTextColor));
+
+    AddBigExitButton(gameWindow, mainGameScreen);
 }
 
 void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
     container->DetachAllChildren();
     container->Add(button);
 }
+
+void Game::AddExitButton(const ftxui::Component &container, ftxui::ScreenInteractive &screen) {
+    Component exitButton;
+
+    auto exitStyle = ButtonOption::Animated(Color::Default, Color::Orange1,
+                                            Color::Default, Color::Red);
+
+    auto onExitButtonClick = [&] {
+        screen.Exit();
+    };
+
+    exitButton = Button(exitButtonText, onExitButtonClick, exitStyle);
+    container->Add(exitButton);
+}
+
+void Game::AddBigExitButton(const ftxui::Component &container, ftxui::ScreenInteractive &screen) {
+    Component exitButton;
+
+    auto onExitButtonClick = [&] {
+        screen.Exit();
+    };
+
+    exitButton = Button(exitButtonText, onExitButtonClick, ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey));
+    container->Add(exitButton);
+}
+
 
 int Game::Start() {
     std::ifstream generalsJson, settlementsJson, controlPointsJson, captainsJson, enemiesJson, localLeadersJson;
@@ -1946,6 +1974,25 @@ int Game::Start() {
 
 
     return 0;
+}
+
+void Game::CheckPlayerSettlementCount() {
+    int alliedSettlementCount = 0;
+    for (unsigned long i = 0; i < Settlements.size(); i++) {
+        if (Settlements[i]->getOwner() == 0) {
+            alliedSettlementCount++;
+        }
+    }
+    if (alliedSettlementCount == 0) {
+        AddElementToFTXUIContainer(gameWindow, paragraph(zeroCurrentSettlementsWarningText) | color(importantGameInformationColor));
+        if (timesWithoutSettlements == 0) {
+            //Push the player towards pressing 'Show my settlements'
+            AddElementToFTXUIContainer(gameWindow, paragraph(firstTimeWithoutSettlementsWarningText) | color(storyRelatedTextColor));
+        } else {
+            //End the game
+            TerminateGame();
+        }
+    }
 }
 
 void Game::AddElementToFTXUIContainer(const ftxui::Component &gameFlowWindow, const ftxui::Element &thingToAdd) {

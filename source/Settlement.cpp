@@ -164,6 +164,8 @@ void Settlement::AttackAndAnalyzeResult(const std::shared_ptr<Settlement> &neigh
 
         break;
     }
+    //Check if the player has no more settlements and guide towards the next move
+    Game::getGame().CheckPlayerSettlementCount();
 }
 
 
@@ -259,8 +261,8 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
 
         //button functions
         auto onDoneButtonClick = [&] {
-            //I only check if they are empty. Any other verification (whether they are digits) will be done elsewhere.
             battleOrder.clear();
+            //The default distribution, if all or some are empty, is done later in the Besieged method
             if (neededInputs > 2) {
                 if (!input3.empty()) {
                     battleOrder.emplace(battleOrder.begin(), std::stoul(input3));
@@ -385,7 +387,7 @@ int Settlement::Besieged(const Army &attackingArmy, const ftxui::Component &game
         }
 
         //To prevent assigning one general to fight multiple enemies (at once)
-
+        //DEFAULT ORDER
         while (battleOrder.size() < neededInputs) {
             battleOrder.emplace_back(2);
         }
