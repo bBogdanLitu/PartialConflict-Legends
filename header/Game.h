@@ -3,11 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <ftxui/component/loop.hpp>
+#include <ftxui/component/screen_interactive.hpp>
 
 #include "Emperor.h"
 #include "Settlement.h"
 #include "Enemy.h"
-#include "ftxui/component/screen_interactive.hpp"
 
 class Game {
 private:

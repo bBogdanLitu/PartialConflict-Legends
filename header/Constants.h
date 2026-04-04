@@ -137,9 +137,9 @@ const inline std::string cancelOptionChosenText = "Operation canceled";
 const inline std::string modifyArmyInformWhichText = "You are modifying this army:";
 const inline std::string moveArmySettlementNeighbourInformationText = "Neighbours of settlement ";
 const inline std::string moveArmyNeighbourChooseWhichText =
-                "Now choose the index of the neighbour you want to move to.";
+        "Now choose the index of the neighbour you want to move to.";
 const inline std::string moveArmyWhereAttackInformationText =
-                "This settlement isn't yours. This action will trigger an attack...";
+        "This settlement isn't yours. This action will trigger an attack...";
 const inline std::string checkSettlementsCaptionText = "CHECKING SETTLEMENTS";
 const inline std::string checkEnemyIntentsCaptionText = "CHECKING ENEMY INTENTS";
 const inline std::string moveArmyCaptionText = "MOVING ARMY";
@@ -150,7 +150,7 @@ const inline std::string checkEnemyIntentsSettlementsInformationText = "Owned se
 const inline std::string modifyPlayerArmyOwnedOnesInformationText = "These are your armies:";
 const inline std::string moveArmyPossibleSettlementsInformationText = "These are your settlements with armies:";
 const inline std::string moveArmySettlementChoiceInformationText =
-                "Enter the index of the settlement whose army you'd like to move.";
+        "Enter the index of the settlement whose army you'd like to move.";
 const inline std::string currentTurnInformationText = "Current turn: ";
 
 const inline std::string ageConfirmationCaptionText = "AGE VERIFICATION";
