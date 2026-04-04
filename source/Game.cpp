@@ -949,13 +949,14 @@ void Game::ShowMainUI() {
 
     //variables that will be used
     unsigned long startingGeneralChosenIndex = 0, whichArmyToModify = 0, moveArmyFromIndex = 0;
-    bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false, nextTurnWarningDisplayed = false;
+    bool checkSettlementClickedFirstTime = false, checkEnemyIntentsClickedCurrentTurn = false, nextTurnWarningDisplayed
+            = false;
     std::vector<std::shared_ptr<Army> > PlayerArmies;
     std::vector<unsigned long> validIndexes; //for moving an army - valid neighbours
 
     //button variables so I can use them in functions
     Component testButton, checkSettlementsButton, checkEnemyIntentsButton, modifyPlayerArmyButton, nextTurnButton,
-        moveArmyButton, saveGameButton;
+            moveArmyButton, saveGameButton;
 
     //to scroll text because it is insanely hard apparently
     float focus_y = 0.5f;
@@ -1486,8 +1487,9 @@ void Game::ShowMainUI() {
                 gameContextualButtonsContainer->Add(moveArmyButton);
             } else {
                 //the only available button becomes exit
-                /*ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
-                ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);*/
+                gameContextualButtonsContainer->DetachAllChildren();
+                gameStateButtonsContainer->DetachAllChildren();
+                AddBigExitButton(gameWindow, mainGameScreen);
             }
             timesWithoutSettlements++;
         } else if (alliedSettlementCount > 3) {
@@ -1499,8 +1501,9 @@ void Game::ShowMainUI() {
                 gameWindow, paragraph(gameWinText) | color(storyRelatedTextColor));
 
             //only button becomes exit
-            /*ReplaceAllButtonsWithAnother(gameContextualButtonsContainer, exitButton);
-            ReplaceAllButtonsWithAnother(gameStateButtonsContainer, exitButton);*/
+            gameContextualButtonsContainer->DetachAllChildren();
+            gameStateButtonsContainer->DetachAllChildren();
+            AddBigExitButton(gameWindow, mainGameScreen);
         }
         if (checkSettlementClickedFirstTime == false) {
             //after it being clicked the first time, we can continue the tutorial
@@ -1722,10 +1725,6 @@ void Game::TerminateGame() {
     AddBigExitButton(gameWindow, mainGameScreen);
 }
 
-void Game::ReplaceAllButtonsWithAnother(const ftxui::Component &container, const ftxui::Component &button) {
-    container->DetachAllChildren();
-    container->Add(button);
-}
 
 void Game::AddExitButton(const ftxui::Component &container, ftxui::ScreenInteractive &screen) {
     Component exitButton;
@@ -1748,7 +1747,8 @@ void Game::AddBigExitButton(const ftxui::Component &container, ftxui::ScreenInte
         screen.Exit();
     };
 
-    exitButton = Button(exitButtonText, onExitButtonClick, ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey));
+    exitButton = Button(exitButtonText, onExitButtonClick,
+                        ButtonStyleCenterText(weirdPurple, beautifulOrange, backgroundGrey, backgroundGrey));
     container->Add(exitButton);
 }
 
@@ -1984,10 +1984,12 @@ void Game::CheckPlayerSettlementCount() {
         }
     }
     if (alliedSettlementCount == 0) {
-        AddElementToFTXUIContainer(gameWindow, paragraph(zeroCurrentSettlementsWarningText) | color(importantGameInformationColor));
+        AddElementToFTXUIContainer(
+            gameWindow, paragraph(zeroCurrentSettlementsWarningText) | color(importantGameInformationColor));
         if (timesWithoutSettlements == 0) {
             //Push the player towards pressing 'Show my settlements'
-            AddElementToFTXUIContainer(gameWindow, paragraph(firstTimeWithoutSettlementsWarningText) | color(storyRelatedTextColor));
+            AddElementToFTXUIContainer(
+                gameWindow, paragraph(firstTimeWithoutSettlementsWarningText) | color(storyRelatedTextColor));
         } else {
             //End the game
             TerminateGame();

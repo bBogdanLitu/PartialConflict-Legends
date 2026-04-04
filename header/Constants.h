@@ -137,9 +137,9 @@ const inline std::string cancelOptionChosenText = "Operation canceled";
 const inline std::string modifyArmyInformWhichText = "You are modifying this army:";
 const inline std::string moveArmySettlementNeighbourInformationText = "Neighbours of settlement ";
 const inline std::string moveArmyNeighbourChooseWhichText =
-        "Now choose the index of the neighbour you want to move to.";
+                "Now choose the index of the neighbour you want to move to.";
 const inline std::string moveArmyWhereAttackInformationText =
-        "This settlement isn't yours. This action will trigger an attack...";
+                "This settlement isn't yours. This action will trigger an attack...";
 const inline std::string checkSettlementsCaptionText = "CHECKING SETTLEMENTS";
 const inline std::string checkEnemyIntentsCaptionText = "CHECKING ENEMY INTENTS";
 const inline std::string moveArmyCaptionText = "MOVING ARMY";
@@ -150,12 +150,12 @@ const inline std::string checkEnemyIntentsSettlementsInformationText = "Owned se
 const inline std::string modifyPlayerArmyOwnedOnesInformationText = "These are your armies:";
 const inline std::string moveArmyPossibleSettlementsInformationText = "These are your settlements with armies:";
 const inline std::string moveArmySettlementChoiceInformationText =
-        "Enter the index of the settlement whose army you'd like to move.";
+                "Enter the index of the settlement whose army you'd like to move.";
 const inline std::string currentTurnInformationText = "Current turn: ";
 
 const inline std::string ageConfirmationCaptionText = "AGE VERIFICATION";
 const inline std::string ageConfirmationExplanationText =
-        "To better reflect the new standard of software, you are REQUIRED to provide your age. Due to lacking technology and knowledge, I am unable to verify your statement. Thus, you shall promise not to lie. Thank you for understanding!";
+                "To better reflect the new standard of software, you are REQUIRED to provide your age. Due to lacking technology and knowledge, I am unable to verify your statement. Thus, you shall promise not to lie. Thank you for understanding!";
 const inline std::string zeroCurrentSettlementsWarningText = "It seems like you have lost all your settlements...";
 const inline std::string firstTimeWithoutSettlementsWarningText = "But it wouldn't hurt checking that yourself!";
 const inline std::string gameTerminatedText1 = "So, it ends here...";
@@ -174,12 +174,12 @@ const inline std::string gameSavedSuccessText = "Game saved.";
 const inline std::string armyFullSizeWarningText = "Army is full already!";
 const inline std::string moveArmyWhereFailText = "Army couldn't be moved!";
 const inline std::string moveArmyWhereLackingActionPointsFailText =
-        "Couldn't send army, probably not enough action points!";
+                "Couldn't send army, probably not enough action points!";
 const inline std::string moveArmyWhereSettlementHasArmyText = "The chosen settlement already had an army stationed.";
 const inline std::string indexInvalidText = "Invalid index";
 const inline std::string forgorToDoAllRequiredOperationsErrorText = "There still are things you should do!";
 const inline std::string ageConfirmationFailedText =
-        "It seems like you do not meet the mandated minimum age. Come back in a few years - ";
+                "It seems like you do not meet the mandated minimum age. Come back in a few years - ";
 
 //Game UI Buttons
 const inline std::string testButtonText = "Show ALL settlements";
